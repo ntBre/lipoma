@@ -1,16 +1,17 @@
+import json
 import warnings
+from collections import defaultdict
 
 from openff.toolkit.topology import Molecule
+from openff.units.openmm import from_openmm
 from openmm.openmm import HarmonicBondForce
-from rdkit.Chem import rdmolfiles
 
 import espaloma as esp
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
 molecule = Molecule.from_smiles("CN1C=NC2=C1C(=O)N(C(=O)N2C)C")
-# print(molecule.bonds)
-rdmol = molecule.to_rdkit()
+mapped_smiles = molecule.to_smiles(mapped=True)
 
 # create an Espaloma Graph object to represent the molecule of interest
 molecule_graph = esp.Graph(molecule)
@@ -40,25 +41,24 @@ bond_lookup = {
 # labels. I'm not going to be able to map these to smirks patterns in any
 # direct sense, but I'm curious to see the elements involved. are these indices
 # into the original Molecule?
+result = defaultdict(dict)
 for force in openmm_system.getForces():
     if isinstance(force, HarmonicBondForce):
         for b in range(force.getNumBonds()):
-            i, j, eq, k = force.getBondParameters(b)
+            # ignore the force constant for now
+            i, j, eq, _k = force.getBondParameters(b)
+            # convert from openmm nanometers to just the value in angstroms
+            result[mapped_smiles][(i, j)] = [
+                from_openmm(eq).to("angstrom").magnitude
+            ]
 
-            atoms = set()
-            for bond in molecule.bonds:
-                idxs = [bond.atom1_index, bond.atom2_index]
-                if i in idxs or j in idxs:
-                    atoms.add(idxs[0])
-                    atoms.add(idxs[1])
-            print(atoms)
 
-            print(
-                i,
-                j,
-                rdmolfiles.MolFragmentToSmarts(rdmol, atomsToUse=atoms),
-            )
-        print()
+print(result)
+# json.dumps(result)
+# for k, v in result.items():
+#     print(k)
+#     for idxs, eqs in v.items():
+#         print(f"\t{idxs} => {eqs}")
 
 # my idea here is to take a molecule, use espaloma to generate the parameters
 # for it, and just print them out. eventually, hopefully I can aggregate and
