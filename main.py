@@ -1,8 +1,5 @@
 import warnings
 
-from chemper.graphs.single_graph import SingleGraph
-from chemper.mol_toolkits import mol_toolkit
-from chemper.smirksify import SMIRKSifier, print_smirks
 from openff.toolkit.topology import Molecule
 from openmm.openmm import HarmonicBondForce
 from rdkit.Chem import rdmolfiles
@@ -14,8 +11,6 @@ warnings.filterwarnings("ignore", category=UserWarning)
 molecule = Molecule.from_smiles("CN1C=NC2=C1C(=O)N(C(=O)N2C)C")
 # print(molecule.bonds)
 rdmol = molecule.to_rdkit()
-
-chemper_mol = mol_toolkit.Mol.from_smiles("CN1C=NC2=C1C(=O)N(C(=O)N2C)C")
 
 # create an Espaloma Graph object to represent the molecule of interest
 molecule_graph = esp.Graph(molecule)
@@ -57,12 +52,6 @@ for force in openmm_system.getForces():
                     atoms.add(idxs[0])
                     atoms.add(idxs[1])
             print(atoms)
-            graph = SingleGraph(chemper_mol, (i, j), layers=1)
-
-            cluster_list = [(f"label {b}", [[(i, j)]])]
-            fier = SMIRKSifier([chemper_mol], cluster_list, verbose=False)
-            res = fier.reduce(max_its=100, verbose=False)
-            print(res)
 
             print(
                 i,
