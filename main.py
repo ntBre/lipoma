@@ -76,7 +76,9 @@ def inner(molecule):
                 i, j, eq, _k = force.getBondParameters(b)
                 # convert from openmm nanometers to just the value in
                 # angstroms
-                d.append((i, j, from_openmm(eq).to("angstrom").magnitude))
+                d.append(
+                    (i + 1, j + 1, from_openmm(eq).to("angstrom").magnitude)
+                )
 
     return mapped_smiles, d
 
