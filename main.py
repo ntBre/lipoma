@@ -41,39 +41,53 @@ def load_dataset(
             raise TypeError(f"Unknown result collection type: {t}")
 
 
+def inner(molecule):
+    mapped_smiles = molecule.to_smiles(mapped=True)
+
+    # create an Espaloma Graph object to represent the molecule of interest
+    molecule_graph = esp.Graph(molecule)
+
+    # load pretrained model
+    espaloma_model = esp.get_model("latest")
+
+    # apply a trained espaloma model to assign parameters
+    espaloma_model(molecule_graph.heterograph)
+
+    # create an OpenMM System for the specified molecule
+    forcefield = "openff_unconstrained-2.1.0"
+    openmm_system = esp.graphs.deploy.openmm_system_from_graph(
+        molecule_graph, forcefield=forcefield
+    )
+
+    d = {}
+    # hopefully these indices match the mapped_smiles...
+    for force in openmm_system.getForces():
+        if isinstance(force, HarmonicBondForce):
+            for b in range(force.getNumBonds()):
+                # ignore the force constant for now
+                i, j, eq, _k = force.getBondParameters(b)
+                # convert from openmm nanometers to just the value in
+                # angstroms
+                d[(i, j)] = [from_openmm(eq).to("angstrom").magnitude]
+
+    return mapped_smiles, d
+
+
 def to_besmarts(
     molecules: list[Molecule],
 ) -> dict[str, dict[tuple[int, int], list[float]]]:
     results = defaultdict(dict)
-    for molecule in molecules:
-        mapped_smiles = molecule.to_smiles(mapped=True)
-
-        # create an Espaloma Graph object to represent the molecule of interest
-        molecule_graph = esp.Graph(molecule)
-
-        # load pretrained model
-        espaloma_model = esp.get_model("latest")
-
-        # apply a trained espaloma model to assign parameters
-        espaloma_model(molecule_graph.heterograph)
-
-        # create an OpenMM System for the specified molecule
-        forcefield = "openff_unconstrained-2.1.0"
-        openmm_system = esp.graphs.deploy.openmm_system_from_graph(
-            molecule_graph, forcefield=forcefield
-        )
-
-        # hopefully these indices match the mapped_smiles...
-        for force in openmm_system.getForces():
-            if isinstance(force, HarmonicBondForce):
-                for b in range(force.getNumBonds()):
-                    # ignore the force constant for now
-                    i, j, eq, _k = force.getBondParameters(b)
-                    # convert from openmm nanometers to just the value in
-                    # angstroms
-                    results[mapped_smiles][(i, j)] = [
-                        from_openmm(eq).to("angstrom").magnitude
-                    ]
+    with Pool(processes=8) as pool:
+        for mapped_smiles, d in tqdm(
+            pool.imap(
+                inner,
+                molecules,
+                chunksize=8,
+            ),
+            desc="Converting to besmarts",
+            total=len(molecules),
+        ):
+            results[mapped_smiles] = d
 
         # TODO angles and torsions too
 
