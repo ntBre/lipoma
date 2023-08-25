@@ -114,7 +114,10 @@ def main():
         for r in data
     ]
     # molecules = [Molecule.from_smiles("CN1C=NC2=C1C(=O)N(C(=O)N2C)C")]
-    print(to_besmarts(molecules))
+    besmarts = to_besmarts(molecules)
+
+    with open("out.json", "w") as out:
+        json.dump(besmarts, out)
 
 
 if __name__ == "__main__":
