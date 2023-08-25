@@ -1,6 +1,8 @@
 import json
+import logging
 import warnings
 from collections import defaultdict
+from multiprocessing import Pool
 from typing import Union
 
 from openff.qcsubmit.results import (
@@ -10,29 +12,35 @@ from openff.qcsubmit.results import (
 from openff.toolkit.topology import Molecule
 from openff.units.openmm import from_openmm
 from openmm.openmm import HarmonicBondForce
+from tqdm import tqdm
 
 import espaloma as esp
 
 warnings.filterwarnings("ignore", category=UserWarning)
+logging.getLogger("openff").setLevel(logging.ERROR)
 
 
 # copy pasta from known-issues main.py
 def load_dataset(
     dataset: str,
+    typ: str = None,
 ) -> Union[OptimizationResultCollection, TorsionDriveResultCollection]:
     """Peeks at the first entry of `dataset` to determine its type and
-    then loads it appropriately.
+    then loads it appropriately. If the `typ` argument is supplied,
+    treat that as the type instead.
 
     Raises a `TypeError` if the first entry is neither a `torsion`
     record nor an `optimization` record.
     """
-    with open(dataset, "r") as f:
-        j = json.load(f)
-    entries = j["entries"]
-    keys = entries.keys()
-    assert len(keys) == 1  # only handling this case for now
-    key = list(keys)[0]
-    match j["entries"][key][0]["type"]:
+    if typ is None:
+        with open(dataset, "r") as f:
+            j = json.load(f)
+        entries = j["entries"]
+        keys = entries.keys()
+        assert len(keys) == 1  # only handling this case for now
+        key = list(keys)[0]
+        typ = j["entries"][key][0]["type"]
+    match typ:
         case "torsion":
             return TorsionDriveResultCollection.parse_file(dataset)
         case "optimization":
@@ -95,8 +103,16 @@ def to_besmarts(
 
 
 def main():
-    molecule = Molecule.from_smiles("CN1C=NC2=C1C(=O)N(C(=O)N2C)C")
-    print(to_besmarts([molecule]))
+    ds = load_dataset("filtered-opt.json")
+    data = [v for value in ds.entries.values() for v in value]
+    # a little dumb to `from_mapped_smiles` here and then `to_mapped_smiles`
+    # above, but I guess I do want the Molecule eventually
+    molecules = [
+        Molecule.from_mapped_smiles(r.cmiles, allow_undefined_stereo=True)
+        for r in data
+    ]
+    # molecules = [Molecule.from_smiles("CN1C=NC2=C1C(=O)N(C(=O)N2C)C")]
+    print(to_besmarts(molecules))
 
 
 if __name__ == "__main__":
