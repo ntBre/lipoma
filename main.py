@@ -67,7 +67,7 @@ def inner(molecule):
         molecule_graph, forcefield=forcefield
     )
 
-    d = {}
+    d = list()
     # hopefully these indices match the mapped_smiles...
     for force in openmm_system.getForces():
         if isinstance(force, HarmonicBondForce):
@@ -76,21 +76,23 @@ def inner(molecule):
                 i, j, eq, _k = force.getBondParameters(b)
                 # convert from openmm nanometers to just the value in
                 # angstroms
-                d[(i, j)] = [from_openmm(eq).to("angstrom").magnitude]
+                d.append((i, j, from_openmm(eq).to("angstrom").magnitude))
 
     return mapped_smiles, d
 
 
 def to_besmarts(
     molecules: list[Molecule],
+    procs: int = 8,
+    chunksize: int = 8,
 ) -> dict[str, dict[tuple[int, int], list[float]]]:
     results = defaultdict(dict)
-    with Pool(processes=8) as pool:
+    with Pool(processes=procs) as pool:
         for mapped_smiles, d in tqdm(
             pool.imap(
                 inner,
                 molecules,
-                chunksize=8,
+                chunksize=chunksize,
             ),
             desc="Converting to besmarts",
             total=len(molecules),
