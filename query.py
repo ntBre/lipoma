@@ -57,6 +57,14 @@ for mol in tqdm(itertools.islice(molecules(ds), None)):
             diffs[smirks] += 1
 
 
+# counting occurences of disagreement is somewhat interesting, but more useful
+# might be recording the espaloma values that disagree. then I could do some
+# kind of statistics on that. maybe our parameter is just the average of the
+# espaloma parameters, for example. if not, maybe we need to shift our
+# parameter toward the average espaloma value. or if espaloma has an especially
+# large range of values, that would be an indicator that we need to break up
+# one of our parameters
+
 print("\nDifference Summary")
 ml = max([len(s) for s in diffs.keys()])
 items = [pair for pair in diffs.items()]
