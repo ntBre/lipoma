@@ -19,6 +19,7 @@ def molecules(ds):
 
 ff = ForceField("openff-2.1.0.offxml")
 ds = load_dataset("filtered-opt.json", "optimization")
+total = sum(len(s) for s in ds.entries.values())
 
 # cutoff for considering espaloma's result to be different from ours
 EPS = 10.0
@@ -27,7 +28,11 @@ verbose = False
 # map of smirks -> disagreement count
 sage_values = {}
 diffs = defaultdict(list)
-for mol in tqdm(itertools.islice(molecules(ds), 10)):
+for mol in tqdm(
+    itertools.islice(molecules(ds), None),
+    desc="Comparing parameters",
+    total=total,
+):
     labels = ff.label_molecules(mol.to_topology())[0]
     bonds = labels["Bonds"]
     # angles = labels["Angles"]
