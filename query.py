@@ -25,8 +25,9 @@ EPS = 10.0
 verbose = False
 
 # map of smirks -> disagreement count
-diffs = defaultdict(int)
-for mol in tqdm(itertools.islice(molecules(ds), None)):
+sage_values = {}
+diffs = defaultdict(list)
+for mol in tqdm(itertools.islice(molecules(ds), 10)):
     labels = ff.label_molecules(mol.to_topology())[0]
     bonds = labels["Bonds"]
     # angles = labels["Angles"]
@@ -54,7 +55,8 @@ for mol in tqdm(itertools.islice(molecules(ds), None)):
         if diff > EPS:
             if verbose:
                 print(f"{i:5}{j:5}{v:12.8}{espaloma_bonds[k]:12.8}{diff:12.8}")
-            diffs[smirks] += 1
+            diffs[smirks].append(espaloma_bonds[k])
+            sage_values[smirks] = v
 
 
 # counting occurences of disagreement is somewhat interesting, but more useful
@@ -65,9 +67,15 @@ for mol in tqdm(itertools.islice(molecules(ds), None)):
 # large range of values, that would be an indicator that we need to break up
 # one of our parameters
 
-print("\nDifference Summary")
+print("# Difference Summary")
+# compute the max len of smirks patterns for pretty printing
 ml = max([len(s) for s in diffs.keys()])
+print(f"# {'SMIRKS':<{ml - 2}}{'Count':>5}{'Sage':>8}{'Rest':>8}")
 items = [pair for pair in diffs.items()]
-items.sort(key=lambda x: x[1], reverse=True)
-for smirks, count in items:
-    print(f"{smirks:{ml}}{count:5}")
+items.sort(key=lambda x: len(x[1]), reverse=True)
+for smirks, values in items:
+    count = len(values)
+    print(f"{smirks:{ml}}{count:5}{sage_values[smirks]:8.2f}", end="")
+    for v in values:
+        print(f"{v:8.2f}", end="")
+    print()
