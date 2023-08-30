@@ -40,6 +40,13 @@ class Bond:
     def to_json(self):
         return [self.atom1, self.atom2, self.eq, self.k]
 
+    def from_zero(self):
+        "Returns `self` with atoms indexed from 0 instead of 1"
+        return Bond(self.atom1 - 1, self.atom2 - 1, self.eq, self.k)
+
+    def as_tuple(self):
+        return self.atom1, self.atom2, self.eq, self.k
+
 
 @dataclass
 class Angle:
