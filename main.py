@@ -119,7 +119,15 @@ def load_dataset(
             raise TypeError(f"Unknown result collection type: {t}")
 
 
-def inner(molecule):
+def espaloma_label(molecule):
+    """Takes a `Molecule`, constructs an espaloma Graph object, assigns the
+    molecule parameters based on that graph, constructs an OpenMM system from
+    the graph, and extracts the force field parameters from the OpenMM system.
+
+    Returns the molecule's mapped SMILES string and dict of bonds->[Bond],
+    angles->[Angle], and torsions->[Torsion]
+
+    """
     mapped_smiles = molecule.to_smiles(mapped=True)
 
     # create an Espaloma Graph object to represent the molecule of interest
@@ -199,7 +207,7 @@ def to_besmarts(
     with Pool(processes=procs) as pool:
         for mapped_smiles, d in tqdm(
             pool.imap(
-                inner,
+                espaloma_label,
                 molecules,
                 chunksize=chunksize,
             ),
