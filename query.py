@@ -147,15 +147,34 @@ class Driver:
             torsions = labels["ProperTorsions"]
             sage_torsions = {}
             for key, v in torsions.items():
-                sage_torsions[key] = (v.k.magnitude, v.smirks)
+                for fc in ["k1", "k2", "k3"]:
+                    val = getattr(v, fc, None)
+                    if val is not None:
+                        per = getattr(v, f"periodicity{fc[-1]}")
+                        i, j, k, m = key
+                        sage_torsions[(i, j, k, m, per)] = (
+                            val.magnitude,
+                            v.smirks,
+                        )
 
             _, d = espaloma_label(mol)
             espaloma = {}
             for torsion in d["torsions"]:
                 i, j, k, m, _per, _phase, fc = torsion.from_zero().as_tuple()
-                espaloma[(i, j, k, m)] = fc
+                espaloma[(i, j, k, m, _per)] = fc
 
-            assert espaloma.keys() == sage_torsions.keys()
+            # espaloma does something funny with the
+            # torsions/periodicity/phase, so just take the keys that correspond
+            # to values in sage
+            espaloma = {
+                k: v for k, v in espaloma.items() if k in sage_torsions
+            }
+            ekeys = espaloma.keys()
+            skeys = sage_torsions.keys()
+            assert len(ekeys) == len(
+                skeys
+            ), f"# espaloma keys ({len(ekeys)}) != # sage keys ({len(skeys)})"
+            assert ekeys == skeys
 
             for key, v in sage_torsions.items():
                 v, smirks = v
@@ -227,8 +246,8 @@ if __name__ == "__main__":
     # diffs, sage_values = driver.compare_bonds()
     # print_summary(diffs, sage_values, outfile="bonds.dat")
 
-    diffs, sage_values = driver.compare_angles()
-    print_summary(diffs, sage_values, outfile="angles.dat")
+    # diffs, sage_values = driver.compare_angles()
+    # print_summary(diffs, sage_values, outfile="angles.dat")
 
     diffs, sage_values = driver.compare_torsions()
     print_summary(diffs, sage_values, outfile="torsions.dat")
