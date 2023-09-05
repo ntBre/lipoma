@@ -98,6 +98,29 @@ class Torsion:
             self.k,
         ]
 
+    def from_zero(self):
+        "Returns `self` with atoms indexed from 0 instead of 1"
+        return Torsion(
+            self.atom1 - 1,
+            self.atom2 - 1,
+            self.atom3 - 1,
+            self.atom4 - 1,
+            self.per,
+            self.phase,
+            self.k,
+        )
+
+    def as_tuple(self):
+        return (
+            self.atom1,
+            self.atom2,
+            self.atom3,
+            self.atom4,
+            self.per,
+            self.phase,
+            self.k,
+        )
+
 
 # copy pasta from known-issues main.py
 def load_dataset(

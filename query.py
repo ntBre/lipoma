@@ -107,9 +107,7 @@ class Driver:
             angles = labels["Angles"]
             sage_angles = {}
             for key, v in angles.items():
-                i, j, k = key
-                # t = (i, j, v.length.magnitude, v.k.magnitude)
-                sage_angles[(i, j, k)] = (v.k.magnitude, v.smirks)
+                sage_angles[key] = (v.k.magnitude, v.smirks)
 
             _, d = espaloma_label(mol)
             espaloma = {}
@@ -120,6 +118,46 @@ class Driver:
             assert espaloma.keys() == sage_angles.keys()
 
             for key, v in sage_angles.items():
+                v, smirks = v
+                diff = abs(v - espaloma[key])
+                if diff > self.eps:
+                    diffs[smirks].append(espaloma[key])
+                    sage_values[smirks] = v
+
+        return diffs, sage_values
+
+    # this is basically a copy pasta from compare_bonds. it would be nice to
+    # factor out some commonality, but many of the internals are different
+    def compare_torsions(
+        self,
+    ) -> Tuple[dict[str, list[float]], dict[str, float]]:
+        """Compare proper torsion paramters assigned by ff and espaloma.
+
+        Returns a map of smirks->[espaloma values], and a map of
+        smirks->sage_value
+        """
+        sage_values = {}
+        diffs = defaultdict(list)
+        for mol in tqdm(
+            itertools.islice(molecules(self.dataset), None),
+            desc="Comparing torsions",
+            total=self.total_molecules,
+        ):
+            labels = self.forcefield.label_molecules(mol.to_topology())[0]
+            torsions = labels["ProperTorsions"]
+            sage_torsions = {}
+            for key, v in torsions.items():
+                sage_torsions[key] = (v.k.magnitude, v.smirks)
+
+            _, d = espaloma_label(mol)
+            espaloma = {}
+            for torsion in d["torsions"]:
+                i, j, k, m, _per, _phase, fc = torsion.from_zero().as_tuple()
+                espaloma[(i, j, k, m)] = fc
+
+            assert espaloma.keys() == sage_torsions.keys()
+
+            for key, v in sage_torsions.items():
                 v, smirks = v
                 diff = abs(v - espaloma[key])
                 if diff > self.eps:
@@ -181,5 +219,11 @@ if __name__ == "__main__":
         eps=10.0,
         verbose=False,
     )
-    diffs, sage_values = driver.compare_bonds()
-    print_summary(diffs, sage_values, outfile="bonds.dat")
+    # diffs, sage_values = driver.compare_bonds()
+    # print_summary(diffs, sage_values, outfile="bonds.dat")
+
+    diffs, sage_values = driver.compare_angles()
+    print_summary(diffs, sage_values, outfile="angles.dat")
+
+    diffs, sage_values = driver.compare_torsions()
+    print_summary(diffs, sage_values, outfile="torsions.dat")
