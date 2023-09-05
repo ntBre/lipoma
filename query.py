@@ -20,60 +20,113 @@ def molecules(ds):
             )
 
 
-ff = ForceField("openff-2.1.0.offxml")
-ds = load_dataset("filtered-opt.json", "optimization")
-total = sum(len(s) for s in ds.entries.values())
-
-# cutoff for considering espaloma's result to be different from ours
-EPS = 10.0
-verbose = False
-
-
-def compare_bonds() -> Tuple[dict[str, list[float]], dict[str, float]]:
-    """Compare bond paramters assigned by ff and espaloma.
-
-    Returns a map of smirks->[espaloma values], and a map of smirks->sage_value
-    """
-    sage_values = {}
-    # map of smirks -> disagreement count
-    diffs = defaultdict(list)
-    for mol in tqdm(
-        itertools.islice(molecules(ds), None),
-        desc="Comparing bonds",
-        total=total,
+# there's probably a better name for this
+class Driver:
+    def __init__(
+        self,
+        forcefield: str,
+        dataset: str,
+        eps: float = 10.0,
+        verbose: bool = False,
     ):
-        labels = ff.label_molecules(mol.to_topology())[0]
-        # angles = labels["Angles"]
-        # torsions = labels["ProperTorsions"]
+        self.forcefield = ForceField(forcefield)
+        self.dataset = load_dataset(dataset, "optimization")
+        self.total_molecules = sum(
+            len(s) for s in self.dataset.entries.values()
+        )
+        # cutoff for considering espaloma's result to be different from ours
+        self.eps = eps
+        self.verbose = verbose
 
-        bonds = labels["Bonds"]
-        sage_bonds = {}
-        for k, v in bonds.items():
-            i, j = k
-            # t = (i, j, v.length.magnitude, v.k.magnitude)
-            sage_bonds[(i, j)] = (v.k.magnitude, v.smirks)
+    def compare_bonds(self) -> Tuple[dict[str, list[float]], dict[str, float]]:
+        """Compare bond paramters assigned by ff and espaloma.
 
-        _, d = espaloma_label(mol)
-        espaloma = {}
-        for bond in d["bonds"]:
-            i, j, _, k = bond.from_zero().as_tuple()
-            espaloma[(i, j)] = k
+        Returns a map of smirks->[espaloma values], and a map of
+        smirks->sage_value
+        """
+        sage_values = {}
+        # map of smirks -> disagreement count
+        diffs = defaultdict(list)
+        for mol in tqdm(
+            itertools.islice(molecules(self.dataset), None),
+            desc="Comparing bonds",
+            total=self.total_molecules,
+        ):
+            labels = self.forcefield.label_molecules(mol.to_topology())[0]
+            bonds = labels["Bonds"]
+            sage_bonds = {}
+            for k, v in bonds.items():
+                i, j = k
+                # t = (i, j, v.length.magnitude, v.k.magnitude)
+                sage_bonds[(i, j)] = (v.k.magnitude, v.smirks)
 
-        assert espaloma.keys() == sage_bonds.keys()
+            _, d = espaloma_label(mol)
+            espaloma = {}
+            for bond in d["bonds"]:
+                i, j, _, k = bond.from_zero().as_tuple()
+                espaloma[(i, j)] = k
 
-        if verbose:
-            print(f"{'i':>5}{'j':>5}{'Sage':>12}{'Espaloma':>12}{'Diff':>12}")
-        for k, v in sage_bonds.items():
-            v, smirks = v
-            diff = abs(v - espaloma[k])
-            i, j = k
-            if diff > EPS:
-                if verbose:
-                    print(f"{i:5}{j:5}{v:12.8}{espaloma[k]:12.8}{diff:12.8}")
-                diffs[smirks].append(espaloma[k])
-                sage_values[smirks] = v
+            assert espaloma.keys() == sage_bonds.keys()
 
-    return diffs, sage_values
+            if self.verbose:
+                print(
+                    f"{'i':>5}{'j':>5}{'Sage':>12}{'Espaloma':>12}{'Diff':>12}"
+                )
+            for k, v in sage_bonds.items():
+                v, smirks = v
+                diff = abs(v - espaloma[k])
+                if diff > self.eps:
+                    if self.verbose:
+                        i, j = k
+                        print(
+                            f"{i:5}{j:5}{v:12.8}{espaloma[k]:12.8}{diff:12.8}"
+                        )
+                    diffs[smirks].append(espaloma[k])
+                    sage_values[smirks] = v
+
+        return diffs, sage_values
+
+    # this is basically a copy pasta from compare_bonds. it would be nice to
+    # factor out some commonality, but many of the internals are different
+    def compare_angles(
+        self,
+    ) -> Tuple[dict[str, list[float]], dict[str, float]]:
+        """Compare angle paramters assigned by ff and espaloma.
+
+        Returns a map of smirks->[espaloma values], and a map of
+        smirks->sage_value
+        """
+        sage_values = {}
+        diffs = defaultdict(list)
+        for mol in tqdm(
+            itertools.islice(molecules(self.dataset), None),
+            desc="Comparing angles",
+            total=self.total_molecules,
+        ):
+            labels = self.forcefield.label_molecules(mol.to_topology())[0]
+            angles = labels["Angles"]
+            sage_angles = {}
+            for key, v in angles.items():
+                i, j, k = key
+                # t = (i, j, v.length.magnitude, v.k.magnitude)
+                sage_angles[(i, j, k)] = (v.k.magnitude, v.smirks)
+
+            _, d = espaloma_label(mol)
+            espaloma = {}
+            for angle in d["angles"]:
+                i, j, k, _, key = angle.from_zero().as_tuple()
+                espaloma[(i, j, k)] = key
+
+            assert espaloma.keys() == sage_angles.keys()
+
+            for key, v in sage_angles.items():
+                v, smirks = v
+                diff = abs(v - espaloma[key])
+                if diff > self.eps:
+                    diffs[smirks].append(espaloma[key])
+                    sage_values[smirks] = v
+
+        return diffs, sage_values
 
 
 def print_summary(diffs, sage_values, outfile=None):
@@ -120,5 +173,13 @@ def print_summary(diffs, sage_values, outfile=None):
 # parameter toward the average espaloma value. or if espaloma has an especially
 # large range of values, that would be an indicator that we need to break up
 # one of our parameters
-diffs, sage_values = compare_bonds()
-print_summary(diffs, sage_values, outfile="bonds.dat")
+
+if __name__ == "__main__":
+    driver = Driver(
+        forcefield="openff-2.1.0.offxml",
+        dataset="filtered-opt.json",
+        eps=10.0,
+        verbose=False,
+    )
+    diffs, sage_values = driver.compare_bonds()
+    print_summary(diffs, sage_values, outfile="bonds.dat")
