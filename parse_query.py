@@ -20,7 +20,15 @@ def main(infile):
             ax = sea.histplot(data=data, label="Espaloma")
             esp_avg = np.average(data)
             ax.axvline(x=float(sage), color="green", label="Sage")
+            max_y = ax.get_ylim()[1]
             ax.axvline(x=esp_avg, color="orange", label="Espaloma Avg.")
+            plt.text(
+                x=1.1 * esp_avg,
+                y=0.9 * max_y,
+                s=f"avg = {esp_avg:.6f}",
+                in_layout=True,
+            )
+            plt.tight_layout()
             fig = ax.get_figure()
             plt.legend()
 
