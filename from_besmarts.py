@@ -50,14 +50,16 @@ def parse_tree(tree):
     return pairs
 
 
-tree = get_last_tree("espaloma_bonds.log")
-pairs = parse_tree(tree)
+bond_tree = get_last_tree("espaloma_bonds.log")
+angle_tree = get_last_tree("espaloma_angles.log")
 
 ff = ForceField("openff-2.1.0.offxml")
 bh = ff.get_parameter_handler("Bonds")
+ah = ff.get_parameter_handler("Angles")
 bh.parameters.clear()
+ah.parameters.clear()
 
-for i, (smirks, mean) in enumerate(pairs):
+for i, (smirks, mean) in enumerate(parse_tree(bond_tree)):
     kcal = unit.kilocalorie / unit.mole / unit.angstrom**2
     bh.add_parameter(
         dict(
@@ -68,8 +70,18 @@ for i, (smirks, mean) in enumerate(pairs):
         )
     )
 
-print(len(ff.get_parameter_handler("Bonds").parameters))
-print(ff.to_string())
+for i, (smirks, mean) in enumerate(parse_tree(angle_tree)):
+    kcal = unit.kilocalorie / unit.mole / unit.radian**2
+    ah.add_parameter(
+        dict(
+            smirks=smirks,
+            angle=mean * unit.degree,
+            k=1.0 * kcal,
+            id=f"a{i}",
+        )
+    )
+
+ff.to_file("esp_ba.offxml")
 
 # okay I get it now, Trevor said to "[label] each bond/angle, then [use] the
 # average of what matched to each parameter." so I first need to generate some
@@ -78,7 +90,7 @@ print(ff.to_string())
 # be able to look up in the espaloma "table" a value for a given (molecule,
 # atom_i, atom_j) key. I might still not get it
 
-# after having to look at the msm script, I think it actually handles this and
-# sounds like what Trevor was saying, so I can safely plop these into a force
-# field with a dummy value and run msm on it. just double check that it comes
-# out okay
+# after having to look at the msm script from valence-fitting, I think it
+# actually handles this and sounds like what Trevor was saying, so I can safely
+# plop these into a force field with a dummy value and run msm on it. just
+# double check that it comes out okay
