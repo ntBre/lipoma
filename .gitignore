@@ -2,3 +2,5 @@
 __pycache__/
 espaloma_angles.log.bz2
 espaloma_bonds.log
+/espaloma_angles.log
+/pretty.out.json
