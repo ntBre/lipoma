@@ -2,6 +2,9 @@ init := ../esp_ba.offxml
 opt := opt.json
 td := td.json
 
+$(init): ../from_besmarts.py
+	cd .. ; python from_besmarts.py
+
 # select optimization parameters to optimize
 opt-smirks.json: $(opt) $(init)
 	select_parameters.py opt \
