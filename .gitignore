@@ -4,3 +4,11 @@ espaloma_angles.log.bz2
 espaloma_bonds.log
 /espaloma_angles.log
 /pretty.out.json
+Modified_Seminario_Angles.txt
+Modified_Seminario_Bonds.txt
+fb-ready
+out.tar.gz
+refit/output/
+working-directory/
+targets/
+targets.tar.gz

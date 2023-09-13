@@ -53,12 +53,12 @@ fb-ready fb-fit/optimize.in fb-fit/forcefield/force-field.offxml: $(fb-deps)
 
 # pack up the generated files for copying to a supercomputer
 fb-fit/targets.tar.gz: fb-ready
-	rm $@
+	-rm $@
 	cd fb-fit; tar cfz targets.tar.gz targets
 
 deps := $(addprefix fb-fit/,forcefield/force-field.offxml optimize.in	\
 targets.tar.gz)
 out.tar.gz: fb-ready $(deps)
-	rm $@
+	-rm $@
 	tar cfz $@ $(deps)
 
