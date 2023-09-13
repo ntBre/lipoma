@@ -1,9 +1,17 @@
 # loading raw output from besmarts and turning it into a force field
 
+import logging
 import re
+from collections import defaultdict
 
+import numpy as np
+import vflib  # this is actually used for a monkey patch
+from openff.qcsubmit.results import OptimizationResultCollection
 from openff.toolkit import ForceField
 from openff.units import unit
+from tqdm import tqdm
+
+logging.getLogger("openff").setLevel(logging.ERROR)
 
 
 def get_last_tree(filename):
@@ -50,38 +58,94 @@ def parse_tree(tree):
     return pairs
 
 
-bond_tree = get_last_tree("espaloma_bonds.log")
-angle_tree = get_last_tree("espaloma_angles.log")
+def initial_force_field():
+    """Generate an initial force field from the besmarts patterns and their
+    corresponding average bond lengths and angles. The force constants are
+    initialized to 1.0
 
-ff = ForceField("openff-2.1.0.offxml")
-bh = ff.get_parameter_handler("Bonds")
-ah = ff.get_parameter_handler("Angles")
-bh.parameters.clear()
-ah.parameters.clear()
+    """
+    bond_tree = get_last_tree("espaloma_bonds.log")
+    angle_tree = get_last_tree("espaloma_angles.log")
 
-for i, (smirks, mean) in enumerate(parse_tree(bond_tree)):
-    kcal = unit.kilocalorie / unit.mole / unit.angstrom**2
-    bh.add_parameter(
-        dict(
-            smirks=smirks,
-            length=mean * unit.angstrom,
-            k=1.0 * kcal,
-            id=f"b{i}",
+    ff = ForceField("openff-2.1.0.offxml")
+    bh = ff.get_parameter_handler("Bonds")
+    ah = ff.get_parameter_handler("Angles")
+    bh.parameters.clear()
+    ah.parameters.clear()
+
+    for i, (smirks, mean) in enumerate(parse_tree(bond_tree)):
+        kcal = unit.kilocalorie / unit.mole / unit.angstrom**2
+        bh.add_parameter(
+            dict(
+                smirks=smirks,
+                length=mean * unit.angstrom,
+                k=1.0 * kcal,
+                id=f"b{i}",
+            )
         )
-    )
 
-for i, (smirks, mean) in enumerate(parse_tree(angle_tree)):
-    kcal = unit.kilocalorie / unit.mole / unit.radian**2
-    ah.add_parameter(
-        dict(
-            smirks=smirks,
-            angle=mean * unit.degree,
-            k=1.0 * kcal,
-            id=f"a{i}",
+    for i, (smirks, mean) in enumerate(parse_tree(angle_tree)):
+        kcal = unit.kilocalorie / unit.mole / unit.radian**2
+        ah.add_parameter(
+            dict(
+                smirks=smirks,
+                angle=mean * unit.degree,
+                k=1.0 * kcal,
+                id=f"a{i}",
+            )
         )
-    )
+    return ff
 
-ff.to_file("esp_ba.offxml")
+
+esp_init = initial_force_field()
+sage = ForceField("openff-2.1.0.offxml")
+opt = OptimizationResultCollection.parse_file("filtered-opt.json")
+# the key in the list is going to be (m, i, j) or (mol_index, bond_atom_1,
+# bond_atom_2). for each of those, I'll accumulate a list of
+
+# I need a map of {esp_smirks->[(m,i,j)]} and a map of {(m,i,j)->[sage_values]},
+# which can be combined to yield a mapping of esp_smirks->[sage_values] and
+# averaging the sage_values gives me esp_smirks->k
+#
+# actually, sage_values is probably not a list. I think each (m, i, j) from
+# sage will only have one value. as I already corrected, the esp_smirks value
+# is actually the list
+esp_bonds = defaultdict(list)
+sage_bonds = {}
+esp_angles = defaultdict(list)
+sage_angles = {}
+molecules = opt.to_molecules()
+for m, mol in tqdm(
+    enumerate(molecules), total=len(molecules), desc="Labeling molecules"
+):
+    top = mol.to_topology()
+    esp = esp_init.label_molecules(top)[0]
+    sag = sage.label_molecules(top)[0]
+    # bonds
+    for (i, j), v in esp["Bonds"].items():
+        esp_bonds[v.smirks].append((m, i, j))
+    for (i, j), v in sag["Bonds"].items():
+        sage_bonds[(m, i, j)] = v.k.magnitude
+    # end bonds
+
+    # angles
+    for (i, j, k), v in esp["Angles"].items():
+        esp_angles[v.smirks].append((m, i, j, k))
+    for (i, j, k), v in sag["Angles"].items():
+        sage_angles[(m, i, j, k)] = v.k.magnitude
+    # end angles
+
+bh = esp_init.get_parameter_handler("Bonds")
+for smirks, keys in esp_bonds.items():
+    k = np.mean([sage_bonds[key] for key in keys])
+    bh[smirks].k = k * bh[smirks].k.units
+
+ah = esp_init.get_parameter_handler("Angles")
+for smirks, keys in esp_angles.items():
+    k = np.mean([sage_angles[key] for key in keys])
+    ah[smirks].k = k * ah[smirks].k.units
+
+esp_init.to_file("esp_ba.offxml")
 
 # okay I get it now, Trevor said to "[label] each bond/angle, then [use] the
 # average of what matched to each parameter." so I first need to generate some
@@ -94,3 +158,7 @@ ff.to_file("esp_ba.offxml")
 # actually handles this and sounds like what Trevor was saying, so I can safely
 # plop these into a force field with a dummy value and run msm on it. just
 # double check that it comes out okay
+
+# I think I get it again now. I'll need to label the molecules with both the
+# new FF and the old one and take the value for the new parameter from the
+# average value of the old parameters that match the same stuff
