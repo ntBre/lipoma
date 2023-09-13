@@ -103,17 +103,16 @@ opt = OptimizationResultCollection.parse_file("filtered-opt.json")
 # the key in the list is going to be (m, i, j) or (mol_index, bond_atom_1,
 # bond_atom_2). for each of those, I'll accumulate a list of
 
-# I need a map of {esp_smirks->[(m,i,j)]} and a map of {(m,i,j)->[sage_values]},
-# which can be combined to yield a mapping of esp_smirks->[sage_values] and
-# averaging the sage_values gives me esp_smirks->k
+# I need a map of {esp_smirks->[(m,i,j)]} and a map of
+# {(m,i,j)->[sage_values]}, which can be combined to yield a mapping of
+# esp_smirks->[sage_values] and averaging the sage_values gives me
+# esp_smirks->k
 #
 # actually, sage_values is probably not a list. I think each (m, i, j) from
 # sage will only have one value. as I already corrected, the esp_smirks value
 # is actually the list
 esp_bonds = defaultdict(list)
-sage_bonds = {}
 esp_angles = defaultdict(list)
-sage_angles = {}
 molecules = opt.to_molecules()
 for m, mol in tqdm(
     enumerate(molecules), total=len(molecules), desc="Labeling molecules"
@@ -121,28 +120,21 @@ for m, mol in tqdm(
     top = mol.to_topology()
     esp = esp_init.label_molecules(top)[0]
     sag = sage.label_molecules(top)[0]
-    # bonds
-    for (i, j), v in esp["Bonds"].items():
-        esp_bonds[v.smirks].append((m, i, j))
-    for (i, j), v in sag["Bonds"].items():
-        sage_bonds[(m, i, j)] = v.k.magnitude
-    # end bonds
 
-    # angles
+    for (i, j), v in esp["Bonds"].items():
+        esp_bonds[v.smirks].append(sag["Bonds"][(i, j)].k.magnitude)
+
     for (i, j, k), v in esp["Angles"].items():
-        esp_angles[v.smirks].append((m, i, j, k))
-    for (i, j, k), v in sag["Angles"].items():
-        sage_angles[(m, i, j, k)] = v.k.magnitude
-    # end angles
+        esp_angles[v.smirks].append(sag["Angles"][(i, j, k)].k.magnitude)
 
 bh = esp_init.get_parameter_handler("Bonds")
-for smirks, keys in esp_bonds.items():
-    k = np.mean([sage_bonds[key] for key in keys])
+for smirks, values in esp_bonds.items():
+    k = np.mean(values)
     bh[smirks].k = k * bh[smirks].k.units
 
 ah = esp_init.get_parameter_handler("Angles")
-for smirks, keys in esp_angles.items():
-    k = np.mean([sage_angles[key] for key in keys])
+for smirks, values in esp_angles.items():
+    k = np.mean(values)
     ah[smirks].k = k * ah[smirks].k.units
 
 esp_init.to_file("esp_ba.offxml")
