@@ -26,6 +26,7 @@ msm.offxml: $(opt) $(init)
 	--initial-force-field $(init)           \
 	--optimization-dataset $<		\
 	--working-directory working-directory   \
+	--verbose				\
 	--output $@
 
 # generate the ForceBalance input. this creates a bunch of stuff, so use a dummy
