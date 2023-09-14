@@ -4,12 +4,7 @@ import warnings
 from collections import defaultdict
 from dataclasses import dataclass
 from multiprocessing import Pool
-from typing import Union
 
-from openff.qcsubmit.results import (
-    OptimizationResultCollection,
-    TorsionDriveResultCollection,
-)
 from openff.toolkit.topology import Molecule
 from openff.units.openmm import from_openmm
 from openmm.openmm import (
@@ -19,6 +14,7 @@ from openmm.openmm import (
     PeriodicTorsionForce,
 )
 from tqdm import tqdm
+from vflib import load_dataset
 
 import espaloma as esp
 
@@ -120,35 +116,6 @@ class Torsion:
             self.phase,
             self.k,
         )
-
-
-# copy pasta from known-issues main.py
-def load_dataset(
-    dataset: str,
-    typ: str = None,
-) -> Union[OptimizationResultCollection, TorsionDriveResultCollection]:
-    """Peeks at the first entry of `dataset` to determine its type and
-    then loads it appropriately. If the `typ` argument is supplied,
-    treat that as the type instead.
-
-    Raises a `TypeError` if the first entry is neither a `torsion`
-    record nor an `optimization` record.
-    """
-    if typ is None:
-        with open(dataset, "r") as f:
-            j = json.load(f)
-        entries = j["entries"]
-        keys = entries.keys()
-        assert len(keys) == 1  # only handling this case for now
-        key = list(keys)[0]
-        typ = j["entries"][key][0]["type"]
-    match typ:
-        case "torsion":
-            return TorsionDriveResultCollection.parse_file(dataset)
-        case "optimization":
-            return OptimizationResultCollection.parse_file(dataset)
-        case t:
-            raise TypeError(f"Unknown result collection type: {t}")
 
 
 def espaloma_label(molecule):
