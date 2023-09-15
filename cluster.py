@@ -76,43 +76,44 @@ def load_thresh(filename):
     return ret
 
 
-smirkss = load_thresh("labeled_bonds.dat")
+def main():
+    smirkss = load_thresh("labeled_bonds.dat")
 
-opt = OptimizationResultCollection.parse_file("filtered-opt.json")
+    opt = OptimizationResultCollection.parse_file("filtered-opt.json")
 
-# demand execution here so I can deduplicate and reuse molecules
-molecules = [m for m in tqdm(opt.to_molecules(), desc="Converting molecules")]
-print(len(molecules), " initially")
-molecules = deduplicate_by(molecules, Molecule.to_inchikey)
-print(len(molecules), " after dedup")
+    # demand execution here so I can deduplicate and reuse molecules
+    molecules = [
+        m for m in tqdm(opt.to_molecules(), desc="Converting molecules")
+    ]
+    print(len(molecules), " initially")
+    molecules = deduplicate_by(molecules, Molecule.to_inchikey)
+    print(len(molecules), " after dedup")
 
-for s, (smirks, fn) in tqdm(
-    enumerate(smirkss), total=len(smirkss), desc="Processing smirks"
-):
-    out_dir = f"output/cluster/bond{s:02d}"
-    if os.path.exists(out_dir):
-        shutil.rmtree(out_dir)
-    os.mkdir(out_dir)
+    for s, (smirks, fn) in tqdm(
+        enumerate(smirkss), total=len(smirkss), desc="Processing smirks"
+    ):
+        out_dir = f"output/cluster/bond{s:02d}"
+        if os.path.exists(out_dir):
+            shutil.rmtree(out_dir)
+        os.mkdir(out_dir)
 
-    for m, molecule in enumerate(molecules):
-        matches = molecule.chemical_environment_matches(smirks)
-        if matches:
-            _, esp = espaloma_label(molecule)
-            esp = [
-                (b.atom1 - 1, b.atom2 - 1)
-                for b in esp["bonds"]
-                if (b.atom1 - 1, b.atom2 - 1) in matches and fn(b.k)
-            ]
-            if esp:
-                draw_rdkit(
-                    molecule,
-                    smirks,
-                    matches=esp,
-                    filename=f"{out_dir}/mol{m:04d}.png",
-                )
+        for m, molecule in enumerate(molecules):
+            matches = molecule.chemical_environment_matches(smirks)
+            if matches:
+                _, esp = espaloma_label(molecule)
+                esp = [
+                    (b.atom1 - 1, b.atom2 - 1)
+                    for b in esp["bonds"]
+                    if (b.atom1 - 1, b.atom2 - 1) in matches and fn(b.k)
+                ]
+                if esp:
+                    draw_rdkit(
+                        molecule,
+                        smirks,
+                        matches=esp,
+                        filename=f"{out_dir}/mol{m:04d}.png",
+                    )
 
-# for bond0 it's already looking like the much lower espaloma values are for a
-# carbon bound to a nitrogen. maybe I should try breaking the pattern on that
 
-# looks like I can do something like "[#7X3]-[#6X4:1]-[#1:2]" where the
-# nitrogen doesn't have a number (:1 or :2)
+if __name__ == "__main__":
+    main()
