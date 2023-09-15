@@ -53,7 +53,7 @@ print(len(molecules), " after dedup")
 
 smirkss = load_smirks("bonds.dat")
 for s, smirks in tqdm(enumerate(smirkss), desc="Processing smirks"):
-    out_dir = f"bond{s:02d}"
+    out_dir = f"output/cluster/bond{s:02d}"
     if os.path.exists(out_dir):
         shutil.rmtree(out_dir)
     os.mkdir(out_dir)
