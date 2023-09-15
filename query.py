@@ -1,23 +1,18 @@
 # asking espaloma questions about our parameters
 
-import itertools
 import sys
+import warnings
 from collections import defaultdict
 from typing import Tuple
 
-from openff.toolkit import ForceField, Molecule
-from tqdm import tqdm
+warnings.filterwarnings("ignore")
 
-from main import espaloma_label, load_dataset
+from openff.toolkit import ForceField, Molecule  # noqa: E402
+from tqdm import tqdm  # noqa: E402
+from vflib import load_dataset  # noqa: E402
 
-
-def molecules(ds):
-    """Yields molecules from `ds` to avoid allocating big lists up front"""
-    for value in ds.entries.values():
-        for v in value:
-            yield Molecule.from_mapped_smiles(
-                v.cmiles, allow_undefined_stereo=True
-            )
+from cluster import deduplicate_by  # noqa: E402
+from main import espaloma_label  # noqa: E402
 
 
 # there's probably a better name for this
@@ -30,13 +25,18 @@ class Driver:
         verbose: bool = False,
     ):
         self.forcefield = ForceField(forcefield)
-        self.dataset = load_dataset(dataset, "optimization")
-        self.total_molecules = sum(
-            len(s) for s in self.dataset.entries.values()
+        # demand execution so I can deduplicate
+        self.molecules = deduplicate_by(
+            load_dataset(dataset, "optimization").to_molecules(),
+            Molecule.to_inchikey,
         )
         # cutoff for considering espaloma's result to be different from ours
         self.eps = eps
         self.verbose = verbose
+
+    @property
+    def total_molecules(self):
+        return len(self.molecules)
 
     def compare_bonds(self) -> Tuple[dict[str, list[float]], dict[str, float]]:
         """Compare bond paramters assigned by ff and espaloma.
@@ -48,7 +48,7 @@ class Driver:
         # map of smirks -> disagreement count
         diffs = defaultdict(list)
         for mol in tqdm(
-            itertools.islice(molecules(self.dataset), None),
+            self.molecules,
             desc="Comparing bonds",
             total=self.total_molecules,
         ):
@@ -99,7 +99,7 @@ class Driver:
         sage_values = {}
         diffs = defaultdict(list)
         for mol in tqdm(
-            itertools.islice(molecules(self.dataset), None),
+            self.molecules,
             desc="Comparing angles",
             total=self.total_molecules,
         ):
@@ -139,7 +139,7 @@ class Driver:
         sage_values = {}
         diffs = defaultdict(list)
         for mol in tqdm(
-            itertools.islice(molecules(self.dataset), None),
+            self.molecules,
             desc="Comparing torsions",
             total=self.total_molecules,
         ):
@@ -243,11 +243,11 @@ if __name__ == "__main__":
         eps=10.0,
         verbose=False,
     )
-    # diffs, sage_values = driver.compare_bonds()
-    # print_summary(diffs, sage_values, outfile="bonds.dat")
+    diffs, sage_values = driver.compare_bonds()
+    print_summary(diffs, sage_values, outfile="bonds_dedup.dat")
 
-    # diffs, sage_values = driver.compare_angles()
-    # print_summary(diffs, sage_values, outfile="angles.dat")
+    diffs, sage_values = driver.compare_angles()
+    print_summary(diffs, sage_values, outfile="angles_dedup.dat")
 
     diffs, sage_values = driver.compare_torsions()
-    print_summary(diffs, sage_values, outfile="torsions.dat")
+    print_summary(diffs, sage_values, outfile="torsions_dedup.dat")
