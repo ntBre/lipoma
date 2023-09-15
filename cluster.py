@@ -4,6 +4,7 @@
 import os
 import shutil
 
+import numpy as np
 from openff.qcsubmit.results import OptimizationResultCollection
 from openff.toolkit import Molecule
 from tqdm import tqdm
@@ -35,13 +36,47 @@ def deduplicate_by(lst, fn):
 
 
 def load_smirks(filename):
-    """Extracts the initial SMIRKS pattern from lines of the form below.
+    """Extracts the SMIRKS pattern, Sage value, and Espaloma average from lines
+    of the form below.
 
+    # Smirks        Count    Sage    Rest
     [#6X4:1]-[#1:2] 50377  719.64  740.36  740.36  740.36
-    """
-    with open(filename, "r") as inp:
-        return [line.split()[0] for line in inp if not line.startswith("#")]
 
+    """
+    ret = []
+    with open(filename, "r") as inp:
+        for line in inp:
+            if line.startswith("#"):
+                continue
+            sp = line.split()
+            ret.append(
+                (sp[0], float(sp[2]), np.mean([float(x) for x in sp[3:]]))
+            )
+        return ret
+
+
+def load_thresh(filename):
+    """load smirks, threshold pairs from `filename`. Returns a sequence of
+    smirks, fn pairs, where `fn` is a function performing the appropriate
+    comparison to threshold
+
+    """
+    ret = []
+    with open(filename) as inp:
+        for line in inp:
+            sp = line.split()
+            smirks = sp[0]
+            if sp[1].startswith("<"):
+                fn = lambda x: x < float(sp[1][1:])  # noqa - I want lambda
+            elif sp[1].startswith(">"):
+                fn = lambda x: x > float(sp[1][1:])  # noqa - ""
+            else:
+                raise ValueError(f"unrecognized operator `{sp[1][0]}`")
+            ret.append((smirks, fn))
+    return ret
+
+
+smirkss = load_thresh("labeled_bonds.dat")
 
 opt = OptimizationResultCollection.parse_file("filtered-opt.json")
 
@@ -51,8 +86,9 @@ print(len(molecules), " initially")
 molecules = deduplicate_by(molecules, Molecule.to_inchikey)
 print(len(molecules), " after dedup")
 
-smirkss = load_smirks("bonds.dat")
-for s, smirks in tqdm(enumerate(smirkss), desc="Processing smirks"):
+for s, (smirks, fn) in tqdm(
+    enumerate(smirkss), total=len(smirkss), desc="Processing smirks"
+):
     out_dir = f"output/cluster/bond{s:02d}"
     if os.path.exists(out_dir):
         shutil.rmtree(out_dir)
@@ -65,7 +101,7 @@ for s, smirks in tqdm(enumerate(smirkss), desc="Processing smirks"):
             esp = [
                 (b.atom1 - 1, b.atom2 - 1)
                 for b in esp["bonds"]
-                if (b.atom1 - 1, b.atom2 - 1) in matches and b.k < 720.0
+                if (b.atom1 - 1, b.atom2 - 1) in matches and fn(b.k)
             ]
             if esp:
                 draw_rdkit(
@@ -74,8 +110,6 @@ for s, smirks in tqdm(enumerate(smirkss), desc="Processing smirks"):
                     matches=esp,
                     filename=f"{out_dir}/mol{m:04d}.png",
                 )
-    break
-
 
 # for bond0 it's already looking like the much lower espaloma values are for a
 # carbon bound to a nitrogen. maybe I should try breaking the pattern on that
