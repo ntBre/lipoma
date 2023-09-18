@@ -15,6 +15,25 @@ from cluster import deduplicate_by  # noqa: E402
 from main import espaloma_label  # noqa: E402
 
 
+# what is the pythonic way to do this? in rust, I would define compare to be
+# generic over T: Compare and then I would implement Compare for Bonds, Angles,
+# and Torsions. and these are all associated functions, not methods
+class Bonds:
+    sage_label = "Bonds"
+    espaloma_label = "bonds"
+
+    def to_pair(bond):
+        i, j, _, k = bond.from_zero().as_tuple()
+        return (i, j), k
+
+    def print_header():
+        print(f"{'i':>5}{'j':>5}{'Sage':>12}{'Espaloma':>12}{'Diff':>12}")
+
+    def print_row(k, v, espaloma, diff):
+        i, j = k
+        print(f"{i:5}{j:5}{v:12.8}{espaloma:12.8}{diff:12.8}")
+
+
 # there's probably a better name for this
 class Driver:
     def __init__(
@@ -38,7 +57,7 @@ class Driver:
     def total_molecules(self):
         return len(self.molecules)
 
-    def compare_bonds(self) -> Tuple[dict[str, list[float]], dict[str, float]]:
+    def compare(self, cls) -> Tuple[dict[str, list[float]], dict[str, float]]:
         """Compare bond paramters assigned by ff and espaloma.
 
         Returns a map of smirks->[espaloma values], and a map of
@@ -53,34 +72,28 @@ class Driver:
             total=self.total_molecules,
         ):
             labels = self.forcefield.label_molecules(mol.to_topology())[0]
-            bonds = labels["Bonds"]
-            sage_bonds = {}
-            for k, v in bonds.items():
-                i, j = k
-                # t = (i, j, v.length.magnitude, v.k.magnitude)
-                sage_bonds[(i, j)] = (v.k.magnitude, v.smirks)
+            labels = labels[cls.sage_label]  # "Bonds"
+            sage = {}
+            for k, v in labels.items():
+                sage[k] = (v.k.magnitude, v.smirks)
 
             _, d = espaloma_label(mol)
             espaloma = {}
-            for bond in d["bonds"]:
-                i, j, _, k = bond.from_zero().as_tuple()
-                espaloma[(i, j)] = k
+            for bond in d[cls.espaloma_label]:  # "bonds"
+                k, v = cls.to_pair(bond)
+                espaloma[k] = v
 
-            assert espaloma.keys() == sage_bonds.keys()
+            assert espaloma.keys() == sage.keys()
 
             if self.verbose:
-                print(
-                    f"{'i':>5}{'j':>5}{'Sage':>12}{'Espaloma':>12}{'Diff':>12}"
-                )
-            for k, v in sage_bonds.items():
+                cls.print_header()
+
+            for k, v in sage.items():
                 v, smirks = v
                 diff = abs(v - espaloma[k])
                 if diff > self.eps:
                     if self.verbose:
-                        i, j = k
-                        print(
-                            f"{i:5}{j:5}{v:12.8}{espaloma[k]:12.8}{diff:12.8}"
-                        )
+                        cls.print_row(k, v, espaloma[k], diff)
                     diffs[smirks].append(espaloma[k])
                     sage_values[smirks] = v
 
@@ -243,11 +256,11 @@ if __name__ == "__main__":
         eps=10.0,
         verbose=False,
     )
-    diffs, sage_values = driver.compare_bonds()
+    diffs, sage_values = driver.compare(Bonds)
     print_summary(diffs, sage_values, outfile="bonds_dedup.dat")
 
-    diffs, sage_values = driver.compare_angles()
-    print_summary(diffs, sage_values, outfile="angles_dedup.dat")
+    # diffs, sage_values = driver.compare_angles()
+    # print_summary(diffs, sage_values, outfile="angles_dedup.dat")
 
-    diffs, sage_values = driver.compare_torsions()
-    print_summary(diffs, sage_values, outfile="torsions_dedup.dat")
+    # diffs, sage_values = driver.compare_torsions()
+    # print_summary(diffs, sage_values, outfile="torsions_dedup.dat")
