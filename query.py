@@ -21,17 +21,51 @@ from main import espaloma_label  # noqa: E402
 class Bonds:
     sage_label = "Bonds"
     espaloma_label = "bonds"
+    header_keys = ["i", "j"]
 
     def to_pair(bond):
         i, j, _, k = bond.from_zero().as_tuple()
         return (i, j), k
 
-    def print_header():
-        print(f"{'i':>5}{'j':>5}{'Sage':>12}{'Espaloma':>12}{'Diff':>12}")
+    def insert_sage(sage, k, v):
+        sage[k] = (v.k.magnitude, v.smirks)
 
-    def print_row(k, v, espaloma, diff):
-        i, j = k
-        print(f"{i:5}{j:5}{v:12.8}{espaloma:12.8}{diff:12.8}")
+
+class Angles:
+    sage_label = "Angles"
+    espaloma_label = "angles"
+    header_keys = ["i", "j", "k"]
+
+    def to_pair(angle):
+        i, j, k, _, key = angle.from_zero().as_tuple()
+        return (i, j, k), key
+
+    def insert_sage(sage, k, v):
+        sage[k] = (v.k.magnitude, v.smirks)
+
+
+class Torsions:
+    sage_label = "ProperTorsions"
+    espaloma_label = "torsions"
+    header_keys = ["i", "j", "k", "l"]
+
+    def to_pair(torsion):
+        i, j, k, m, per, _phase, fc = torsion.from_zero().as_tuple()
+        return (i, j, k, m, per), fc
+
+    def insert_sage(sage, key, v):
+        for fc in ["k1", "k2", "k3"]:
+            val = getattr(v, fc, None)
+            if val is not None:
+                per = getattr(v, f"periodicity{fc[-1]}")
+                i, j, k, m = key
+                sage[(i, j, k, m, per)] = (
+                    val.magnitude,
+                    v.smirks,
+                )
+
+    def fix_keys(espaloma, sage):
+        return {k: v for k, v in espaloma.items() if k in sage}
 
 
 # there's probably a better name for this
@@ -57,143 +91,61 @@ class Driver:
     def total_molecules(self):
         return len(self.molecules)
 
+    def print_header(self, cls):
+        cls.print_header()
+        for h in cls.header_keys:
+            print(f"{h:>5}", end="")
+        print(f"{'Sage':>12}{'Espaloma':>12}{'Diff':>12}")
+
+    def print_row(self, cls, k, v, espaloma, diff):
+        for elt in k:
+            print(f"{elt:5}", end="")
+        print(f"{v:12.8}{espaloma[k]:12.8}{diff:12.8}")
+
     def compare(self, cls) -> Tuple[dict[str, list[float]], dict[str, float]]:
-        """Compare bond paramters assigned by ff and espaloma.
+        """Compare paramters of type `cls` assigned by `self.forcefield` and
+        espaloma.
 
         Returns a map of smirks->[espaloma values], and a map of
         smirks->sage_value
+
         """
         sage_values = {}
         # map of smirks -> disagreement count
         diffs = defaultdict(list)
         for mol in tqdm(
             self.molecules,
-            desc="Comparing bonds",
+            desc=f"Comparing {cls.espaloma_label}",
             total=self.total_molecules,
         ):
             labels = self.forcefield.label_molecules(mol.to_topology())[0]
-            labels = labels[cls.sage_label]  # "Bonds"
+            labels = labels[cls.sage_label]
             sage = {}
             for k, v in labels.items():
-                sage[k] = (v.k.magnitude, v.smirks)
+                cls.insert_sage(sage, k, v)
 
             _, d = espaloma_label(mol)
             espaloma = {}
-            for bond in d[cls.espaloma_label]:  # "bonds"
+            for bond in d[cls.espaloma_label]:
                 k, v = cls.to_pair(bond)
                 espaloma[k] = v
+
+            # needed for torsions
+            if hasattr(cls, "fix_keys"):
+                espaloma = cls.fix_keys(espaloma, sage)
 
             assert espaloma.keys() == sage.keys()
 
             if self.verbose:
-                cls.print_header()
+                self.print_header(cls)
 
             for k, v in sage.items():
                 v, smirks = v
                 diff = abs(v - espaloma[k])
                 if diff > self.eps:
                     if self.verbose:
-                        cls.print_row(k, v, espaloma[k], diff)
+                        self.print_row(cls, k, v, espaloma, diff)
                     diffs[smirks].append(espaloma[k])
-                    sage_values[smirks] = v
-
-        return diffs, sage_values
-
-    # this is basically a copy pasta from compare_bonds. it would be nice to
-    # factor out some commonality, but many of the internals are different
-    def compare_angles(
-        self,
-    ) -> Tuple[dict[str, list[float]], dict[str, float]]:
-        """Compare angle paramters assigned by ff and espaloma.
-
-        Returns a map of smirks->[espaloma values], and a map of
-        smirks->sage_value
-        """
-        sage_values = {}
-        diffs = defaultdict(list)
-        for mol in tqdm(
-            self.molecules,
-            desc="Comparing angles",
-            total=self.total_molecules,
-        ):
-            labels = self.forcefield.label_molecules(mol.to_topology())[0]
-            angles = labels["Angles"]
-            sage_angles = {}
-            for key, v in angles.items():
-                sage_angles[key] = (v.k.magnitude, v.smirks)
-
-            _, d = espaloma_label(mol)
-            espaloma = {}
-            for angle in d["angles"]:
-                i, j, k, _, key = angle.from_zero().as_tuple()
-                espaloma[(i, j, k)] = key
-
-            assert espaloma.keys() == sage_angles.keys()
-
-            for key, v in sage_angles.items():
-                v, smirks = v
-                diff = abs(v - espaloma[key])
-                if diff > self.eps:
-                    diffs[smirks].append(espaloma[key])
-                    sage_values[smirks] = v
-
-        return diffs, sage_values
-
-    # this is basically a copy pasta from compare_bonds. it would be nice to
-    # factor out some commonality, but many of the internals are different
-    def compare_torsions(
-        self,
-    ) -> Tuple[dict[str, list[float]], dict[str, float]]:
-        """Compare proper torsion paramters assigned by ff and espaloma.
-
-        Returns a map of smirks->[espaloma values], and a map of
-        smirks->sage_value
-        """
-        sage_values = {}
-        diffs = defaultdict(list)
-        for mol in tqdm(
-            self.molecules,
-            desc="Comparing torsions",
-            total=self.total_molecules,
-        ):
-            labels = self.forcefield.label_molecules(mol.to_topology())[0]
-            torsions = labels["ProperTorsions"]
-            sage_torsions = {}
-            for key, v in torsions.items():
-                for fc in ["k1", "k2", "k3"]:
-                    val = getattr(v, fc, None)
-                    if val is not None:
-                        per = getattr(v, f"periodicity{fc[-1]}")
-                        i, j, k, m = key
-                        sage_torsions[(i, j, k, m, per)] = (
-                            val.magnitude,
-                            v.smirks,
-                        )
-
-            _, d = espaloma_label(mol)
-            espaloma = {}
-            for torsion in d["torsions"]:
-                i, j, k, m, _per, _phase, fc = torsion.from_zero().as_tuple()
-                espaloma[(i, j, k, m, _per)] = fc
-
-            # espaloma does something funny with the
-            # torsions/periodicity/phase, so just take the keys that correspond
-            # to values in sage
-            espaloma = {
-                k: v for k, v in espaloma.items() if k in sage_torsions
-            }
-            ekeys = espaloma.keys()
-            skeys = sage_torsions.keys()
-            assert len(ekeys) == len(
-                skeys
-            ), f"# espaloma keys ({len(ekeys)}) != # sage keys ({len(skeys)})"
-            assert ekeys == skeys
-
-            for key, v in sage_torsions.items():
-                v, smirks = v
-                diff = abs(v - espaloma[key])
-                if diff > self.eps:
-                    diffs[smirks].append(espaloma[key])
                     sage_values[smirks] = v
 
         return diffs, sage_values
@@ -256,11 +208,11 @@ if __name__ == "__main__":
         eps=10.0,
         verbose=False,
     )
-    diffs, sage_values = driver.compare(Bonds)
-    print_summary(diffs, sage_values, outfile="bonds_dedup.dat")
 
-    # diffs, sage_values = driver.compare_angles()
-    # print_summary(diffs, sage_values, outfile="angles_dedup.dat")
-
-    # diffs, sage_values = driver.compare_torsions()
-    # print_summary(diffs, sage_values, outfile="torsions_dedup.dat")
+    for param, outfile in [
+        (Bonds, "bonds_dedup.dat"),
+        (Angles, "angles_dedup.dat"),
+        (Torsions, "torsions_dedup.dat"),
+    ]:
+        diffs, sage_values = driver.compare(param)
+        print_summary(diffs, sage_values, outfile=outfile)
