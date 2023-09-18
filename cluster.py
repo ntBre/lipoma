@@ -77,9 +77,9 @@ def load_thresh(filename):
 
 
 def main():
-    smirkss = load_thresh("labeled_bonds.dat")
+    smirkss = load_thresh("data/labeled_bonds.dat")
 
-    opt = OptimizationResultCollection.parse_file("filtered-opt.json")
+    opt = OptimizationResultCollection.parse_file("datasets/filtered-opt.json")
 
     # demand execution here so I can deduplicate and reuse molecules
     molecules = [
