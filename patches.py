@@ -4,25 +4,10 @@ from dataclasses import dataclass
 import numpy as np
 import torch
 from openff.toolkit import ForceField
-from openff.units.openmm import from_openmm
 from openmm import unit
 from openmm.unit import Quantity
 
 import espaloma as esp
-
-# =============================================================================
-# CONSTANTS
-# =============================================================================
-OPENMM_LENGTH_UNIT = unit.nanometer
-OPENMM_ANGLE_UNIT = unit.radian
-OPENMM_ENERGY_UNIT = unit.kilojoule_per_mole
-
-OPENMM_BOND_EQ_UNIT = OPENMM_LENGTH_UNIT
-OPENMM_ANGLE_EQ_UNIT = OPENMM_ANGLE_UNIT
-OPENMM_TORSION_K_UNIT = OPENMM_ENERGY_UNIT
-OPENMM_TORSION_PHASE_UNIT = OPENMM_ANGLE_UNIT
-OPENMM_BOND_K_UNIT = OPENMM_ENERGY_UNIT / (OPENMM_LENGTH_UNIT**2)
-OPENMM_ANGLE_K_UNIT = OPENMM_ENERGY_UNIT / (OPENMM_ANGLE_UNIT**2)
 
 
 @dataclass
