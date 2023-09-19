@@ -107,8 +107,6 @@ class Torsion:
 
 
 def openmm_system_from_graph(g, forcefield: ForceField):
-    ff = forcefield
-
     # get the mapping between position and indices
     bond_lookup = {
         tuple(idxs.detach().numpy()): position
@@ -126,7 +124,7 @@ def openmm_system_from_graph(g, forcefield: ForceField):
     ].flatten().detach().cpu().numpy().astype(
         np.float64,
     )
-    sys = ff.create_openmm_system(
+    sys = forcefield.create_openmm_system(
         g.mol.to_topology(),
         charge_from_molecules=[g.mol],
         allow_nonintegral_charges=True,
