@@ -66,10 +66,11 @@ def load_thresh(filename):
         for line in inp:
             sp = line.split()
             smirks = sp[0]
+            v = float(sp[1][1:])
             if sp[1].startswith("<"):
-                fn = lambda x: x < float(sp[1][1:])  # noqa - I want lambda
+                fn = lambda x, v=v: x < v  # noqa - I want lambda
             elif sp[1].startswith(">"):
-                fn = lambda x: x > float(sp[1][1:])  # noqa - ""
+                fn = lambda x, v=v: x > v  # noqa - ""
             else:
                 raise ValueError(f"unrecognized operator `{sp[1][0]}`")
             ret.append((smirks, fn))
