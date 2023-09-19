@@ -1,8 +1,10 @@
 import math
+from dataclasses import dataclass
 
 import numpy as np
 import torch
 from openff.toolkit import ForceField
+from openff.units.openmm import from_openmm
 from openmm import unit
 from openmm.unit import Quantity
 
@@ -21,6 +23,102 @@ OPENMM_TORSION_K_UNIT = OPENMM_ENERGY_UNIT
 OPENMM_TORSION_PHASE_UNIT = OPENMM_ANGLE_UNIT
 OPENMM_BOND_K_UNIT = OPENMM_ENERGY_UNIT / (OPENMM_LENGTH_UNIT**2)
 OPENMM_ANGLE_K_UNIT = OPENMM_ENERGY_UNIT / (OPENMM_ANGLE_UNIT**2)
+
+
+@dataclass
+class Bond:
+    """
+    A bond between two atoms, with equilibrium distance `eq` in Å and a
+    force constant `k` in kcal/mol/Å²"""
+
+    atom1: int
+    atom2: int
+    eq: float
+    k: float
+
+    def to_json(self):
+        return [self.atom1, self.atom2, self.eq, self.k]
+
+    def from_zero(self):
+        "Returns `self` with atoms indexed from 0 instead of 1"
+        return Bond(self.atom1 - 1, self.atom2 - 1, self.eq, self.k)
+
+    def as_tuple(self):
+        return self.atom1, self.atom2, self.eq, self.k
+
+
+@dataclass
+class Angle:
+    """
+    An angle between three atoms, with equilibrium value `eq` in radians
+    and a force constant `k` in kcal/mol/rad²"""
+
+    atom1: int
+    atom2: int
+    atom3: int
+    eq: float
+    k: float
+
+    def to_json(self):
+        return [self.atom1, self.atom2, self.atom3, self.eq, self.k]
+
+    def from_zero(self):
+        "Returns `self` with atoms indexed from 0 instead of 1"
+        return Angle(
+            self.atom1 - 1, self.atom2 - 1, self.atom3 - 1, self.eq, self.k
+        )
+
+    def as_tuple(self):
+        return self.atom1, self.atom2, self.atom3, self.eq, self.k
+
+
+@dataclass
+class Torsion:
+    """
+    A torsion between four atoms, with periodicity `per`, phase offset
+    `phase` in radians and force constant `k` in kcal/mol"""
+
+    atom1: int
+    atom2: int
+    atom3: int
+    atom4: int
+    per: int
+    phase: float
+    k: float
+
+    def to_json(self):
+        return [
+            self.atom1,
+            self.atom2,
+            self.atom3,
+            self.atom4,
+            self.per,
+            self.phase,
+            self.k,
+        ]
+
+    def from_zero(self):
+        "Returns `self` with atoms indexed from 0 instead of 1"
+        return Torsion(
+            self.atom1 - 1,
+            self.atom2 - 1,
+            self.atom3 - 1,
+            self.atom4 - 1,
+            self.per,
+            self.phase,
+            self.k,
+        )
+
+    def as_tuple(self):
+        return (
+            self.atom1,
+            self.atom2,
+            self.atom3,
+            self.atom4,
+            self.per,
+            self.phase,
+            self.k,
+        )
 
 
 def openmm_system_from_graph(g, forcefield: ForceField):
@@ -49,6 +147,7 @@ def openmm_system_from_graph(g, forcefield: ForceField):
         allow_nonintegral_charges=True,
     )
 
+    d = dict(bonds=[], angles=[], torsions=[])
     for force in sys.getForces():
         name = force.__class__.__name__
         if "HarmonicBondForce" in name:
@@ -69,15 +168,12 @@ def openmm_system_from_graph(g, forcefield: ForceField):
                     esp.units.DISTANCE_UNIT,
                 ).value_in_unit(OPENMM_BOND_EQ_UNIT)
 
-                _k = Quantity(  # bond force constant:
-                    # since everything is enumerated twice in espaloma
-                    # and once in OpenMM,
-                    # we insert a coefficient of 2.0
+                _k = Quantity(
                     _k,
                     esp.units.FORCE_CONSTANT_UNIT,
                 ).value_in_unit(OPENMM_BOND_K_UNIT)
 
-                force.setBondParameters(idx, idx0, idx1, _eq, _k)
+                d["bonds"].append(Bond(idx0 + 1, idx1 + 1, _eq, _k))
 
         if "HarmonicAngleForce" in name:
             assert force.getNumAngles() * 2 == g.heterograph.number_of_nodes(
@@ -105,10 +201,17 @@ def openmm_system_from_graph(g, forcefield: ForceField):
                     esp.units.ANGLE_FORCE_CONSTANT_UNIT,
                 ).value_in_unit(OPENMM_ANGLE_K_UNIT)
 
-                force.setAngleParameters(idx, idx0, idx1, idx2, _eq, _k)
+                d["angles"].append(
+                    Angle(
+                        idx0 + 1,
+                        idx1 + 1,
+                        idx2 + 1,
+                        _eq,
+                        _k,
+                    )
+                )
 
         if "PeriodicTorsionForce" in name:
-            number_of_torsions = force.getNumTorsions()
             if (
                 "periodicity" not in g.nodes["n4"].data
                 or "phase" not in g.nodes["n4"].data
@@ -161,36 +264,17 @@ def openmm_system_from_graph(g, forcefield: ForceField):
                                 OPENMM_ENERGY_UNIT,
                             )
 
-                            if count_idx < number_of_torsions:
-                                force.setTorsionParameters(
-                                    # since everything is enumerated
-                                    # twice in espaloma
-                                    # and once in OpenMM,
-                                    # we insert a coefficient of 2.0
-                                    count_idx,
-                                    idx0,
-                                    idx1,
-                                    idx2,
-                                    idx3,
+                            d["torsions"].append(
+                                Torsion(
+                                    idx0 + 1,
+                                    idx1 + 1,
+                                    idx2 + 1,
+                                    idx3 + 1,
                                     _periodicity,
                                     _phase,
                                     k,
                                 )
-
-                            else:
-                                force.addTorsion(
-                                    # since everything is enumerated
-                                    # twice in espaloma
-                                    # and once in OpenMM,
-                                    # we insert a coefficient of 2.0
-                                    idx0,
-                                    idx1,
-                                    idx2,
-                                    idx3,
-                                    _periodicity,
-                                    _phase,
-                                    k,
-                                )
+                            )
 
                             count_idx += 1
 
@@ -223,37 +307,18 @@ def openmm_system_from_graph(g, forcefield: ForceField):
                                 OPENMM_ENERGY_UNIT,
                             )
 
-                            if count_idx < number_of_torsions:
-                                force.setTorsionParameters(
-                                    # since everything is enumerated
-                                    # twice in espaloma
-                                    # and once in OpenMM,
-                                    # we insert a coefficient of 2.0
-                                    count_idx,
-                                    idx0,
-                                    idx1,
-                                    idx2,
-                                    idx3,
+                            d["torsions"].append(
+                                Torsion(
+                                    idx0 + 1,
+                                    idx1 + 1,
+                                    idx2 + 1,
+                                    idx3 + 1,
                                     _periodicity,
                                     _phase,
                                     0.5 * k,
                                 )
-
-                            else:
-                                force.addTorsion(
-                                    # since everything is enumerated
-                                    # twice in espaloma
-                                    # and once in OpenMM,
-                                    # we insert a coefficient of 2.0
-                                    idx0,
-                                    idx1,
-                                    idx2,
-                                    idx3,
-                                    _periodicity,
-                                    _phase,
-                                    0.5 * k,
-                                )
+                            )
 
                             count_idx += 1
 
-    return sys
+    return d
