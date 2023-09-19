@@ -17,6 +17,7 @@ from tqdm import tqdm
 from vflib import load_dataset
 
 import espaloma as esp
+from patches import openmm_system_from_graph
 
 warnings.filterwarnings("ignore", category=UserWarning)
 logging.getLogger("openff").setLevel(logging.ERROR)
@@ -118,18 +119,6 @@ class Torsion:
         )
 
 
-old_load_forcefield = esp.graphs.deploy.load_forcefield
-
-
-def my_load_forcefield(forcefield):
-    if isinstance(forcefield, ForceField):
-        return forcefield
-    else:
-        return old_load_forcefield(forcefield)
-
-
-# cache the FORCEFIELD to save loading cost on every call to espaloma_label
-esp.graphs.deploy.load_forcefield = my_load_forcefield
 FORCEFIELD = ForceField("openff_unconstrained-2.1.0.offxml")
 
 
@@ -154,7 +143,7 @@ def espaloma_label(molecule, types=["bonds", "angles", "torsions"]):
     espaloma_model(molecule_graph.heterograph)
 
     # create an OpenMM System for the specified molecule
-    openmm_system = esp.graphs.deploy.openmm_system_from_graph(
+    openmm_system = openmm_system_from_graph(
         molecule_graph, forcefield=FORCEFIELD
     )
 
