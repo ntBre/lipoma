@@ -90,15 +90,17 @@ def main():
     molecules = deduplicate_by(molecules, Molecule.to_inchikey)
     print(len(molecules), " after dedup")
 
-    for s, (smirks, fn) in tqdm(
-        enumerate(smirkss), total=len(smirkss), desc="Processing smirks"
-    ):
+    for s, (smirks, fn) in enumerate(smirkss):
         out_dir = f"output/cluster/bond{s:02d}"
         if os.path.exists(out_dir):
             shutil.rmtree(out_dir)
         os.mkdir(out_dir)
 
-        for m, molecule in enumerate(molecules):
+        for m, molecule in tqdm(
+            enumerate(molecules),
+            total=len(molecules),
+            desc=f"Processing molecules for smirks {s}",
+        ):
             matches = molecule.chemical_environment_matches(smirks)
             if matches:
                 _, esp = espaloma_label(molecule)
