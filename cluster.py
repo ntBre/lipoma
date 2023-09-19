@@ -82,10 +82,7 @@ def main():
 
     opt = OptimizationResultCollection.parse_file("datasets/filtered-opt.json")
 
-    # demand execution here so I can deduplicate and reuse molecules
-    molecules = [
-        m for m in tqdm(opt.to_molecules(), desc="Converting molecules")
-    ]
+    molecules = tqdm(opt.to_molecules(), desc="Converting molecules")
     print(len(molecules), " initially")
     molecules = deduplicate_by(molecules, Molecule.to_inchikey)
     print(len(molecules), " after dedup")
