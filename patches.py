@@ -115,7 +115,7 @@ def handle_bonds(force, g, bond_lookup, d):
         _eq = g.nodes["n2"].data["eq"][position].detach().numpy().item()
         _k = g.nodes["n2"].data["k"][position].detach().numpy().item()
 
-        _eq = Quantity(  # bond length
+        _eq = Quantity(
             _eq,
             esp.units.DISTANCE_UNIT,
         ).value_in_unit(unit.angstroms)
@@ -147,15 +147,7 @@ def handle_angles(force, g, angle_lookup, d):
             esp.units.ANGLE_FORCE_CONSTANT_UNIT,
         ).value_in_unit(unit.kilocalories_per_mole / unit.radian**2)
 
-        d["angles"].append(
-            Angle(
-                idx0 + 1,
-                idx1 + 1,
-                idx2 + 1,
-                _eq,
-                _k,
-            )
-        )
+        d["angles"].append(Angle(idx0 + 1, idx1 + 1, idx2 + 1, _eq, _k))
 
 
 def handle_torsions(force, g, d):
