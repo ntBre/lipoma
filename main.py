@@ -5,7 +5,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 from multiprocessing import Pool
 
-from openff.toolkit.topology import Molecule
+from openff.toolkit import ForceField, Molecule
 from openff.units.openmm import from_openmm
 from openmm.openmm import (
     HarmonicAngleForce,
@@ -118,7 +118,22 @@ class Torsion:
         )
 
 
-def espaloma_label(molecule):
+old_load_forcefield = esp.graphs.deploy.load_forcefield
+
+
+def my_load_forcefield(forcefield):
+    if isinstance(forcefield, ForceField):
+        return forcefield
+    else:
+        return old_load_forcefield(forcefield)
+
+
+# cache the FORCEFIELD to save loading cost on every call to espaloma_label
+esp.graphs.deploy.load_forcefield = my_load_forcefield
+FORCEFIELD = ForceField("openff_unconstrained-2.1.0.offxml")
+
+
+def espaloma_label(molecule, types=["bonds", "angles", "torsions"]):
     """Takes a `Molecule`, constructs an espaloma Graph object, assigns the
     molecule parameters based on that graph, constructs an OpenMM system from
     the graph, and extracts the force field parameters from the OpenMM system.
@@ -139,15 +154,14 @@ def espaloma_label(molecule):
     espaloma_model(molecule_graph.heterograph)
 
     # create an OpenMM System for the specified molecule
-    forcefield = "openff_unconstrained-2.1.0"
     openmm_system = esp.graphs.deploy.openmm_system_from_graph(
-        molecule_graph, forcefield=forcefield
+        molecule_graph, forcefield=FORCEFIELD
     )
 
     d = dict(bonds=[], angles=[], torsions=[])
     # hopefully these indices match the mapped_smiles...
     for force in openmm_system.getForces():
-        if isinstance(force, HarmonicBondForce):
+        if isinstance(force, HarmonicBondForce) and "bonds" in types:
             for b in range(force.getNumBonds()):
                 # ignore the force constant for now
                 i, j, eq, f = force.getBondParameters(b)
@@ -163,7 +177,7 @@ def espaloma_label(molecule):
                         .magnitude,
                     )
                 )
-        elif isinstance(force, HarmonicAngleForce):
+        elif isinstance(force, HarmonicAngleForce) and "angles" in types:
             for a in range(force.getNumAngles()):
                 i, j, k, eq, f = force.getAngleParameters(a)
                 d["angles"].append(
@@ -175,7 +189,7 @@ def espaloma_label(molecule):
                         from_openmm(f).to("kcal / (mol rad**2)").magnitude,
                     )
                 )
-        elif isinstance(force, PeriodicTorsionForce):
+        elif isinstance(force, PeriodicTorsionForce) and "torsions" in types:
             for t in range(force.getNumTorsions()):
                 i, j, k, l, per, phase, f = force.getTorsionParameters(t)
                 d["torsions"].append(
@@ -192,7 +206,7 @@ def espaloma_label(molecule):
         elif isinstance(force, NonbondedForce):
             pass
         else:
-            raise ValueError(f"unrecognized force type: {force}")
+            pass
 
     return mapped_smiles, d
 

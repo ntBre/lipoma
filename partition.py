@@ -26,7 +26,7 @@ def inner(molecules, smirks, fn, s=None):
     ):
         matches = molecule.chemical_environment_matches(smirks)
         if matches:
-            _, esp = espaloma_label(molecule)
+            _, esp = espaloma_label(molecule, types=["bonds"])
             esp_in, esp_out = [], []
             for b in esp["bonds"]:
                 idx = (b.atom1 - 1, b.atom2 - 1)
