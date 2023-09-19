@@ -47,5 +47,10 @@ def partition():
     return in_thresh, out_thresh
 
 
+# okay, this isn't enough. all I can do with this is check that the chemical
+# environment of the partitioned molecules matches or doesn't match some
+# pattern, but I need to know what I'm checking in the loop: it matches the
+# pattern AND the espaloma value is below/above the threshold
+
 if __name__ == "__main__":
     partition()
