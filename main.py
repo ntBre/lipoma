@@ -222,15 +222,9 @@ def to_besmarts(
 
 
 def main():
-    ds = load_dataset("filtered-opt.json", typ="optimization")
-    data = [v for value in ds.entries.values() for v in value]
-    # a little dumb to `from_mapped_smiles` here and then `to_mapped_smiles`
-    # above, but I guess I do want the Molecule eventually
-    molecules = [
-        Molecule.from_mapped_smiles(r.cmiles, allow_undefined_stereo=True)
-        for r in data
-    ]
-    # molecules = [Molecule.from_smiles("CN1C=NC2=C1C(=O)N(C(=O)N2C)C")]
+    ds = load_dataset("datasets/filtered-opt.json", type_="optimization")
+    molecules = ds.to_molecules()
+
     besmarts = to_besmarts(molecules)
 
     with open("out.json", "w") as out:
