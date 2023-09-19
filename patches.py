@@ -166,12 +166,14 @@ def openmm_system_from_graph(g, forcefield: ForceField):
                 _eq = Quantity(  # bond length
                     _eq,
                     esp.units.DISTANCE_UNIT,
-                ).value_in_unit(OPENMM_BOND_EQ_UNIT)
+                ).value_in_unit(unit.angstroms)
 
                 _k = Quantity(
                     _k,
                     esp.units.FORCE_CONSTANT_UNIT,
-                ).value_in_unit(OPENMM_BOND_K_UNIT)
+                ).value_in_unit(
+                    unit.kilocalories_per_mole / unit.angstroms**2
+                )
 
                 d["bonds"].append(Bond(idx0 + 1, idx1 + 1, _eq, _k))
 
@@ -191,15 +193,12 @@ def openmm_system_from_graph(g, forcefield: ForceField):
                 _eq = Quantity(
                     _eq,
                     esp.units.ANGLE_UNIT,
-                ).value_in_unit(OPENMM_ANGLE_EQ_UNIT)
+                ).value_in_unit(unit.radians)
 
-                _k = Quantity(  # force constant
-                    # since everything is enumerated twice in espaloma
-                    # and once in OpenMM,
-                    # we insert a coefficient of 2.0
+                _k = Quantity(
                     _k,
                     esp.units.ANGLE_FORCE_CONSTANT_UNIT,
-                ).value_in_unit(OPENMM_ANGLE_K_UNIT)
+                ).value_in_unit(unit.kilocalories_per_mole / unit.radian**2)
 
                 d["angles"].append(
                     Angle(
@@ -260,9 +259,7 @@ def openmm_system_from_graph(g, forcefield: ForceField):
                             k = Quantity(
                                 k,
                                 esp.units.ENERGY_UNIT,
-                            ).value_in_unit(
-                                OPENMM_ENERGY_UNIT,
-                            )
+                            ).value_in_unit(unit.kilocalories_per_mole)
 
                             d["torsions"].append(
                                 Torsion(
@@ -303,9 +300,7 @@ def openmm_system_from_graph(g, forcefield: ForceField):
                             k = Quantity(
                                 k,
                                 esp.units.ENERGY_UNIT,
-                            ).value_in_unit(
-                                OPENMM_ENERGY_UNIT,
-                            )
+                            ).value_in_unit(unit.kilocalories_per_mole)
 
                             d["torsions"].append(
                                 Torsion(
