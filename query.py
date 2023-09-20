@@ -1,12 +1,10 @@
 # asking espaloma questions about our parameters
 
 import sys
-import warnings
 from collections import defaultdict
 from typing import Tuple
 
-warnings.filterwarnings("ignore")
-
+import click
 from openff.toolkit import ForceField, Molecule
 from tqdm import tqdm
 from vflib import load_dataset
@@ -15,9 +13,32 @@ from cluster import deduplicate_by
 from main import espaloma_label
 
 
-# what is the pythonic way to do this? in rust, I would define compare to be
-# generic over T: Compare and then I would implement Compare for Bonds, Angles,
-# and Torsions. and these are all associated functions, not methods
+class BondsEq:
+    sage_label = "Bonds"
+    espaloma_label = "bonds"
+    header_keys = ["i", "j"]
+
+    def to_pair(bond):
+        i, j, k, _ = bond.from_zero().as_tuple()
+        return (i, j), k
+
+    def insert_sage(sage, k, v):
+        sage[k] = (v.length.magnitude, v.smirks)
+
+
+class AnglesEq:
+    sage_label = "Angles"
+    espaloma_label = "angles"
+    header_keys = ["i", "j", "k"]
+
+    def to_pair(angle):
+        i, j, k, key, _ = angle.from_zero().as_tuple()
+        return (i, j, k), key
+
+    def insert_sage(sage, k, v):
+        sage[k] = (v.angle.to("radians").magnitude, v.smirks)
+
+
 class Bonds:
     sage_label = "Bonds"
     espaloma_label = "bonds"
@@ -68,7 +89,6 @@ class Torsions:
         return {k: v for k, v in espaloma.items() if k in sage}
 
 
-# there's probably a better name for this
 class Driver:
     def __init__(
         self,
@@ -78,7 +98,6 @@ class Driver:
         verbose: bool = False,
     ):
         self.forcefield = ForceField(forcefield)
-        # demand execution so I can deduplicate
         self.molecules = deduplicate_by(
             load_dataset(dataset, "optimization").to_molecules(),
             Molecule.to_inchikey,
@@ -188,18 +207,35 @@ def print_summary(diffs, sage_values, outfile=None):
         outfile.close()
 
 
-if __name__ == "__main__":
+@click.command()
+@click.option("--force-constants", "-f", is_flag=True, default=True)
+def main(force_constants):
+    if force_constants:
+        pairs = [
+            (Bonds, "data/bonds_dedup.dat"),
+            (Angles, "data/angles_dedup.dat"),
+            (Torsions, "data/torsions_dedup.dat"),
+        ]
+        eps = 10.0
+    else:
+        pairs = [
+            (BondsEq, "data/bonds_eq.dat"),
+            (AnglesEq, "data/angles_eq.dat"),
+        ]
+        # this is too large. I might need to vary it per target (cls.eps) or
+        # just set it to 0 for now
+        eps = 0.1
+
     driver = Driver(
         forcefield="openff-2.1.0.offxml",
         dataset="datasets/filtered-opt.json",
-        eps=10.0,
+        eps=eps,
         verbose=False,
     )
-
-    for param, outfile in [
-        (Bonds, "output/eq/bonds_dedup.dat"),
-        (Angles, "output/eq/angles_dedup.dat"),
-        (Torsions, "output/eq/torsions_dedup.dat"),
-    ]:
+    for param, outfile in pairs:
         diffs, sage_values = driver.compare(param)
         print_summary(diffs, sage_values, outfile=outfile)
+
+
+if __name__ == "__main__":
+    main()
