@@ -188,31 +188,18 @@ def print_summary(diffs, sage_values, outfile=None):
         outfile.close()
 
 
-# counting occurences of disagreement is somewhat interesting, but more useful
-# might be recording the espaloma values that disagree. then I could do some
-# kind of statistics on that. maybe our parameter is just the average of the
-# espaloma parameters, for example. if not, maybe we need to shift our
-# parameter toward the average espaloma value. or if espaloma has an especially
-# large range of values, that would be an indicator that we need to break up
-# one of our parameters
-
-# another idea, which I'm pursuing right now, is just to get all of the average
-# values from espaloma and put them into a force field. then I'll just
-# benchmark this force field and see if espaloma does a better job than all of
-# our optimizations
-
 if __name__ == "__main__":
     driver = Driver(
         forcefield="openff-2.1.0.offxml",
-        dataset="filtered-opt.json",
+        dataset="datasets/filtered-opt.json",
         eps=10.0,
         verbose=False,
     )
 
     for param, outfile in [
-        (Bonds, "bonds_dedup.dat"),
-        (Angles, "angles_dedup.dat"),
-        (Torsions, "torsions_dedup.dat"),
+        (Bonds, "output/eq/bonds_dedup.dat"),
+        (Angles, "output/eq/angles_dedup.dat"),
+        (Torsions, "output/eq/torsions_dedup.dat"),
     ]:
         diffs, sage_values = driver.compare(param)
         print_summary(diffs, sage_values, outfile=outfile)
