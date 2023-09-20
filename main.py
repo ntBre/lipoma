@@ -16,7 +16,7 @@ from tqdm import tqdm
 from vflib import load_dataset
 
 import espaloma as esp
-from patches import openmm_system_from_graph
+from wrapper import openmm_system_from_graph
 
 warnings.filterwarnings("ignore", category=UserWarning)
 logging.getLogger("openff").setLevel(logging.ERROR)
