@@ -7,12 +7,12 @@ from typing import Tuple
 
 warnings.filterwarnings("ignore")
 
-from openff.toolkit import ForceField, Molecule  # noqa: E402
-from tqdm import tqdm  # noqa: E402
-from vflib import load_dataset  # noqa: E402
+from openff.toolkit import ForceField, Molecule
+from tqdm import tqdm
+from vflib import load_dataset
 
-from cluster import deduplicate_by  # noqa: E402
-from main import espaloma_label  # noqa: E402
+from cluster import deduplicate_by
+from main import espaloma_label
 
 
 # what is the pythonic way to do this? in rust, I would define compare to be
