@@ -9,6 +9,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sea
 
+# Usage:
+# python parse_query.py -i data/bonds_dedup.dat -o /tmp/bonds [-p]
 
 @click.command()
 @click.option("--infile", "-i")
