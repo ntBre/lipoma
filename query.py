@@ -216,7 +216,7 @@ def main(force_constants):
             (Angles, "data/angles_dedup.dat"),
             (Torsions, "data/torsions_dedup.dat"),
         ]
-        eps = 10.0
+        eps = 0.0
     else:
         pairs = [
             (BondsEq, "data/bonds_eq.dat"),
@@ -224,7 +224,7 @@ def main(force_constants):
         ]
         # this is too large. I might need to vary it per target (cls.eps) or
         # just set it to 0 for now
-        eps = 0.1
+        eps = 0.0
 
     driver = Driver(
         forcefield="openff-2.1.0.offxml",
