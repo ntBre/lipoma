@@ -106,6 +106,10 @@ class Torsion:
         )
 
 
+class Improper(Torsion):
+    pass
+
+
 def handle_bonds(force, g, bond_lookup, d):
     assert force.getNumBonds() * 2 == g.heterograph.number_of_nodes("n2")
 
@@ -235,8 +239,8 @@ def handle_torsions(force, g, d):
                         esp.units.ENERGY_UNIT,
                     ).value_in_unit(unit.kilocalories_per_mole)
 
-                    d["torsions"].append(
-                        Torsion(
+                    d["impropers"].append(
+                        Improper(
                             idx0 + 1,
                             idx1 + 1,
                             idx2 + 1,
@@ -272,7 +276,7 @@ def openmm_system_from_graph(g, forcefield: ForceField):
         allow_nonintegral_charges=True,
     )
 
-    d = dict(bonds=[], angles=[], torsions=[])
+    d = dict(bonds=[], angles=[], torsions=[], impropers=[])
     for force in sys.getForces():
         match force.__class__.__name__:
             case "HarmonicBondForce":
