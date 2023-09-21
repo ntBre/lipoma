@@ -5,13 +5,6 @@ from collections import defaultdict
 from multiprocessing import Pool
 
 from openff.toolkit import ForceField, Molecule
-from openff.units.openmm import from_openmm
-from openmm.openmm import (
-    HarmonicAngleForce,
-    HarmonicBondForce,
-    NonbondedForce,
-    PeriodicTorsionForce,
-)
 from tqdm import tqdm
 from vflib import load_dataset
 
