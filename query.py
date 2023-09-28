@@ -2,7 +2,8 @@
 
 import sys
 from collections import defaultdict
-from typing import Tuple
+from dataclasses import dataclass
+from typing import Dict, List, Tuple
 
 import click
 from openff.toolkit import ForceField, Molecule
@@ -129,9 +130,7 @@ class Driver:
         smirks->sage_value
 
         """
-        sage_values = {}
-        # map of smirks -> disagreement count
-        diffs = defaultdict(list)
+        ret = defaultdict(Record)
         for mol in tqdm(
             self.molecules,
             desc=f"Comparing {cls.espaloma_label}",
@@ -158,19 +157,42 @@ class Driver:
             if self.verbose:
                 self.print_header(cls)
 
-            for k, v in sage.items():
-                v, smirks = v
+            for k, (v, smirks) in sage.items():
                 diff = abs(v - espaloma[k])
                 if diff > self.eps:
                     if self.verbose:
                         self.print_row(cls, k, v, espaloma, diff)
-                    diffs[smirks].append(espaloma[k])
-                    sage_values[smirks] = v
+                    ret[smirks].molecules.append(mol.to_smiles(mapped=True))
+                    ret[smirks].espaloma_values.append(espaloma[k])
+                    ret[smirks].sage_value = v
 
-        return diffs, sage_values
+        return ret
 
 
-def print_summary(diffs, sage_values, outfile=None):
+@dataclass
+class Record:
+    # parallel to espaloma_values, matching molecules to espaloma values
+    molecules: List[str]
+    espaloma_values: List[float]
+    sage_value: float
+
+    def __init__(self):
+        self.molecules = []
+        self.espaloma_values = []
+        self.sage_value = None
+
+        # I want to be able to see what molecules correspond to the peaks on
+        # the histograms. the first step is saving them here. the next step
+        # will be creating my own histograms that maintain this association.
+        # the final step will be figuring out some way to click on the
+        # histogram drawing and then get a bunch of molecules. the last two
+        # steps might be combined. maybe I can use entomon somewhere in here,
+        # or at least something like it. basically I want to query by entries
+        # in a range that I see in the histogram and then visualize the
+        # molecules in that range
+
+
+def print_summary(records: Dict[str, Record], outfile=None):
     """Print a summary of diffs and sage_values to `outfile` or stdout if None.
 
     The output format is `SMIRKS Count Sage Rest`, where Rest is all of the
@@ -185,21 +207,21 @@ def print_summary(diffs, sage_values, outfile=None):
 
     print("# Difference Summary", file=outfile)
     # compute the max len of smirks patterns for pretty printing
-    ml = max([len(s) for s in diffs.keys()])
+    ml = max([len(s) for s in records.keys()])
     print(
         f"# {'SMIRKS':<{ml - 2}}{'Count':>5}{'Sage':>8}{'Rest':>8}",
         file=outfile,
     )
-    items = [pair for pair in diffs.items()]
-    items.sort(key=lambda x: len(x[1]), reverse=True)
-    for smirks, values in items:
-        count = len(values)
+    items = [pair for pair in records.items()]
+    items.sort(key=lambda x: len(x[1].espaloma_values), reverse=True)
+    for smirks, record in items:
+        count = len(record.espaloma_values)
         print(
-            f"{smirks:{ml}}{count:5}{sage_values[smirks]:8.2f}",
+            f"{smirks:{ml}}{count:5}{records[smirks].sage_value:8.2f}",
             end="",
             file=outfile,
         )
-        for v in values:
+        for v in record.espaloma_values:
             print(f"{v:8.2f}", end="", file=outfile)
         print(file=outfile)
 
@@ -233,8 +255,8 @@ def main(force_constants):
         verbose=False,
     )
     for param, outfile in pairs:
-        diffs, sage_values = driver.compare(param)
-        print_summary(diffs, sage_values, outfile=outfile)
+        records = driver.compare(param)
+        print_summary(records, outfile=outfile)
 
 
 if __name__ == "__main__":
