@@ -203,11 +203,18 @@ class Record:
     sage_value: float
     ident: str
 
-    def __init__(self):
-        self.molecules = []
-        self.espaloma_values = []
-        self.sage_value = None
-        self.ident = None
+    def __init__(
+        self, molecules=None, espaloma_values=None, sage_value=None, ident=None
+    ):
+        if molecules is None:
+            molecules = []
+        if espaloma_values is None:
+            espaloma_values = []
+
+        self.molecules = molecules
+        self.espaloma_values = espaloma_values
+        self.sage_value = sage_value
+        self.ident = ident
 
     def asdict(self):
         return asdict(self)
@@ -222,8 +229,14 @@ class Records(defaultdict):
             json.dump(self, out, indent=2, default=lambda r: r.asdict())
 
     def from_file(filename):
+        # this _cannot_ be the best way to do this, but I can't figure out the
+        # right way
+        ret = Records()
         with open(filename, "r") as inp:
-            return json.load(inp, object_hook=Records)
+            d = json.load(inp)
+            for k, v in d.items():
+                ret[k] = Record(**v)
+            return ret
 
 
 def print_summary(records: Records, outfile=None):
