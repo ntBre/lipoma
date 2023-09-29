@@ -19,6 +19,8 @@ def make_fig(smirk, record):
         record.espaloma_values,
         title=f"{record.ident} {smirk}",
         labels="Espaloma",
+        width=800,
+        height=600,
     )
     fig.add_vline(
         x=record.sage_value, annotation_text="Sage Avg.", line_dash="dash"
@@ -132,10 +134,25 @@ app.layout = html.Div(
         html.Button("Previous", id="previous", n_clicks=0),
         html.Button("Next", id="next", n_clicks=0),
         html.Div(
-            [make_fig(SMIRKS[CUR_SMIRK], RECORDS[SMIRKS[CUR_SMIRK]])],
-            id="graph-container",
+            [
+                html.Div(
+                    [make_fig(SMIRKS[CUR_SMIRK], RECORDS[SMIRKS[CUR_SMIRK]])],
+                    id="graph-container",
+                    style=dict(display="inline-block"),
+                ),
+                html.Div(
+                    [],
+                    id="click-output",
+                    style={
+                        "display": "inline-block",
+                        "max-height": "90vh",
+                        "overflow": "hidden",
+                        "overflow-y": "scroll",
+                    },
+                ),
+            ],
+            style=dict(display="flex"),
         ),
-        html.Div([], id="click-output"),
         html.Div([], id="radio-output"),
     ],
 )
