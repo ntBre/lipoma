@@ -13,20 +13,8 @@ with warnings.catch_warnings():
 
     from query import Records
 
-records = Records.from_file("data/bonds_dedup.json")
 
-smirks = list(records.keys())
-
-CUR_SMIRK = 0
-
-app = Dash(__name__)
-
-colors = {"background": "white", "text": "black"}
-
-
-def make_fig(smirk):
-    global record
-    record = records[smirk]
+def make_fig(smirk, record):
     fig = px.histogram(
         record.espaloma_values,
         title=f"{record.ident} {smirk}",
@@ -44,20 +32,9 @@ def make_fig(smirk):
     return dcc.Graph(figure=fig, id="graph")
 
 
-app.layout = html.Div(
-    style={"backgroundColor": colors["background"]},
-    children=[
-        html.Button("Previous", id="previous", n_clicks=0),
-        html.Button("Next", id="next", n_clicks=0),
-        html.Div([make_fig(smirks[CUR_SMIRK])], id="graph-container"),
-        html.Div([], id="click-output"),
-    ],
-)
-
-
 # adapted from ligand Molecule::to_svg
-def draw_rdkit(mol):
-    matches = mol.chemical_environment_matches(smirks[CUR_SMIRK])
+def draw_rdkit(mol, smirks):
+    matches = mol.chemical_environment_matches(smirks)
     rdmol = mol.to_rdkit()
     rdDepictor.SetPreferCoordGen(True)
     rdDepictor.Compute2DCoords(rdmol)
@@ -75,11 +52,12 @@ def draw_rdkit(mol):
 def display_click_data(clickData):
     if clickData:
         points = clickData["points"][0]["pointNumbers"]
-        mols = {record.molecules[p] for p in points}
+        mols = {RECORDS[SMIRKS[CUR_SMIRK]].molecules[p] for p in points}
         pics = []
         for mol in mols:
             svg = draw_rdkit(
-                Molecule.from_smiles(mol, allow_undefined_stereo=True)
+                Molecule.from_smiles(mol, allow_undefined_stereo=True),
+                SMIRKS[CUR_SMIRK],
             )
             try:
                 encoded = base64.b64encode(bytes(svg, "utf-8"))
@@ -98,9 +76,9 @@ def display_click_data(clickData):
 )
 def previous_button(_):
     global CUR_SMIRK
-    if CUR_SMIRK > 1:
+    if CUR_SMIRK >= 1:
         CUR_SMIRK -= 1
-    return make_fig(smirks[CUR_SMIRK])
+    return make_fig(SMIRKS[CUR_SMIRK], RECORDS[SMIRKS[CUR_SMIRK]])
 
 
 @callback(
@@ -110,9 +88,33 @@ def previous_button(_):
 )
 def next_button(_):
     global CUR_SMIRK
-    if CUR_SMIRK < len(smirks) - 1:
+    if CUR_SMIRK < len(SMIRKS) - 1:
         CUR_SMIRK += 1
-    return make_fig(smirks[CUR_SMIRK])
+    return make_fig(SMIRKS[CUR_SMIRK], RECORDS[SMIRKS[CUR_SMIRK]])
+
+
+RECORDS = Records.from_file("data/bonds_dedup.json")
+
+SMIRKS = list(RECORDS.keys())
+
+CUR_SMIRK = 0
+
+app = Dash(__name__)
+
+colors = {"background": "white", "text": "black"}
+
+app.layout = html.Div(
+    style={"backgroundColor": colors["background"]},
+    children=[
+        html.Button("Previous", id="previous", n_clicks=0),
+        html.Button("Next", id="next", n_clicks=0),
+        html.Div(
+            [make_fig(SMIRKS[CUR_SMIRK], RECORDS[SMIRKS[CUR_SMIRK]])],
+            id="graph-container",
+        ),
+        html.Div([], id="click-output"),
+    ],
+)
 
 
 if __name__ == "__main__":
