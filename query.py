@@ -300,3 +300,10 @@ def main(force_constants):
 
 if __name__ == "__main__":
     main()
+
+# Now that I have the dashboard running, I see that separate bars in the
+# histogram can correspond to the same molecule, and my current drawing scheme
+# treats them the same way. Instead of calling chemical_environment_matches in
+# the plotting code, I should capture the Espaloma matches here and store it in
+# the Record. Then I can visualize the exact pattern the Espaloma value
+# corresponds to
