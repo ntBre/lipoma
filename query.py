@@ -1,9 +1,11 @@
 # asking espaloma questions about our parameters
 
+import json
+import os
 import sys
 from collections import defaultdict
-from dataclasses import dataclass
-from typing import Dict, List, Tuple
+from dataclasses import asdict, dataclass
+from typing import List, Tuple
 
 import click
 from openff.toolkit import ForceField, Molecule
@@ -130,7 +132,7 @@ class Driver:
         smirks->sage_value
 
         """
-        ret = defaultdict(Record)
+        ret = Records()
         for mol in tqdm(
             self.molecules,
             desc=f"Comparing {cls.espaloma_label}",
@@ -169,6 +171,17 @@ class Driver:
         return ret
 
 
+# I want to be able to see what molecules correspond to the peaks on
+# the histograms. the first step is saving them here. the next step
+# will be creating my own histograms that maintain this association.
+# the final step will be figuring out some way to click on the
+# histogram drawing and then get a bunch of molecules. the last two
+# steps might be combined. maybe I can use entomon somewhere in here,
+# or at least something like it. basically I want to query by entries
+# in a range that I see in the histogram and then visualize the
+# molecules in that range
+
+
 @dataclass
 class Record:
     # parallel to espaloma_values, matching molecules to espaloma values
@@ -181,18 +194,20 @@ class Record:
         self.espaloma_values = []
         self.sage_value = None
 
-        # I want to be able to see what molecules correspond to the peaks on
-        # the histograms. the first step is saving them here. the next step
-        # will be creating my own histograms that maintain this association.
-        # the final step will be figuring out some way to click on the
-        # histogram drawing and then get a bunch of molecules. the last two
-        # steps might be combined. maybe I can use entomon somewhere in here,
-        # or at least something like it. basically I want to query by entries
-        # in a range that I see in the histogram and then visualize the
-        # molecules in that range
+    def asdict(self):
+        return asdict(self)
 
 
-def print_summary(records: Dict[str, Record], outfile=None):
+class Records(defaultdict):
+    def __init__(self, *args, **kwargs):
+        super().__init__(Record)
+
+    def to_json(self, filename):
+        with open(filename, "w") as out:
+            json.dump(self, out, indent=2, default=lambda r: r.asdict())
+
+
+def print_summary(records: Records, outfile=None):
     """Print a summary of diffs and sage_values to `outfile` or stdout if None.
 
     The output format is `SMIRKS Count Sage Rest`, where Rest is all of the
@@ -257,6 +272,9 @@ def main(force_constants):
     for param, outfile in pairs:
         records = driver.compare(param)
         print_summary(records, outfile=outfile)
+
+        js = os.path.splitext(outfile)[0]
+        records.to_json(f"{js}.json")
 
 
 if __name__ == "__main__":
