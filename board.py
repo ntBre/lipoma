@@ -93,10 +93,27 @@ def next_button(_):
     return make_fig(SMIRKS[CUR_SMIRK], RECORDS[SMIRKS[CUR_SMIRK]])
 
 
+@callback(
+    Output("graph-container", "children", allow_duplicate=True),
+    Input("radio", "value"),
+    prevent_initial_call=True,
+)
+def choose_parameter(value):
+    global RECORDS, SMIRKS, CUR_SMIRK
+    match value:
+        case "Bonds":
+            RECORDS = Records.from_file("data/bonds_dedup.json")
+        case "Angles":
+            RECORDS = Records.from_file("data/angles_dedup.json")
+        case "Torsions":
+            RECORDS = Records.from_file("data/torsions_dedup.json")
+    SMIRKS = list(RECORDS.keys())
+    CUR_SMIRK = 0
+    return make_fig(SMIRKS[CUR_SMIRK], RECORDS[SMIRKS[CUR_SMIRK]])
+
+
 RECORDS = Records.from_file("data/bonds_dedup.json")
-
 SMIRKS = list(RECORDS.keys())
-
 CUR_SMIRK = 0
 
 app = Dash(__name__)
@@ -106,6 +123,12 @@ colors = {"background": "white", "text": "black"}
 app.layout = html.Div(
     style={"backgroundColor": colors["background"]},
     children=[
+        dcc.RadioItems(
+            ["Bonds", "Angles", "Torsions"],
+            "Bonds",
+            inline=True,
+            id="radio",
+        ),
         html.Button("Previous", id="previous", n_clicks=0),
         html.Button("Next", id="next", n_clicks=0),
         html.Div(
@@ -113,6 +136,7 @@ app.layout = html.Div(
             id="graph-container",
         ),
         html.Div([], id="click-output"),
+        html.Div([], id="radio-output"),
     ],
 )
 
