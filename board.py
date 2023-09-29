@@ -8,7 +8,7 @@ with warnings.catch_warnings():
     import plotly.express as px
     from dash import Dash, Input, Output, callback, dcc, html
     from openff.toolkit import Molecule
-    from rdkit.Chem.Draw import rdDepictor, rdMolDraw2D
+    from rdkit.Chem.Draw import MolsToGridImage, rdDepictor, rdMolDraw2D
 
     from query import Records
 
@@ -41,16 +41,20 @@ app.layout = html.Div(
 )
 
 
-# pasted in from ligand Molecule::to_svg
+# adapted from ligand Molecule::to_svg
 def draw_rdkit(mol):
+    matches = mol.chemical_environment_matches(smirks)
     rdmol = mol.to_rdkit()
     rdDepictor.SetPreferCoordGen(True)
     rdDepictor.Compute2DCoords(rdmol)
     rdmol = rdMolDraw2D.PrepareMolForDrawing(rdmol)
-    drawer = rdMolDraw2D.MolDraw2DSVG(300, 300)
-    drawer.DrawMolecule(rdmol)
-    drawer.FinishDrawing()
-    return drawer.GetDrawingText()
+    return MolsToGridImage(
+        [rdmol],
+        useSVG=True,
+        highlightAtomLists=matches,
+        subImgSize=(300, 300),
+        molsPerRow=1,
+    )
 
 
 @callback(Output("click-output", "children"), Input("graph", "clickData"))
