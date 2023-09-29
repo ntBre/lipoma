@@ -215,11 +215,15 @@ class Record:
 
 class Records(defaultdict):
     def __init__(self, *args, **kwargs):
-        super().__init__(Record)
+        super().__init__(Record, *args, **kwargs)
 
     def to_json(self, filename):
         with open(filename, "w") as out:
             json.dump(self, out, indent=2, default=lambda r: r.asdict())
+
+    def from_file(filename):
+        with open(filename, "r") as inp:
+            return json.load(inp, object_hook=Records)
 
 
 def print_summary(records: Records, outfile=None):
