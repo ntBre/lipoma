@@ -184,17 +184,6 @@ class Driver:
         return ret
 
 
-# I want to be able to see what molecules correspond to the peaks on
-# the histograms. the first step is saving them here. the next step
-# will be creating my own histograms that maintain this association.
-# the final step will be figuring out some way to click on the
-# histogram drawing and then get a bunch of molecules. the last two
-# steps might be combined. maybe I can use entomon somewhere in here,
-# or at least something like it. basically I want to query by entries
-# in a range that I see in the histogram and then visualize the
-# molecules in that range
-
-
 @dataclass
 class Record:
     # parallel to espaloma_values, matching molecules to espaloma values
