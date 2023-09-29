@@ -5,7 +5,7 @@ import os
 import sys
 from collections import defaultdict
 from dataclasses import asdict, dataclass
-from typing import List, Tuple
+from typing import List
 
 import click
 from openff.toolkit import ForceField, Molecule
@@ -109,6 +109,11 @@ class Driver:
         self.eps = eps
         self.verbose = verbose
 
+        # caches of labels to prevent repeated labeling for multiple parameter
+        # types. initialized to None and filled in on the first call to compare
+        self.espaloma_labels = [None] * self.total_molecules
+        self.sage_labels = [None] * self.total_molecules
+
     @property
     def total_molecules(self):
         return len(self.molecules)
@@ -124,27 +129,34 @@ class Driver:
             print(f"{elt:5}", end="")
         print(f"{v:12.8}{espaloma[k]:12.8}{diff:12.8}")
 
-    def compare(self, cls) -> Tuple[dict[str, list[float]], dict[str, float]]:
+    def compare(self, cls):
         """Compare paramters of type `cls` assigned by `self.forcefield` and
         espaloma.
 
-        Returns a map of smirks->[espaloma values], and a map of
-        smirks->sage_value
-
+        Returns a [Records]
         """
         ret = Records()
-        for mol in tqdm(
-            self.molecules,
+        for m, mol in tqdm(
+            enumerate(self.molecules),
             desc=f"Comparing {cls.espaloma_label}",
             total=self.total_molecules,
         ):
-            labels = self.forcefield.label_molecules(mol.to_topology())[0]
-            labels = labels[cls.sage_label]
+            if self.sage_labels[m] is None:
+                self.sage_labels[m] = self.forcefield.label_molecules(
+                    mol.to_topology()
+                )[0]
+
+            labels = self.sage_labels[m][cls.sage_label]
             sage = {}
+            ids = {}  # map of smirks to id
             for k, v in labels.items():
+                ids[v.smirks] = v.id
                 cls.insert_sage(sage, k, v)
 
-            _, d = espaloma_label(mol)
+            if self.espaloma_labels[m] is None:
+                _, self.espaloma_labels[m] = espaloma_label(mol)
+
+            d = self.espaloma_labels[m]
             espaloma = {}
             for bond in d[cls.espaloma_label]:
                 k, v = cls.to_pair(bond)
@@ -167,6 +179,7 @@ class Driver:
                     ret[smirks].molecules.append(mol.to_smiles(mapped=True))
                     ret[smirks].espaloma_values.append(espaloma[k])
                     ret[smirks].sage_value = v
+                    ret[smirks].ident = ids[smirks]
 
         return ret
 
@@ -188,11 +201,13 @@ class Record:
     molecules: List[str]
     espaloma_values: List[float]
     sage_value: float
+    ident: str
 
     def __init__(self):
         self.molecules = []
         self.espaloma_values = []
         self.sage_value = None
+        self.ident = None
 
     def asdict(self):
         return asdict(self)
