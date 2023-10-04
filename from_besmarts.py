@@ -64,8 +64,8 @@ def initial_force_field():
     initialized to 1.0
 
     """
-    bond_tree = get_last_tree("espaloma_bonds.log")
-    angle_tree = get_last_tree("espaloma_angles.log")
+    bond_tree = get_last_tree("besmarts/output/espaloma_bonds.log")
+    angle_tree = get_last_tree("besmarts/output/espaloma_angles.log")
 
     ff = ForceField("openff-2.1.0.offxml")
     bh = ff.get_parameter_handler("Bonds")
@@ -99,8 +99,10 @@ def initial_force_field():
 
 esp_init = initial_force_field()
 sage = ForceField("openff-2.1.0.offxml")
-opt = OptimizationResultCollection.parse_file("filtered-opt.json")
+opt = OptimizationResultCollection.parse_file("datasets/filtered-opt.json")
 
+# derive initial values for the force constants from the average values
+# assigned by Sage
 esp_bonds = defaultdict(list)
 esp_angles = defaultdict(list)
 molecules = opt.to_molecules()
@@ -127,4 +129,4 @@ for smirks, values in esp_angles.items():
     k = np.mean(values)
     ah[smirks].k = k * ah[smirks].k.units
 
-esp_init.to_file("esp_ba.offxml")
+esp_init.to_file("forcefields/esp_ba.offxml")
