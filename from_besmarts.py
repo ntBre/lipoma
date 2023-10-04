@@ -5,7 +5,7 @@ import re
 from collections import defaultdict
 
 import numpy as np
-import vflib  # this is actually used for a monkey patch
+import vflib  # noqa: F401
 from openff.qcsubmit.results import OptimizationResultCollection
 from openff.toolkit import ForceField
 from openff.units import unit
@@ -100,17 +100,7 @@ def initial_force_field():
 esp_init = initial_force_field()
 sage = ForceField("openff-2.1.0.offxml")
 opt = OptimizationResultCollection.parse_file("filtered-opt.json")
-# the key in the list is going to be (m, i, j) or (mol_index, bond_atom_1,
-# bond_atom_2). for each of those, I'll accumulate a list of
 
-# I need a map of {esp_smirks->[(m,i,j)]} and a map of
-# {(m,i,j)->[sage_values]}, which can be combined to yield a mapping of
-# esp_smirks->[sage_values] and averaging the sage_values gives me
-# esp_smirks->k
-#
-# actually, sage_values is probably not a list. I think each (m, i, j) from
-# sage will only have one value. as I already corrected, the esp_smirks value
-# is actually the list
 esp_bonds = defaultdict(list)
 esp_angles = defaultdict(list)
 molecules = opt.to_molecules()
@@ -138,19 +128,3 @@ for smirks, values in esp_angles.items():
     ah[smirks].k = k * ah[smirks].k.units
 
 esp_init.to_file("esp_ba.offxml")
-
-# okay I get it now, Trevor said to "[label] each bond/angle, then [use] the
-# average of what matched to each parameter." so I first need to generate some
-# pseudo-parameters in a force field, use that force field to label_molecules,
-# and then take the average back from my espaloma parameters? I guess I should
-# be able to look up in the espaloma "table" a value for a given (molecule,
-# atom_i, atom_j) key. I might still not get it
-
-# after having to look at the msm script from valence-fitting, I think it
-# actually handles this and sounds like what Trevor was saying, so I can safely
-# plop these into a force field with a dummy value and run msm on it. just
-# double check that it comes out okay
-
-# I think I get it again now. I'll need to label the molecules with both the
-# new FF and the old one and take the value for the new parameter from the
-# average value of the old parameters that match the same stuff
