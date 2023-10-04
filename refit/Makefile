@@ -1,4 +1,4 @@
-init := ../esp_ba.offxml
+init := ../forcefields/esp_ba.offxml
 opt := opt.json
 td := td.json
 
