@@ -89,7 +89,7 @@ def initial_force_field():
         ah.add_parameter(
             dict(
                 smirks=smirks,
-                angle=mean * unit.degree,
+                angle=mean * unit.radians,
                 k=1.0 * kcal,
                 id=f"a{i}",
             )
