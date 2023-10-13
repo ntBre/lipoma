@@ -12,3 +12,7 @@ refit/output/
 working-directory/
 targets/
 targets.tar.gz
+data/industry/angles_dedup.json
+data/industry/bonds_dedup.json
+data/industry/torsions_dedup.json
+
