@@ -3,6 +3,7 @@
 import json
 import os
 import sys
+import warnings
 from collections import defaultdict
 from dataclasses import asdict, dataclass
 from typing import List
@@ -10,10 +11,15 @@ from typing import List
 import click
 from openff.toolkit import ForceField, Molecule
 from tqdm import tqdm
-from vflib import load_dataset
 
-from cluster import deduplicate_by
-from main import espaloma_label
+warnings.filterwarnings("ignore")
+
+# suppress numpy warnings
+with warnings.catch_warnings():
+    from vflib import load_dataset
+
+    from cluster import deduplicate_by
+    from main import espaloma_label
 
 
 class BondsEq:
@@ -102,7 +108,10 @@ class Driver:
     ):
         self.forcefield = ForceField(forcefield)
         self.molecules = deduplicate_by(
-            load_dataset(dataset, "optimization").to_molecules(),
+            tqdm(
+                load_dataset(dataset, "optimization").to_molecules(),
+                desc="Deduplicating molecules",
+            ),
             Molecule.to_inchikey,
         )
         # cutoff for considering espaloma's result to be different from ours
