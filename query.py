@@ -267,18 +267,23 @@ def print_summary(records: Records, outfile=None):
 
 @click.command()
 @click.option("--force-constants", "-f", is_flag=True, default=True)
-def main(force_constants):
+@click.option("--dataset", "-d", default="datasets/filtered-opt.json")
+@click.option("--out-dir", "-o", default="data")
+def main(force_constants, dataset, out_dir):
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
+
     if force_constants:
         pairs = [
-            (Bonds, "data/bonds_dedup.dat"),
-            (Angles, "data/angles_dedup.dat"),
-            (Torsions, "data/torsions_dedup.dat"),
+            (Bonds, f"{out_dir}/bonds_dedup.dat"),
+            (Angles, f"{out_dir}/angles_dedup.dat"),
+            (Torsions, f"{out_dir}/torsions_dedup.dat"),
         ]
         eps = 0.0
     else:
         pairs = [
-            (BondsEq, "data/bonds_eq.dat"),
-            (AnglesEq, "data/angles_eq.dat"),
+            (BondsEq, f"{out_dir}/bonds_eq.dat"),
+            (AnglesEq, f"{out_dir}/angles_eq.dat"),
         ]
         # this is too large. I might need to vary it per target (cls.eps) or
         # just set it to 0 for now
@@ -286,7 +291,7 @@ def main(force_constants):
 
     driver = Driver(
         forcefield="openff-2.1.0.offxml",
-        dataset="datasets/filtered-opt.json",
+        dataset=dataset,
         eps=eps,
         verbose=False,
     )
