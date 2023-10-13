@@ -254,7 +254,7 @@ def print_summary(records: Records, outfile=None):
     # compute the max len of smirks patterns for pretty printing
     ml = max([len(s) for s in records.keys()])
     print(
-        f"# {'SMIRKS':<{ml - 2}}{'Count':>5}{'Sage':>8}{'Rest':>8}",
+        f"# {'SMIRKS':<{ml - 2}} {'Count':>5}{'Sage':>8}{'Rest':>8}",
         file=outfile,
     )
     items = [pair for pair in records.items()]
@@ -262,7 +262,7 @@ def print_summary(records: Records, outfile=None):
     for smirks, record in items:
         count = len(record.espaloma_values)
         print(
-            f"{smirks:{ml}}{count:5}{records[smirks].sage_value:8.2f}",
+            f"{smirks:{ml}} {count:5}{records[smirks].sage_value:8.2f}",
             end="",
             file=outfile,
         )
