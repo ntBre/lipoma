@@ -1,9 +1,9 @@
+import base64
+import re
 import warnings
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore")
-
-    import base64
 
     import numpy as np
     import plotly.express as px
@@ -109,13 +109,28 @@ def choose_parameter(value):
             RECORDS = Records.from_file("data/angles_dedup.json")
         case "Torsions":
             RECORDS = Records.from_file("data/torsions_dedup.json")
-    SMIRKS = list(RECORDS.keys())
+    SMIRKS = make_smirks(RECORDS)
     CUR_SMIRK = 0
     return make_fig(SMIRKS[CUR_SMIRK], RECORDS[SMIRKS[CUR_SMIRK]])
 
 
+# pasted from benchmarking/parse_hist
+LABEL = re.compile(r"([bat])(\d+)([a-z]*)")
+
+
+def sort_label(key):
+    t, n, tail = LABEL.match(key).groups()
+    return (t, int(n), tail)
+
+
+def make_smirks(records):
+    pairs = [(smirks, record) for smirks, record in records.items()]
+    pairs = sorted(pairs, key=lambda pair: sort_label(pair[1].ident))
+    return [smirks for smirks, record in pairs]
+
+
 RECORDS = Records.from_file("data/bonds_dedup.json")
-SMIRKS = list(RECORDS.keys())
+SMIRKS = make_smirks(RECORDS)
 CUR_SMIRK = 0
 
 app = Dash(__name__)
