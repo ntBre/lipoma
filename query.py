@@ -98,6 +98,12 @@ class Torsions:
         return {k: v for k, v in espaloma.items() if k in sage}
 
 
+class Impropers(Torsions):
+    sage_label = "ImproperTorsions"
+    espaloma_label = "impropers"
+    header_keys = ["i", "j", "k", "l"]
+
+
 class Driver:
     def __init__(
         self,
@@ -300,6 +306,7 @@ def main(force_constants, dataset, out_dir):
             (Bonds, f"{out_dir}/bonds_dedup.dat"),
             (Angles, f"{out_dir}/angles_dedup.dat"),
             (Torsions, f"{out_dir}/torsions_dedup.dat"),
+            (Impropers, f"{out_dir}/impropers_dedup.dat"),
         ]
         eps = 0.0
     else:

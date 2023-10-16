@@ -110,13 +110,15 @@ def choose_parameter(value):
             RECORDS = Records.from_file("data/industry/angles_dedup.json")
         case "Torsions":
             RECORDS = Records.from_file("data/industry/torsions_dedup.json")
+        case "Impropers":
+            RECORDS = Records.from_file("data/industry/impropers_dedup.json")
     SMIRKS = make_smirks(RECORDS)
     CUR_SMIRK = 0
     return make_fig(SMIRKS[CUR_SMIRK], RECORDS[SMIRKS[CUR_SMIRK]])
 
 
 # pasted from benchmarking/parse_hist
-LABEL = re.compile(r"([bat])(\d+)([a-z]*)")
+LABEL = re.compile(r"([bati])(\d+)([a-z]*)")
 
 
 def sort_label(key):
@@ -142,7 +144,7 @@ app.layout = html.Div(
     style={"backgroundColor": colors["background"]},
     children=[
         dcc.RadioItems(
-            ["Bonds", "Angles", "Torsions"],
+            ["Bonds", "Angles", "Torsions", "Impropers"],
             "Bonds",
             inline=True,
             id="radio",
