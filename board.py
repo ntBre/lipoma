@@ -23,7 +23,10 @@ def make_fig(smirk, record):
         height=600,
     )
     fig.add_vline(
-        x=record.sage_value, annotation_text="Sage Avg.", line_dash="dash"
+        x=record.sage_value,
+        annotation_text="Sage",
+        line_dash="dash",
+        line_color="green",
     )
     fig.add_vline(
         x=np.average(record.espaloma_values),
