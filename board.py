@@ -56,19 +56,12 @@ def draw_rdkit(mol, smirks, matches):
 def display_click_data(clickData):
     if clickData:
         points = clickData["points"][0]["pointNumbers"]
-        mols = {
-            RECORDS[SMIRKS[CUR_SMIRK]]
-            .molecules[p]: RECORDS[SMIRKS[CUR_SMIRK]]
-            .envs[p]
-            for p in points
-        }
+        record = RECORDS[SMIRKS[CUR_SMIRK]]
+        mols = {record.molecules[p]: record.envs[p] for p in points}
         pics = []
         for mol, env in mols.items():
-            svg = draw_rdkit(
-                Molecule.from_smiles(mol, allow_undefined_stereo=True),
-                SMIRKS[CUR_SMIRK],
-                env,
-            )
+            mol = Molecule.from_mapped_smiles(mol, allow_undefined_stereo=True)
+            svg = draw_rdkit(mol, SMIRKS[CUR_SMIRK], env)
             try:
                 encoded = base64.b64encode(bytes(svg, "utf-8"))
             except Exception as e:
