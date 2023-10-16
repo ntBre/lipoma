@@ -186,10 +186,6 @@ class Driver:
                     if self.verbose:
                         self.print_row(cls, k, v, espaloma, diff)
                     smiles = mol.to_smiles(mapped=True)
-                    print(smirks)
-                    print(smiles)
-                    print(k)
-                    exit(1)
                     ret[smirks].molecules.append(smiles)
                     ret[smirks].espaloma_values.append(espaloma[k])
                     ret[smirks].envs.append(list(k))
