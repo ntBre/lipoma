@@ -104,11 +104,11 @@ def choose_parameter(value):
     global RECORDS, SMIRKS, CUR_SMIRK
     match value:
         case "Bonds":
-            RECORDS = Records.from_file("data/bonds_dedup.json")
+            RECORDS = Records.from_file("data/industry/bonds_dedup.json")
         case "Angles":
-            RECORDS = Records.from_file("data/angles_dedup.json")
+            RECORDS = Records.from_file("data/industry/angles_dedup.json")
         case "Torsions":
-            RECORDS = Records.from_file("data/torsions_dedup.json")
+            RECORDS = Records.from_file("data/industry/torsions_dedup.json")
     SMIRKS = make_smirks(RECORDS)
     CUR_SMIRK = 0
     return make_fig(SMIRKS[CUR_SMIRK], RECORDS[SMIRKS[CUR_SMIRK]])
@@ -129,7 +129,7 @@ def make_smirks(records):
     return [smirks for smirks, record in pairs]
 
 
-RECORDS = Records.from_file("data/bonds_dedup.json")
+RECORDS = Records.from_file("data/industry/bonds_dedup.json")
 SMIRKS = make_smirks(RECORDS)
 CUR_SMIRK = 0
 
