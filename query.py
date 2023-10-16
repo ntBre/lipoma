@@ -188,7 +188,8 @@ class Driver:
                     smiles = mol.to_smiles(mapped=True)
                     ret[smirks].molecules.append(smiles)
                     ret[smirks].espaloma_values.append(espaloma[k])
-                    ret[smirks].envs.append(list(k))
+                    # trim periodicity off of torsions, others should be fine
+                    ret[smirks].envs.append(list(k)[:4])
                     ret[smirks].sage_value = v
                     ret[smirks].ident = ids[smirks]
 
