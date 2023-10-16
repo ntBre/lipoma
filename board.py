@@ -38,8 +38,7 @@ def make_fig(smirk, record):
 
 
 # adapted from ligand Molecule::to_svg
-def draw_rdkit(mol, smirks):
-    matches = mol.chemical_environment_matches(smirks)
+def draw_rdkit(mol, smirks, matches):
     rdmol = mol.to_rdkit()
     rdDepictor.SetPreferCoordGen(True)
     rdDepictor.Compute2DCoords(rdmol)
@@ -47,7 +46,7 @@ def draw_rdkit(mol, smirks):
     return MolsToGridImage(
         [rdmol],
         useSVG=True,
-        highlightAtomLists=matches,
+        highlightAtomLists=[matches],
         subImgSize=(300, 300),
         molsPerRow=1,
     )
@@ -57,12 +56,18 @@ def draw_rdkit(mol, smirks):
 def display_click_data(clickData):
     if clickData:
         points = clickData["points"][0]["pointNumbers"]
-        mols = {RECORDS[SMIRKS[CUR_SMIRK]].molecules[p] for p in points}
+        mols = {
+            RECORDS[SMIRKS[CUR_SMIRK]]
+            .molecules[p]: RECORDS[SMIRKS[CUR_SMIRK]]
+            .envs[p]
+            for p in points
+        }
         pics = []
-        for mol in mols:
+        for mol, env in mols.items():
             svg = draw_rdkit(
                 Molecule.from_smiles(mol, allow_undefined_stereo=True),
                 SMIRKS[CUR_SMIRK],
+                env,
             )
             try:
                 encoded = base64.b64encode(bytes(svg, "utf-8"))

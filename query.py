@@ -185,8 +185,14 @@ class Driver:
                 if diff > self.eps:
                     if self.verbose:
                         self.print_row(cls, k, v, espaloma, diff)
-                    ret[smirks].molecules.append(mol.to_smiles(mapped=True))
+                    smiles = mol.to_smiles(mapped=True)
+                    print(smirks)
+                    print(smiles)
+                    print(k)
+                    exit(1)
+                    ret[smirks].molecules.append(smiles)
                     ret[smirks].espaloma_values.append(espaloma[k])
+                    ret[smirks].envs.append(list(k))
                     ret[smirks].sage_value = v
                     ret[smirks].ident = ids[smirks]
 
@@ -200,19 +206,29 @@ class Record:
     espaloma_values: List[float]
     sage_value: float
     ident: str
+    envs: List[List[int]]
 
     def __init__(
-        self, molecules=None, espaloma_values=None, sage_value=None, ident=None
+        self,
+        molecules=None,
+        espaloma_values=None,
+        sage_value=None,
+        ident=None,
+        envs=None,
     ):
+        # these three lists are parallel to each other
         if molecules is None:
             molecules = []
         if espaloma_values is None:
             espaloma_values = []
+        if envs is None:
+            envs = []
 
         self.molecules = molecules
         self.espaloma_values = espaloma_values
         self.sage_value = sage_value
         self.ident = ident
+        self.envs = envs  # chemical environments from espaloma
 
     def asdict(self):
         return asdict(self)
@@ -314,6 +330,9 @@ def main(force_constants, dataset, out_dir):
 
 if __name__ == "__main__":
     main()
+
+# usage for industry data set:
+# python query.py -d ../benchmarking/datasets/industry.json -o data/industry
 
 # Now that I have the dashboard running, I see that separate bars in the
 # histogram can correspond to the same molecule, and my current drawing scheme
