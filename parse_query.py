@@ -33,6 +33,7 @@ def main(infile, outdir, plot):
     pmap.update({h.smirks: h.id for h in th})
 
     buf = StringIO()
+    averages = []
     with open(infile, "r") as inp:
         for i, line in enumerate(inp):
             if line.startswith("#"):
@@ -43,11 +44,21 @@ def main(infile, outdir, plot):
             assert int(count) == len(rest)
             data = [float(r) for r in rest]
             esp_avg = np.average(data)
-            buf.write(f"{smirks} {esp_avg}\n")
+
+            sage = float(sage)
+
+            diff = [abs(d - sage) / d for d in data if d != 0.0]
+            if len(diff) > 0:
+                avg_diff = np.average(diff)
+                std_diff = np.std(diff)
+
+                averages.append(avg_diff)
+
+            buf.write(f"{smirks} {esp_avg} {sage} {avg_diff} {std_diff}\n")
 
             if plot:
                 ax = sea.histplot(data=data, label="Espaloma")
-                ax.axvline(x=float(sage), color="green", label="Sage")
+                ax.axvline(x=sage, color="green", label="Sage")
                 ax.axvline(x=esp_avg, color="orange", label="Espaloma Avg.")
                 fig = ax.get_figure()
                 pid = pmap[smirks]
@@ -58,6 +69,8 @@ def main(infile, outdir, plot):
 
     with open(f"{outdir}/output.dat", "w") as out:
         out.write(buf.getvalue())
+
+    print(f"average MA%E: {np.average(averages) * 100: .2f}")
 
 
 if __name__ == "__main__":
