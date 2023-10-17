@@ -1,7 +1,15 @@
 .PHONY: industry
 
+query_flags =
+
+ifdef PLOT
+    query_flags += -p
+endif
+
 parse_query = \
-    python parse_query.py -i data/industry/$1_dedup.dat -o output/$1/industry
+    python parse_query.py -i data/industry/$1_dedup.dat \
+			  -o output/$1/industry \
+		          $(query_flags)
 
 industry:
 	$(call parse_query,bonds)
