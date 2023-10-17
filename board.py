@@ -52,6 +52,9 @@ def draw_rdkit(mol, smirks, matches):
     )
 
 
+MAX = 100
+
+
 @callback(Output("click-output", "children"), Input("graph", "clickData"))
 def display_click_data(clickData):
     if clickData:
@@ -59,7 +62,10 @@ def display_click_data(clickData):
         record = RECORDS[SMIRKS[CUR_SMIRK]]
         mols = {record.molecules[p]: record.envs[p] for p in points}
         pics = []
+        count = 0
         for mol, env in mols.items():
+            if count > MAX:
+                break
             mol = Molecule.from_mapped_smiles(mol, allow_undefined_stereo=True)
             svg = draw_rdkit(mol, SMIRKS[CUR_SMIRK], env)
             try:
@@ -69,6 +75,7 @@ def display_click_data(clickData):
             pics.append(
                 html.Img(src=f"data:image/svg+xml;base64,{encoded.decode()}")
             )
+            count += 1
         return pics
 
 
