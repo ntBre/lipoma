@@ -100,14 +100,14 @@ def calculate_parameters(
         records["bonds_dedup"][p.smirks].sage_value = p.k.magnitude
         records["bonds_dedup"][p.smirks].ident = p.id
 
-    for angle, p in labels["Angles"].items():
-        qube_param = qube_mol.AngleForce[angle]
+    for key, p in labels["Angles"].items():
+        qube_param = qube_mol.AngleForce[key]
 
         angle = qube_param.angle * unit.radian
         angle = angle.to(unit.degree).magnitude
         records["angles_eq"][p.smirks].molecules.append(smiles)
         records["angles_eq"][p.smirks].espaloma_values.append(angle)
-        records["angles_eq"][p.smirks].envs.append(angle)
+        records["angles_eq"][p.smirks].envs.append(key)
         records["angles_eq"][p.smirks].sage_value = p.angle.magnitude
         records["angles_eq"][p.smirks].ident = p.id
 
@@ -115,7 +115,7 @@ def calculate_parameters(
         k = k.to(kcal_per_mol_per_rad).magnitude
         records["angles_dedup"][p.smirks].molecules.append(smiles)
         records["angles_dedup"][p.smirks].espaloma_values.append(k)
-        records["angles_dedup"][p.smirks].envs.append(angle)
+        records["angles_dedup"][p.smirks].envs.append(key)
         records["angles_dedup"][p.smirks].sage_value = p.k.magnitude
         records["angles_dedup"][p.smirks].ident = p.id
 
