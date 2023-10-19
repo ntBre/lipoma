@@ -14,11 +14,11 @@ with warnings.catch_warnings():
     from query import Records
 
 
-def make_fig(smirk, record):
+def make_fig(smirk, record, title):
     fig = px.histogram(
         record.espaloma_values,
         title=f"{record.ident} {smirk}",
-        labels="Espaloma",
+        labels=title,
         width=800,
         height=600,
     )
@@ -30,10 +30,10 @@ def make_fig(smirk, record):
     )
     fig.add_vline(
         x=np.average(record.espaloma_values),
-        annotation_text="Espaloma Avg.",
+        annotation_text=f"{title} Avg.",
         line_dash="dash",
     )
-    fig.update_traces(marker_line_width=1, name="Espaloma")
+    fig.update_traces(marker_line_width=1, name=title)
     return dcc.Graph(figure=fig, id="graph")
 
 
@@ -88,7 +88,7 @@ def previous_button(_):
     global CUR_SMIRK
     if CUR_SMIRK >= 1:
         CUR_SMIRK -= 1
-    return make_fig(SMIRKS[CUR_SMIRK], RECORDS[SMIRKS[CUR_SMIRK]])
+    return make_fig(SMIRKS[CUR_SMIRK], RECORDS[SMIRKS[CUR_SMIRK]], TITLE)
 
 
 @callback(
@@ -100,12 +100,12 @@ def next_button(_):
     global CUR_SMIRK
     if CUR_SMIRK < len(SMIRKS) - 1:
         CUR_SMIRK += 1
-    return make_fig(SMIRKS[CUR_SMIRK], RECORDS[SMIRKS[CUR_SMIRK]])
+    return make_fig(SMIRKS[CUR_SMIRK], RECORDS[SMIRKS[CUR_SMIRK]], TITLE)
 
 
 def make_radio(k):
     match k:
-        case "k":
+        case "k" | "esp":
             radio = (
                 dcc.RadioItems(
                     ["Bonds", "Angles", "Torsions", "Impropers"],
@@ -114,7 +114,7 @@ def make_radio(k):
                     id="radio",
                 ),
             )
-        case "eq":
+        case "eq" | "msm":
             radio = (
                 dcc.RadioItems(
                     ["Bonds", "Angles"],
@@ -127,7 +127,7 @@ def make_radio(k):
 
 
 @callback(
-    Output("radio-parent", "children"),
+    Output("radio-parent", "children", allow_duplicate=True),
     Output("graph-container", "children", allow_duplicate=True),
     Input("radio2", "value"),
     prevent_initial_call=True,
@@ -138,7 +138,30 @@ def choose_constant(value):
     RECORDS = make_records(value)
     SMIRKS = make_smirks(RECORDS)
     CUR_SMIRK = 0
-    fig = make_fig(SMIRKS[CUR_SMIRK], RECORDS[SMIRKS[CUR_SMIRK]])
+    fig = make_fig(SMIRKS[CUR_SMIRK], RECORDS[SMIRKS[CUR_SMIRK]], TITLE)
+    radio = make_radio(value)
+    return radio, fig
+
+
+@callback(
+    Output("radio-parent", "children", allow_duplicate=True),
+    Output("graph-container", "children", allow_duplicate=True),
+    Input("radio3", "value"),
+    prevent_initial_call=True,
+)
+def choose_data(value):
+    global RECORDS, SMIRKS, CUR_SMIRK, TYPE, DIR, TITLE
+    match value:
+        case "esp":
+            TITLE = "Espaloma"
+            DIR = "data/industry"
+        case "msm":
+            TITLE = "MSM"
+            DIR = "data/msm"
+    RECORDS = make_records(TYPE)
+    SMIRKS = make_smirks(RECORDS)
+    CUR_SMIRK = 0
+    fig = make_fig(SMIRKS[CUR_SMIRK], RECORDS[SMIRKS[CUR_SMIRK]], TITLE)
     radio = make_radio(value)
     return radio, fig
 
@@ -162,7 +185,7 @@ def choose_parameter(value):
     RECORDS = make_records(TYPE, param)
     SMIRKS = make_smirks(RECORDS)
     CUR_SMIRK = 0
-    return make_fig(SMIRKS[CUR_SMIRK], RECORDS[SMIRKS[CUR_SMIRK]])
+    return make_fig(SMIRKS[CUR_SMIRK], RECORDS[SMIRKS[CUR_SMIRK]], TITLE)
 
 
 # pasted from benchmarking/parse_hist
@@ -187,9 +210,11 @@ def make_records(typ, param="bonds"):
         case "eq":
             suff = "_eq"
 
-    return Records.from_file(f"data/industry/{param}{suff}.json")
+    return Records.from_file(f"{DIR}/{param}{suff}.json")
 
 
+TITLE = "Espaloma"
+DIR = "data/industry"
 TYPE = "k"
 RECORDS = make_records(TYPE)
 SMIRKS = make_smirks(RECORDS)
@@ -202,14 +227,21 @@ colors = {"background": "white", "text": "black"}
 app.layout = html.Div(
     style={"backgroundColor": colors["background"]},
     children=[
-        dcc.RadioItems(["eq", "k"], "k", inline=True, id="radio2"),
+        dcc.RadioItems(["esp", "msm"], "esp", inline=True, id="radio3"),
+        dcc.RadioItems(["k", "eq"], "k", inline=True, id="radio2"),
         html.Div(make_radio("k"), id="radio-parent"),
         html.Button("Previous", id="previous", n_clicks=0),
         html.Button("Next", id="next", n_clicks=0),
         html.Div(
             [
                 html.Div(
-                    [make_fig(SMIRKS[CUR_SMIRK], RECORDS[SMIRKS[CUR_SMIRK]])],
+                    [
+                        make_fig(
+                            SMIRKS[CUR_SMIRK],
+                            RECORDS[SMIRKS[CUR_SMIRK]],
+                            TITLE,
+                        )
+                    ],
                     id="graph-container",
                     style=dict(display="inline-block"),
                 ),
