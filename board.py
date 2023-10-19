@@ -158,6 +158,9 @@ def choose_data(value):
         case "msm":
             TITLE = "MSM"
             DIR = "data/msm"
+        case e:
+            raise ValueError(e)
+
     RECORDS = make_records(TYPE)
     SMIRKS = make_smirks(RECORDS)
     CUR_SMIRK = 0
