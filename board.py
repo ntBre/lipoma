@@ -103,6 +103,46 @@ def next_button(_):
     return make_fig(SMIRKS[CUR_SMIRK], RECORDS[SMIRKS[CUR_SMIRK]])
 
 
+def make_radio(k):
+    match k:
+        case "k":
+            radio = (
+                dcc.RadioItems(
+                    ["Bonds", "Angles", "Torsions", "Impropers"],
+                    "Bonds",
+                    inline=True,
+                    id="radio",
+                ),
+            )
+        case "eq":
+            radio = (
+                dcc.RadioItems(
+                    ["Bonds", "Angles"],
+                    "Bonds",
+                    inline=True,
+                    id="radio",
+                ),
+            )
+    return radio
+
+
+@callback(
+    Output("radio-parent", "children"),
+    Output("graph-container", "children", allow_duplicate=True),
+    Input("radio2", "value"),
+    prevent_initial_call=True,
+)
+def choose_constant(value):
+    global RECORDS, SMIRKS, CUR_SMIRK, TYPE
+    TYPE = value
+    RECORDS = make_records(value)
+    SMIRKS = make_smirks(RECORDS)
+    CUR_SMIRK = 0
+    fig = make_fig(SMIRKS[CUR_SMIRK], RECORDS[SMIRKS[CUR_SMIRK]])
+    radio = make_radio(value)
+    return radio, fig
+
+
 @callback(
     Output("graph-container", "children", allow_duplicate=True),
     Input("radio", "value"),
@@ -112,13 +152,14 @@ def choose_parameter(value):
     global RECORDS, SMIRKS, CUR_SMIRK
     match value:
         case "Bonds":
-            RECORDS = Records.from_file("data/industry/bonds_dedup.json")
+            param = "bonds"
         case "Angles":
-            RECORDS = Records.from_file("data/industry/angles_dedup.json")
+            param = "angles"
         case "Torsions":
-            RECORDS = Records.from_file("data/industry/torsions_dedup.json")
+            param = "torsions"
         case "Impropers":
-            RECORDS = Records.from_file("data/industry/impropers_dedup.json")
+            param = "impropers"
+    RECORDS = make_records(TYPE, param)
     SMIRKS = make_smirks(RECORDS)
     CUR_SMIRK = 0
     return make_fig(SMIRKS[CUR_SMIRK], RECORDS[SMIRKS[CUR_SMIRK]])
@@ -139,7 +180,18 @@ def make_smirks(records):
     return [smirks for smirks, record in pairs]
 
 
-RECORDS = Records.from_file("data/industry/bonds_dedup.json")
+def make_records(typ, param="bonds"):
+    match typ:
+        case "k":
+            suff = "_dedup"
+        case "eq":
+            suff = "_eq"
+
+    return Records.from_file(f"data/industry/{param}{suff}.json")
+
+
+TYPE = "k"
+RECORDS = make_records(TYPE)
 SMIRKS = make_smirks(RECORDS)
 CUR_SMIRK = 0
 
@@ -150,12 +202,8 @@ colors = {"background": "white", "text": "black"}
 app.layout = html.Div(
     style={"backgroundColor": colors["background"]},
     children=[
-        dcc.RadioItems(
-            ["Bonds", "Angles", "Torsions", "Impropers"],
-            "Bonds",
-            inline=True,
-            id="radio",
-        ),
+        dcc.RadioItems(["eq", "k"], "k", inline=True, id="radio2"),
+        html.Div(make_radio("k"), id="radio-parent"),
         html.Button("Previous", id="previous", n_clicks=0),
         html.Button("Next", id="next", n_clicks=0),
         html.Div(
