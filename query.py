@@ -104,6 +104,60 @@ class Impropers(Torsions):
     header_keys = ["i", "j", "k", "l"]
 
 
+@dataclass
+class Record:
+    # parallel to espaloma_values, matching molecules to espaloma values
+    molecules: List[str]
+    espaloma_values: List[float]
+    sage_value: float
+    ident: str
+    envs: List[List[int]]
+
+    def __init__(
+        self,
+        molecules=None,
+        espaloma_values=None,
+        sage_value=None,
+        ident=None,
+        envs=None,
+    ):
+        # these three lists are parallel to each other
+        if molecules is None:
+            molecules = []
+        if espaloma_values is None:
+            espaloma_values = []
+        if envs is None:
+            envs = []
+
+        self.molecules = molecules
+        self.espaloma_values = espaloma_values
+        self.sage_value = sage_value
+        self.ident = ident
+        self.envs = envs  # chemical environments from espaloma
+
+    def asdict(self):
+        return asdict(self)
+
+
+class Records(defaultdict):
+    def __init__(self, *args, **kwargs):
+        super().__init__(Record, *args, **kwargs)
+
+    def to_json(self, filename):
+        with open(filename, "w") as out:
+            json.dump(self, out, indent=2, default=lambda r: r.asdict())
+
+    def from_file(filename):
+        # this _cannot_ be the best way to do this, but I can't figure out the
+        # right way
+        ret = Records()
+        with open(filename, "r") as inp:
+            d = json.load(inp)
+            for k, v in d.items():
+                ret[k] = Record(**v)
+            return ret
+
+
 class Driver:
     def __init__(
         self,
@@ -144,7 +198,7 @@ class Driver:
             print(f"{elt:5}", end="")
         print(f"{v:12.8}{espaloma[k]:12.8}{diff:12.8}")
 
-    def compare(self, cls):
+    def compare(self, cls) -> Records:
         """Compare paramters of type `cls` assigned by `self.forcefield` and
         espaloma.
 
@@ -200,60 +254,6 @@ class Driver:
                     ret[smirks].ident = ids[smirks]
 
         return ret
-
-
-@dataclass
-class Record:
-    # parallel to espaloma_values, matching molecules to espaloma values
-    molecules: List[str]
-    espaloma_values: List[float]
-    sage_value: float
-    ident: str
-    envs: List[List[int]]
-
-    def __init__(
-        self,
-        molecules=None,
-        espaloma_values=None,
-        sage_value=None,
-        ident=None,
-        envs=None,
-    ):
-        # these three lists are parallel to each other
-        if molecules is None:
-            molecules = []
-        if espaloma_values is None:
-            espaloma_values = []
-        if envs is None:
-            envs = []
-
-        self.molecules = molecules
-        self.espaloma_values = espaloma_values
-        self.sage_value = sage_value
-        self.ident = ident
-        self.envs = envs  # chemical environments from espaloma
-
-    def asdict(self):
-        return asdict(self)
-
-
-class Records(defaultdict):
-    def __init__(self, *args, **kwargs):
-        super().__init__(Record, *args, **kwargs)
-
-    def to_json(self, filename):
-        with open(filename, "w") as out:
-            json.dump(self, out, indent=2, default=lambda r: r.asdict())
-
-    def from_file(filename):
-        # this _cannot_ be the best way to do this, but I can't figure out the
-        # right way
-        ret = Records()
-        with open(filename, "r") as inp:
-            d = json.load(inp)
-            for k, v in d.items():
-                ret[k] = Record(**v)
-            return ret
 
 
 def print_summary(records: Records, outfile=None):
