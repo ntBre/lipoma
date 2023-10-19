@@ -19,3 +19,4 @@ data/industry/torsions_dedup.json
 /data/industry/impropers_dedup.json
 
 *.json
+/fault_handler.log
