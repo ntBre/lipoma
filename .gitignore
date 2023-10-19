@@ -17,3 +17,5 @@ data/industry/bonds_dedup.json
 data/industry/torsions_dedup.json
 
 /data/industry/impropers_dedup.json
+
+*.json
