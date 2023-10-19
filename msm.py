@@ -1,7 +1,9 @@
 # comparing msm parameters to the Sage values. mostly copied from
 # vflib/bin/create_msm.py
 
+import faulthandler
 import logging
+import os
 from collections import defaultdict
 
 import click
@@ -27,10 +29,11 @@ def force_constant_bond(bond, eigenvals, eigenvecs, coords):
 
     unit_vectors_ab = ModSemMaths.unit_vector_along_bond(coords, bond)
 
-    return -0.5 * sum(
+    lst = [
         eigenvals_ab[i] * abs(np.dot(unit_vectors_ab, eigenvecs_ab[:, i]))
         for i in range(3)
-    )
+    ]
+    return -0.5 * sum(lst)
 
 
 ModSemMaths.force_constant_bond = force_constant_bond
@@ -76,28 +79,46 @@ def calculate_parameters(
     kj_per_mol_per_rad2 = unit.kilojoule_per_mole / (unit.radian**2)
     kcal_per_mol_per_rad = unit.kilocalorie_per_mole / unit.radian**2
 
+    smiles = molecule.to_smiles(mapped=True)
+
     for bond, p in labels["Bonds"].items():
         qube_param = qube_mol.BondForce[bond]
-        length = qube_param.length * unit.nanometer
-        k = qube_param.k * kj_per_mol_per_nm2
-        # params.bond_k[p.smirks].append(k.to(kcal_per_mol_per_ang))
-
-        smiles = molecule.to_smiles(mapped=True)
         smirks = p.smirks
-        records["bond_eq"][smirks].molecules.append(smiles)
-        records["bond_eq"][smirks].espaloma_values.append(
-            length.to(unit.angstrom).magnitude
-        )
-        records["bond_eq"][smirks].envs.append(bond)
-        records["bond_eq"][smirks].sage_value = p.length.magnitude
-        records["bond_eq"][smirks].ident = p.id
+
+        length = qube_param.length * unit.nanometer
+        length = length.to(unit.angstrom).magnitude
+        records["bonds_eq"][smirks].molecules.append(smiles)
+        records["bonds_eq"][smirks].espaloma_values.append(length)
+        records["bonds_eq"][smirks].envs.append(bond)
+        records["bonds_eq"][smirks].sage_value = p.length.magnitude
+        records["bonds_eq"][smirks].ident = p.id
+
+        k = qube_param.k * kj_per_mol_per_nm2
+        k = k.to(kcal_per_mol_per_ang).magnitude
+        records["bonds_dedup"][smirks].molecules.append(smiles)
+        records["bonds_dedup"][smirks].espaloma_values.append(k)
+        records["bonds_dedup"][smirks].envs.append(bond)
+        records["bonds_dedup"][smirks].sage_value = p.k.magnitude
+        records["bonds_dedup"][smirks].ident = p.id
 
     for angle, p in labels["Angles"].items():
         qube_param = qube_mol.AngleForce[angle]
+
         angle = qube_param.angle * unit.radian
+        angle = angle.to(unit.degree).magnitude
+        records["angles_eq"][smirks].molecules.append(smiles)
+        records["angles_eq"][smirks].espaloma_values.append(angle)
+        records["angles_eq"][smirks].envs.append(angle)
+        records["angles_eq"][smirks].sage_value = p.angle.magnitude
+        records["angles_eq"][smirks].ident = p.id
+
         k = qube_param.k * kj_per_mol_per_rad2
-        # params.angle_eq[p.smirks].append(angle.to(unit.degree))
-        # params.angle_k[p.smirks].append(k.to(kcal_per_mol_per_rad))
+        k = k.to(kcal_per_mol_per_rad).magnitude
+        records["angles_dedup"][smirks].molecules.append(smiles)
+        records["angles_dedup"][smirks].espaloma_values.append(k)
+        records["angles_dedup"][smirks].envs.append(angle)
+        records["angles_dedup"][smirks].sage_value = p.k.magnitude
+        records["angles_dedup"][smirks].ident = p.id
 
 
 @click.command()
@@ -105,6 +126,9 @@ def calculate_parameters(
 @click.option("--dataset", "-d", default="datasets/filtered-opt.json")
 @click.option("--out-dir", "-o", default="data")
 def main(forcefield, dataset, out_dir):
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
+
     timer = Timer()
     dataset = OptimizationResultCollection.parse_file(dataset)
 
@@ -135,9 +159,12 @@ def main(forcefield, dataset, out_dir):
 
     timer.say(f"finished labeling with {errors} errors")
 
-    records["bond_eq"].to_json("/tmp/try.json")
+    for param, record in records.items():
+        record.to_json(f"{out_dir}/{param}.json")
 
 
 if __name__ == "__main__":
     logging.getLogger("openff").setLevel(logging.ERROR)
-    main()
+    with open("fault_handler.log", "w") as fobj:
+        faulthandler.enable(fobj)
+        main()
