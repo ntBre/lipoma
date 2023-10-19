@@ -1,5 +1,3 @@
-.PHONY: industry industry-eq
-
 query_flags =
 
 ifdef PLOT
