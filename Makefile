@@ -9,6 +9,8 @@ parse_query = \
 			  -o output/$1/industry \
 		          $(query_flags)
 
+all: msm industry industry-eq
+
 parse:
 	$(call parse_query,bonds)
 	$(call parse_query,angles)
@@ -29,3 +31,10 @@ $(eq): query.py
 			--out-dir data/industry --force-constants
 
 industry-eq: $(eq)
+
+msm := $(addprefix data/msm/,angles_dedup.json angles_eq.json bonds_dedup.json	\
+			     bonds_eq.json)
+$(msm): msm.py
+	python msm.py -o data/msm
+
+msm: $(msm)
