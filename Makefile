@@ -20,14 +20,14 @@ parse:
 json := $(addprefix data/industry/,bonds_dedup.json angles_dedup.json	\
 				   torsions_dedup.json impropers_dedup.json)
 $(json): query.py
-	python query.py --dataset ../benchmarking/datasets/industry.json \
+	python query.py --dataset datasets/industry.json \
 			--out-dir data/industry
 industry: $(json)
 
 # industry equilibrium values
 eq := $(addprefix data/industry/,bonds_eq.json angles_eq.json)
 $(eq): query.py
-	python query.py --dataset ../benchmarking/datasets/industry.json \
+	python query.py --dataset datasets/industry.json \
 			--out-dir data/industry --force-constants
 
 industry-eq: $(eq)
