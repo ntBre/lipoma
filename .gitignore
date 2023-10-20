@@ -15,8 +15,11 @@ targets.tar.gz
 data/industry/angles_dedup.json
 data/industry/bonds_dedup.json
 data/industry/torsions_dedup.json
-
 /data/industry/impropers_dedup.json
-
-*.json
 /fault_handler.log
+/data/industry/angles_eq.json
+/data/industry/bonds_eq.json
+/good.json
+/patched.json
+/pretty.patched.json
+/data/msm/*.json
