@@ -7,7 +7,6 @@ import os
 from collections import defaultdict
 
 import click
-import numpy as np
 from openff.qcsubmit.results import OptimizationResultCollection
 from openff.qcsubmit.results.filters import LowestEnergyFilter
 from openff.toolkit import ForceField, Molecule
@@ -22,6 +21,13 @@ from vflib.utils import Timer
 from query import Records
 
 
+def dot(v, w):
+    ret = 0.0
+    for i in range(3):
+        ret += v[i] * w[i]
+    return ret
+
+
 def force_constant_bond(bond, eigenvals, eigenvecs, coords):
     atom_a, atom_b = bond
     eigenvals_ab = eigenvals[atom_a, atom_b, :]
@@ -29,11 +35,14 @@ def force_constant_bond(bond, eigenvals, eigenvecs, coords):
 
     unit_vectors_ab = ModSemMaths.unit_vector_along_bond(coords, bond)
 
-    lst = [
-        eigenvals_ab[i] * abs(np.dot(unit_vectors_ab, eigenvecs_ab[:, i]))
-        for i in range(3)
-    ]
-    return -0.5 * sum(lst)
+    s = 0.0
+    for i in range(3):
+        v = unit_vectors_ab
+        w = eigenvecs_ab[:, i]
+        d = dot(v, w)
+        s += eigenvals_ab[i] * abs(d)
+
+    return -0.5 * s
 
 
 ModSemMaths.force_constant_bond = force_constant_bond
