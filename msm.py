@@ -129,40 +129,6 @@ def calculate_parameters(
         records["angles_dedup"][p.smirks].ident = p.id
 
 
-def compute_msm(forcefield, dataset):
-    timer = Timer()
-    dataset = OptimizationResultCollection.parse_file(dataset)
-
-    timer.say("finished loading dataset")
-
-    filtered = dataset.filter(LowestEnergyFilter())
-
-    timer.say("finished filtering dataset")
-
-    hessian_set = filtered.to_basic_result_collection(driver="hessian")
-
-    timer.say("finished converting dataset")
-
-    print(f"Found {hessian_set.n_results} hessian calculations")
-    print(f"Found {hessian_set.n_molecules} hessian molecules")
-
-    ff = ForceField(forcefield, allow_cosmetic_attributes=True)
-
-    records_and_molecules = hessian_set.to_records()
-
-    records = defaultdict(Records)
-    errors = 0
-    for record, molecule in tqdm(records_and_molecules, desc="Computing msm"):
-        try:
-            calculate_parameters(records, record, molecule, ff)
-        except (KeyError, StereoChemistryError):
-            errors += 1
-
-    timer.say(f"finished labeling with {errors} errors")
-
-    return records
-
-
 def distance(record) -> float:
     """Compute the mean absolute difference between record.espaloma_values and
     record.sage_value"""
@@ -182,6 +148,48 @@ def summary(records):
     print()
 
 
+class MSM:
+    def __init__(self, dataset):
+        self.timer = Timer()
+        dataset = OptimizationResultCollection.parse_file(dataset)
+
+        self.timer.say("finished loading dataset")
+
+        filtered = dataset.filter(LowestEnergyFilter())
+
+        self.timer.say("finished filtering dataset")
+
+        hessian_set = filtered.to_basic_result_collection(driver="hessian")
+
+        self.timer.say("finished converting dataset")
+
+        print(f"Found {hessian_set.n_results} hessian calculations")
+        print(f"Found {hessian_set.n_molecules} hessian molecules")
+
+        self.records_and_molecules = hessian_set.to_records()
+
+    def compute_msm(self, forcefield):
+        ff = ForceField(forcefield, allow_cosmetic_attributes=True)
+
+        records = defaultdict(Records)
+        errors = 0
+        for record, molecule in tqdm(
+            self.records_and_molecules, desc="Computing msm"
+        ):
+            try:
+                calculate_parameters(records, record, molecule, ff)
+            except (KeyError, StereoChemistryError):
+                errors += 1
+
+        self.timer.say(f"finished labeling with {errors} errors")
+
+        return records
+
+    def score(self, forcefield):
+        records = self.compute_msm(forcefield)
+        summary(records)
+
+
 @click.command()
 @click.option("--forcefield", "-f", default="openff-2.1.0.offxml")
 @click.option("--dataset", "-d", default="datasets/filtered-opt.json")
@@ -190,7 +198,9 @@ def main(forcefield, dataset, out_dir):
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
 
-    records = compute_msm(forcefield, dataset)
+    msm = MSM(dataset)
+
+    records = msm.compute_msm(forcefield)
 
     for param, record in records.items():
         record.to_json(f"{out_dir}/{param}.json")
