@@ -7,6 +7,7 @@ import os
 from collections import defaultdict
 
 import click
+import numpy as np
 from openff.qcsubmit.results import OptimizationResultCollection
 from openff.qcsubmit.results.filters import LowestEnergyFilter
 from openff.toolkit import ForceField, Molecule
@@ -186,8 +187,35 @@ class MSM:
         return records
 
     def score(self, forcefield):
+        "Print a distance summary for `forcefield`"
         records = self.compute_msm(forcefield)
         summary(records)
+
+    def update_forcefield(self, forcefield) -> ForceField:
+        """Update the parameters in `forcefield` with the MSM guess and return
+        the new ForceField"""
+        ff = ForceField(forcefield, allow_cosmetic_attributes=True)
+        records = self.compute_msm(forcefield)
+        bh = ff.get_parameter_handler("Bonds")
+        for smirks, record in records["bonds_eq"].items():
+            bond = bh.parameters[smirks]
+            bond.length = np.mean(record.espaloma_values) * unit.angstrom
+            bond.k = (
+                np.mean(records["bonds_dedup"][smirks].espaloma_values)
+                * unit.kilocalorie_per_mole
+                / (unit.angstrom**2)
+            )
+
+        ah = ff.get_parameter_handler("Angles")
+        for smirks, record in records["angles_eq"].items():
+            angle = ah.parameters[smirks]
+            angle.angle = np.mean(record.espaloma_values) * unit.degrees
+            angle.k = (
+                np.mean(records["angles_dedup"][smirks].espaloma_values)
+                * unit.kilocalorie_per_mole
+                / unit.radian**2
+            )
+        return ff
 
 
 @click.command()
