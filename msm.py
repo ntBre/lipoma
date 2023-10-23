@@ -129,14 +129,7 @@ def calculate_parameters(
         records["angles_dedup"][p.smirks].ident = p.id
 
 
-@click.command()
-@click.option("--forcefield", "-f", default="openff-2.1.0.offxml")
-@click.option("--dataset", "-d", default="datasets/filtered-opt.json")
-@click.option("--out-dir", "-o", default="data")
-def main(forcefield, dataset, out_dir):
-    if not os.path.exists(out_dir):
-        os.makedirs(out_dir)
-
+def compute_msm(forcefield, dataset):
     timer = Timer()
     dataset = OptimizationResultCollection.parse_file(dataset)
 
@@ -166,6 +159,38 @@ def main(forcefield, dataset, out_dir):
             errors += 1
 
     timer.say(f"finished labeling with {errors} errors")
+
+    return records
+
+
+def distance(record) -> float:
+    """Compute the mean absolute difference between record.espaloma_values and
+    record.sage_value"""
+    lst = [abs(e - record.sage_value) for e in record.espaloma_values]
+    return sum(lst) / len(lst)
+
+
+def summary(records):
+    """Print the distance summary for all of records"""
+    ptypes = ["bonds_eq", "bonds_dedup", "angles_eq", "angles_dedup"]
+    width = 14
+    print("".join([f"{p:>{width}}" for p in ptypes]))
+    for ptype in ptypes:
+        ds = [distance(rec) for rec in records[ptype].values()]
+        avg = sum(ds) / len(ds)
+        print(f"{avg:{width}.6f}", end="")
+    print()
+
+
+@click.command()
+@click.option("--forcefield", "-f", default="openff-2.1.0.offxml")
+@click.option("--dataset", "-d", default="datasets/filtered-opt.json")
+@click.option("--out-dir", "-o", default="data")
+def main(forcefield, dataset, out_dir):
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
+
+    records = compute_msm(forcefield, dataset)
 
     for param, record in records.items():
         record.to_json(f"{out_dir}/{param}.json")
