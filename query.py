@@ -140,6 +140,9 @@ class Record:
 
 
 class Records(defaultdict):
+    """Records is a defaultdict of smirks->Record with additional methods for
+    converting to and from JSON"""
+
     def __init__(self, *args, **kwargs):
         super().__init__(Record, *args, **kwargs)
 
