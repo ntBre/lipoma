@@ -170,7 +170,10 @@ class MSM:
         self.records_and_molecules = hessian_set.to_records()
 
     def compute_msm(self, forcefield):
-        ff = ForceField(forcefield, allow_cosmetic_attributes=True)
+        if isinstance(forcefield, ForceField):
+            ff = forcefield
+        else:
+            ff = ForceField(forcefield, allow_cosmetic_attributes=True)
 
         records = defaultdict(Records)
         errors = 0
@@ -216,6 +219,11 @@ class MSM:
                 / unit.radian**2
             )
         return ff
+
+    def update_and_score(self, forcefield):
+        """Call `update_forcefield` and then `score` the result"""
+        ff = self.update_forcefield(forcefield)
+        self.score(ff)
 
 
 @click.command()
