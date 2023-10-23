@@ -129,6 +129,7 @@
         <Angle smirks="[*:1]@-[r4;#7X4,#7X3,#7X2-1:2]@-[*:3]" angle="105.8401571906 * degree ** 1" k="265.3585554223 * mole ** -1 * radian ** -2 * kilocalorie ** 1" id="a18b"></Angle>
         <Angle smirks="[*:1]@-[r5;#7X4,#7X3,#7X2-1:2]@-[*:3]" angle="105.8401571906 * degree ** 1" k="265.3585554223 * mole ** -1 * radian ** -2 * kilocalorie ** 1" id="a18c"></Angle>
         <Angle smirks="[#1:1]-[#7X4,#7X3,#7X2-1:2]-[*:3]" angle="109.8280614024 * degree ** 1" k="93.85648326614 * mole ** -1 * radian ** -2 * kilocalorie ** 1" id="a19"></Angle>
+        <Angle smirks="[#1:1]-[#7X4,#7X3,#7X2-1:2]-[#1:3]" angle="109.8280614024 * degree ** 1" k="93.85648326614 * mole ** -1 * radian ** -2 * kilocalorie ** 1" id="a19a"></Angle>
         <Angle smirks="[*:1]~[#7X3$(*~[#6X3,#6X2,#7X2+0]):2]~[*:3]" angle="119.1748379248 * degree ** 1" k="151.142556131 * mole ** -1 * radian ** -2 * kilocalorie ** 1" id="a20"></Angle>
         <Angle smirks="[#1:1]-[#7X3$(*~[#6X3,#6X2,#7X2+0]):2]-[*:3]" angle="117.5760620116 * degree ** 1" k="71.15425408676 * mole ** -1 * radian ** -2 * kilocalorie ** 1" id="a21"></Angle>
         <Angle smirks="[*:1]~[#7X2+0:2]~[*:3]" angle="118.7711698022 * degree ** 1" k="272.4286544662 * mole ** -1 * radian ** -2 * kilocalorie ** 1" id="a22"></Angle>
@@ -139,6 +140,7 @@
         <Angle smirks="[#8X1:1]~[#7X3:2]~[#8X1:3]" angle="124.9682447718 * degree ** 1" k="136.5596518574 * mole ** -1 * radian ** -2 * kilocalorie ** 1" id="a26"></Angle>
         <Angle smirks="[*:1]~[#7X2:2]~[#7X1:3]" angle="175.86536907731292 * degree ** 1" k="101.8769252507 * mole ** -1 * radian ** -2 * kilocalorie ** 1" id="a27"></Angle>
         <Angle smirks="[*:1]-[#8:2]-[*:3]" angle="111.9874516071 * degree ** 1" k="237.851218935 * mole ** -1 * radian ** -2 * kilocalorie ** 1" id="a28"></Angle>
+        <Angle smirks="[*:1]-[#8:2]-[#1:3]" angle="111.9874516071 * degree ** 1" k="237.851218935 * mole ** -1 * radian ** -2 * kilocalorie ** 1" id="a28a"></Angle>
         <Angle smirks="[#6X3,#7:1]~;@[#8;r:2]~;@[#6X3,#7:3]" angle="108.1782929371 * degree ** 1" k="329.0368535669 * mole ** -1 * radian ** -2 * kilocalorie ** 1" id="a29"></Angle>
         <Angle smirks="[*:1]-[#8X2+1:2]=[*:3]" angle="125.1570722794 * degree ** 1" k="308.4405595435 * mole ** -1 * radian ** -2 * kilocalorie ** 1" id="a30"></Angle>
         <Angle smirks="[*:1]~[#16X4:2]~[*:3]" angle="117.3713508414 * degree ** 1" k="197.5762430878 * mole ** -1 * radian ** -2 * kilocalorie ** 1" id="a31"></Angle>
