@@ -2,6 +2,7 @@
 
 import json
 import os
+import re
 import sys
 import warnings
 from collections import defaultdict
@@ -91,7 +92,7 @@ class Torsions:
                 i, j, k, m = key
                 sage[(i, j, k, m, per)] = (
                     val.magnitude,
-                    v.smirks,
+                    f"{v.smirks}-{fc}",  # tag the smirks with the fc
                 )
 
     def fix_keys(espaloma, sage):
@@ -244,6 +245,9 @@ class Driver:
                 self.print_header(cls)
 
             for k, (v, smirks) in sage.items():
+                # smirks is actually a tagged smirks for torsions to separate
+                # the k values
+                id_key = re.sub(r"-k[123]$", "", smirks)
                 diff = abs(v - espaloma[k])
                 if diff > self.eps:
                     if self.verbose:
@@ -254,7 +258,7 @@ class Driver:
                     # trim periodicity off of torsions, others should be fine
                     ret[smirks].envs.append(list(k)[:4])
                     ret[smirks].sage_value = v
-                    ret[smirks].ident = ids[smirks]
+                    ret[smirks].ident = ids[id_key]
 
         return ret
 
