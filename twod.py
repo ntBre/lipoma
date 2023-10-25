@@ -17,17 +17,15 @@ with warnings.catch_warnings():
     from rdkit.Chem.Draw import MolsToGridImage, rdDepictor, rdMolDraw2D
 
 
-def make_fig(record, title):
+def make_fig(record):
     fig = px.scatter(
         x=record.eqs,
         y=record.fcs,
         title=f"{record.ident} {record.smirks}",
-        labels=title,
         width=800,
         height=600,
     )
     fig.update_layout(xaxis_title="eq", yaxis_title="k")
-    fig.update_traces(marker_line_width=1, name=title)
     return dcc.Graph(figure=fig, id="graph")
 
 
@@ -77,7 +75,7 @@ def previous_button(_):
     global CUR_SMIRK
     if CUR_SMIRK >= 1:
         CUR_SMIRK -= 1
-    return make_fig(RECORDS[SMIRKS[CUR_SMIRK]], TITLE)
+    return make_fig(RECORDS[SMIRKS[CUR_SMIRK]])
 
 
 @callback(
@@ -89,47 +87,18 @@ def next_button(_):
     global CUR_SMIRK
     if CUR_SMIRK < len(SMIRKS) - 1:
         CUR_SMIRK += 1
-    return make_fig(RECORDS[SMIRKS[CUR_SMIRK]], TITLE)
+    return make_fig(RECORDS[SMIRKS[CUR_SMIRK]])
 
 
-def make_radio(k):
-    match k:
-        case "k" | "esp":
-            radio = (
-                dcc.RadioItems(
-                    ["Bonds", "Angles", "Torsions", "Impropers"],
-                    "Bonds",
-                    inline=True,
-                    id="radio",
-                ),
-            )
-        case "eq" | "msm":
-            radio = (
-                dcc.RadioItems(
-                    ["Bonds", "Angles"],
-                    "Bonds",
-                    inline=True,
-                    id="radio",
-                ),
-            )
-    return radio
-
-
-@callback(
-    Output("radio-parent", "children", allow_duplicate=True),
-    Output("graph-container", "children", allow_duplicate=True),
-    Input("radio2", "value"),
-    prevent_initial_call=True,
-)
-def choose_constant(value):
-    global RECORDS, SMIRKS, CUR_SMIRK, TYPE
-    TYPE = value
-    RECORDS = make_records(value)
-    SMIRKS = make_smirks(RECORDS)
-    CUR_SMIRK = 0
-    fig = make_fig(SMIRKS[CUR_SMIRK], RECORDS[SMIRKS[CUR_SMIRK]], TITLE)
-    radio = make_radio(value)
-    return radio, fig
+def make_radio():
+    return (
+        dcc.RadioItems(
+            ["Bonds", "Angles"],
+            "Bonds",
+            inline=True,
+            id="radio",
+        ),
+    )
 
 
 @callback(
@@ -139,22 +108,21 @@ def choose_constant(value):
     prevent_initial_call=True,
 )
 def choose_data(value):
-    global RECORDS, SMIRKS, CUR_SMIRK, TYPE, DIR, TITLE
+    global RECORDS, SMIRKS, CUR_SMIRK, DIR, TYPE
     match value:
         case "esp":
-            TITLE = "Espaloma"
             DIR = "data/industry"
         case "msm":
-            TITLE = "MSM"
             DIR = "data/msm"
         case e:
             raise ValueError(e)
 
+    TYPE = value
     RECORDS = make_records(TYPE)
     SMIRKS = make_smirks(RECORDS)
     CUR_SMIRK = 0
-    fig = make_fig(SMIRKS[CUR_SMIRK], RECORDS[SMIRKS[CUR_SMIRK]], TITLE)
-    radio = make_radio(value)
+    fig = make_fig(RECORDS[SMIRKS[CUR_SMIRK]])
+    radio = make_radio()
     return radio, fig
 
 
@@ -177,7 +145,7 @@ def choose_parameter(value):
     RECORDS = make_records(TYPE, param)
     SMIRKS = make_smirks(RECORDS)
     CUR_SMIRK = 0
-    return make_fig(SMIRKS[CUR_SMIRK], RECORDS[SMIRKS[CUR_SMIRK]], TITLE)
+    return make_fig(RECORDS[SMIRKS[CUR_SMIRK]])
 
 
 # pasted from benchmarking/parse_hist
@@ -222,9 +190,15 @@ class Record:
         return Record([], [], [], [], smirks, ident)
 
 
-def make_records():
-    bk = Records.from_file("data/msm/bonds_dedup.json")
-    be = Records.from_file("data/msm/bonds_eq.json")
+def make_records(method, param="bonds"):
+    match method:
+        case "esp":
+            dir_ = "data/industry"
+        case "msm":
+            dir_ = "data/msm"
+    base = f"{dir_}/{param}"
+    bk = Records.from_file(f"{base}_dedup.json")
+    be = Records.from_file(f"{base}_eq.json")
 
     # a Records is a dict of smirks -> Record and a Record contains three
     # parallel arrays I'm interested in: molecules, espaloma_values, and envs.
@@ -248,10 +222,9 @@ def make_records():
     return rets
 
 
-TITLE = "Espaloma"
 DIR = "data/industry"
-TYPE = "k"
-RECORDS = make_records()
+TYPE = "msm"
+RECORDS = make_records(TYPE)
 SMIRKS = make_smirks(RECORDS)
 CUR_SMIRK = 0
 
@@ -262,20 +235,14 @@ colors = {"background": "white", "text": "black"}
 app.layout = html.Div(
     style={"backgroundColor": colors["background"]},
     children=[
-        dcc.RadioItems(["esp", "msm"], "esp", inline=True, id="radio3"),
-        dcc.RadioItems(["k", "eq"], "k", inline=True, id="radio2"),
-        html.Div(make_radio("k"), id="radio-parent"),
+        dcc.RadioItems(["msm", "esp"], TYPE, inline=True, id="radio3"),
+        html.Div(make_radio(), id="radio-parent"),
         html.Button("Previous", id="previous", n_clicks=0),
         html.Button("Next", id="next", n_clicks=0),
         html.Div(
             [
                 html.Div(
-                    [
-                        make_fig(
-                            RECORDS[SMIRKS[CUR_SMIRK]],
-                            "scatter",
-                        )
-                    ],
+                    [make_fig(RECORDS[SMIRKS[CUR_SMIRK]])],
                     id="graph-container",
                     style=dict(display="inline-block"),
                 ),
