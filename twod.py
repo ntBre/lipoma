@@ -45,9 +45,6 @@ def draw_rdkit(mol, smirks, matches):
     )
 
 
-MAX = 100
-
-
 @callback(Output("click-output", "children"), Input("graph", "clickData"))
 def display_click_data(clickData):
     if clickData:
@@ -91,40 +88,18 @@ def next_button(_):
     return make_fig(RECORDS[SMIRKS[CUR_SMIRK]])
 
 
-def make_radio():
-    return (
-        dcc.RadioItems(
-            ["Bonds", "Angles"],
-            "Bonds",
-            inline=True,
-            id="radio",
-        ),
-    )
-
-
 @callback(
-    Output("radio-parent", "children", allow_duplicate=True),
     Output("graph-container", "children", allow_duplicate=True),
     Input("radio3", "value"),
     prevent_initial_call=True,
 )
 def choose_data(value):
-    global RECORDS, SMIRKS, CUR_SMIRK, DIR, TYPE
-    match value:
-        case "esp":
-            DIR = "data/industry"
-        case "msm":
-            DIR = "data/msm"
-        case e:
-            raise ValueError(e)
-
+    global RECORDS, SMIRKS, CUR_SMIRK, TYPE
     TYPE = value
     RECORDS = make_records(TYPE)
     SMIRKS = make_smirks(RECORDS)
-    CUR_SMIRK = 0
     fig = make_fig(RECORDS[SMIRKS[CUR_SMIRK]])
-    radio = make_radio()
-    return radio, fig
+    return fig
 
 
 @callback(
@@ -139,10 +114,8 @@ def choose_parameter(value):
             param = "bonds"
         case "Angles":
             param = "angles"
-        case "Torsions":
-            param = "torsions"
-        case "Impropers":
-            param = "impropers"
+        case e:
+            raise ValueError(f"choose_parameter got {e}")
     RECORDS = make_records(TYPE, param)
     SMIRKS = make_smirks(RECORDS)
     CUR_SMIRK = 0
@@ -224,7 +197,6 @@ def make_records(method, param="bonds"):
     return rets
 
 
-DIR = "data/industry"
 TYPE = "msm"
 RECORDS = make_records(TYPE)
 SMIRKS = make_smirks(RECORDS)
@@ -238,7 +210,7 @@ app.layout = html.Div(
     style={"backgroundColor": colors["background"]},
     children=[
         dcc.RadioItems(["msm", "esp"], TYPE, inline=True, id="radio3"),
-        html.Div(make_radio(), id="radio-parent"),
+        dcc.RadioItems(["Bonds", "Angles"], "Bonds", inline=True, id="radio"),
         html.Button("Previous", id="previous", n_clicks=0),
         html.Button("Next", id="next", n_clicks=0),
         html.Div(
@@ -261,7 +233,6 @@ app.layout = html.Div(
             ],
             style=dict(display="flex"),
         ),
-        html.Div([], id="radio-output"),
     ],
 )
 
