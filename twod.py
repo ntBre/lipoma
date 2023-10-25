@@ -4,6 +4,7 @@ import base64
 import re
 import warnings
 from dataclasses import dataclass
+from functools import cache
 from typing import List, Tuple
 
 from query import Records
@@ -190,6 +191,7 @@ class Record:
         return Record([], [], [], [], smirks, ident)
 
 
+@cache
 def make_records(method, param="bonds"):
     match method:
         case "esp":
