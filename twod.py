@@ -7,6 +7,9 @@ from dataclasses import dataclass
 from functools import cache
 from typing import List, Tuple
 
+import numpy as np
+from sklearn.cluster import KMeans as model
+
 from query import Records
 
 with warnings.catch_warnings():
@@ -18,13 +21,30 @@ with warnings.catch_warnings():
     from rdkit.Chem.Draw import MolsToGridImage, rdDepictor, rdMolDraw2D
 
 
-def make_fig(record):
+def unit(vec):
+    v = np.array(vec)
+    return v / np.linalg.norm(v)
+
+
+def make_fig(record, nclusters):
+    mat = np.column_stack((unit(record.eqs), unit(record.fcs)))
+    # kmeans seems to cluster too simply to be of much use.
+    # AffinityPropagation, on the other hand, yields too many clusters to be of
+    # much use. it's also quite slow to run. I skipped Mean-shift because it
+    # has similar characteristics to AffinityPropagation. SpectralClustering is
+    # nice because it finally gives non-vertical splits, but it becomes
+    # intractable above ~3 clusters. AgglomerativeClustering with the Ward
+    # linkage looks the same as kmeans but runs much slower. OPTICS produces
+    # too many clusters again. KMeans it is
+
+    kmeans = model(n_clusters=nclusters, n_init="auto").fit(mat)
     fig = px.scatter(
         x=record.eqs,
         y=record.fcs,
         title=f"{record.ident} {record.smirks}",
         width=800,
         height=600,
+        color=kmeans.labels_.astype(str),  # for discrete types
     )
     fig.update_layout(xaxis_title="eq", yaxis_title="k")
     return dcc.Graph(figure=fig, id="graph")
@@ -73,7 +93,7 @@ def previous_button(_):
     global CUR_SMIRK
     if CUR_SMIRK >= 1:
         CUR_SMIRK -= 1
-    return make_fig(RECORDS[SMIRKS[CUR_SMIRK]])
+    return make_fig(RECORDS[SMIRKS[CUR_SMIRK]], NCLUSTERS)
 
 
 @callback(
@@ -85,7 +105,19 @@ def next_button(_):
     global CUR_SMIRK
     if CUR_SMIRK < len(SMIRKS) - 1:
         CUR_SMIRK += 1
-    return make_fig(RECORDS[SMIRKS[CUR_SMIRK]])
+    return make_fig(RECORDS[SMIRKS[CUR_SMIRK]], NCLUSTERS)
+
+
+@callback(
+    Output("graph-container", "children", allow_duplicate=True),
+    Input("clusters", "value"),
+    prevent_initial_call=True,
+)
+def choose_clusters(value):
+    global RECORDS, SMIRKS, CUR_SMIRK, TYPE, NCLUSTERS
+    NCLUSTERS = value
+    fig = make_fig(RECORDS[SMIRKS[CUR_SMIRK]], NCLUSTERS)
+    return fig
 
 
 @callback(
@@ -98,7 +130,7 @@ def choose_data(value):
     TYPE = value
     RECORDS = make_records(TYPE)
     SMIRKS = make_smirks(RECORDS)
-    fig = make_fig(RECORDS[SMIRKS[CUR_SMIRK]])
+    fig = make_fig(RECORDS[SMIRKS[CUR_SMIRK]], NCLUSTERS)
     return fig
 
 
@@ -119,7 +151,7 @@ def choose_parameter(value):
     RECORDS = make_records(TYPE, param)
     SMIRKS = make_smirks(RECORDS)
     CUR_SMIRK = 0
-    return make_fig(RECORDS[SMIRKS[CUR_SMIRK]])
+    return make_fig(RECORDS[SMIRKS[CUR_SMIRK]], NCLUSTERS)
 
 
 # pasted from benchmarking/parse_hist
@@ -201,6 +233,7 @@ TYPE = "msm"
 RECORDS = make_records(TYPE)
 SMIRKS = make_smirks(RECORDS)
 CUR_SMIRK = 0
+NCLUSTERS = 1
 
 app = Dash(__name__)
 
@@ -213,10 +246,11 @@ app.layout = html.Div(
         dcc.RadioItems(["Bonds", "Angles"], "Bonds", inline=True, id="radio"),
         html.Button("Previous", id="previous", n_clicks=0),
         html.Button("Next", id="next", n_clicks=0),
+        dcc.Slider(1, 10, 1, value=NCLUSTERS, id="clusters"),
         html.Div(
             [
                 html.Div(
-                    [make_fig(RECORDS[SMIRKS[CUR_SMIRK]])],
+                    [make_fig(RECORDS[SMIRKS[CUR_SMIRK]], NCLUSTERS)],
                     id="graph-container",
                     style=dict(display="inline-block"),
                 ),
