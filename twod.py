@@ -69,11 +69,25 @@ def draw_rdkit(mol, smirks, matches):
     )
 
 
+def position_if(lst, f):
+    "Return the first index in `lst` satisfying `f`"
+    return next(i for i, x in enumerate(lst) if f(x))
+
+
+def close(x, y, eps=1e-16):
+    return abs(x - y) < eps
+
+
 @callback(Output("click-output", "children"), Input("graph", "clickData"))
 def display_click_data(clickData):
     if clickData:
-        p = clickData["points"][0]["pointNumber"]
+        data = clickData["points"][0]
+        dx, dy = data["x"], data["y"]
         record = RECORDS[SMIRKS[CUR_SMIRK]]
+        find = zip(record.eqs, record.fcs)
+        # have to search directly because the multiple curves when clustering
+        # ruins using the data index directly
+        p = position_if(find, lambda px: close(px[0], dx) and close(px[1], dy))
         mol, env = record.mols[p], record.envs[p]
         pics = []
         mol = Molecule.from_mapped_smiles(mol, allow_undefined_stereo=True)
