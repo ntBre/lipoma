@@ -37,14 +37,18 @@ def make_fig(record, nclusters):
     # linkage looks the same as kmeans but runs much slower. OPTICS produces
     # too many clusters again. KMeans it is
 
-    kmeans = model(n_clusters=nclusters, n_init="auto").fit(mat)
+    if nclusters > 1 and len(mat) > nclusters:
+        kmeans = model(n_clusters=nclusters, n_init="auto").fit(mat)
+        colors = kmeans.labels_.astype(str)
+    else:
+        colors = ["black"] * len(mat)
     fig = px.scatter(
         x=record.eqs,
         y=record.fcs,
         title=f"{record.ident} {record.smirks}",
         width=800,
         height=600,
-        color=kmeans.labels_.astype(str),  # for discrete types
+        color=colors,  # for discrete types
     )
     fig.update_layout(xaxis_title="eq", yaxis_title="k")
     return dcc.Graph(figure=fig, id="graph")
