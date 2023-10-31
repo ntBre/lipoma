@@ -5,16 +5,28 @@ ifdef PLOT
 endif
 
 parse_query = \
-    python parse_query.py -i data/industry/$1_dedup.dat \
-			  -o output/$1/industry \
+    python parse_query.py -i data/$1/$2.dat \
+			  -o output/$2/$1 \
 		          $(query_flags)
+
+parse_query_i = $(call parse_query,industry,$1)
+parse_query_m = $(call parse_query,msm,$1)
 
 all: msm industry industry-eq
 
 parse:
-	$(call parse_query,bonds)
-	$(call parse_query,angles)
-	$(call parse_query,torsions)
+	$(call parse_query_i,bonds_dedup)
+	$(call parse_query_i,angles_dedup)
+	$(call parse_query_i,torsions_dedup)
+	$(call parse_query_i,impropers_dedup)
+
+	$(call parse_query_i,bonds_eq)
+	$(call parse_query_i,angles_eq)
+
+	$(call parse_query_m,bonds_dedup)
+	$(call parse_query_m,angles_dedup)
+	$(call parse_query_m,bonds_eq)
+	$(call parse_query_m,angles_eq)
 
 # industry force constants
 json := $(addprefix data/industry/,bonds_dedup.json angles_dedup.json	\
