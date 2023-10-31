@@ -1,6 +1,7 @@
 # read the results produced by query.py and generate useful graphics
 
 import os
+import re
 import shutil
 from io import StringIO
 
@@ -27,10 +28,12 @@ def main(infile, outdir, plot):
     bh = ff.get_parameter_handler("Bonds")
     ah = ff.get_parameter_handler("Angles")
     th = ff.get_parameter_handler("ProperTorsions")
+    ih = ff.get_parameter_handler("ImproperTorsions")
 
     pmap = {h.smirks: h.id for h in bh}
     pmap.update({h.smirks: h.id for h in ah})
     pmap.update({h.smirks: h.id for h in th})
+    pmap.update({h.smirks: h.id for h in ih})
 
     buf = StringIO()
     averages = []
@@ -61,9 +64,14 @@ def main(infile, outdir, plot):
                 ax.axvline(x=sage, color="green", label="Sage")
                 ax.axvline(x=esp_avg, color="orange", label="Espaloma Avg.")
                 fig = ax.get_figure()
-                pid = pmap[smirks]
+                id_key = re.sub(r"-k[123]$", "", smirks)
+                pid = pmap[id_key]
+                if id_key != smirks:
+                    title = f"{pid} {smirks[-2:]}"  # append k[123] to pid
+                else:
+                    title = pid
                 plt.legend()
-                plt.title(f"{pid}: {smirks}\navg = {esp_avg}")
+                plt.title(f"{title}: {smirks}\navg = {esp_avg}")
                 fig.savefig(f"{outdir}/{i:05d}.png", dpi=300)
                 plt.close()
 
