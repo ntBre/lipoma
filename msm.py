@@ -19,7 +19,7 @@ from qubekit.utils.exceptions import StereoChemistryError
 from tqdm import tqdm
 from vflib.utils import Timer
 
-from query import Records
+from query import Records, print_summary
 
 
 def dot(v, w):
@@ -239,6 +239,7 @@ def main(forcefield, dataset, out_dir):
     records = msm.compute_msm(forcefield)
 
     for param, record in records.items():
+        print_summary(record, f"{out_dir}/{param}.dat")
         record.to_json(f"{out_dir}/{param}.json")
 
 
