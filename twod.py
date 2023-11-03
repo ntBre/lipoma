@@ -16,6 +16,8 @@ with warnings.catch_warnings():
     warnings.filterwarnings("ignore")
 
     import plotly.express as px
+    from chemper.mol_toolkits import mol_toolkit
+    from chemper.smirksify import SMIRKSifier, print_smirks
     from dash import Dash, Input, Output, callback, dcc, html
     from openff.toolkit import Molecule
     from rdkit.Chem.Draw import MolsToGridImage, rdDepictor, rdMolDraw2D
@@ -106,7 +108,29 @@ def display_click_data(clickData):
 def display_select_data(selectData):
     if selectData:
         data = [x["pointNumber"] for x in selectData["points"]]
-        return f"{data}"
+        record = RECORDS[SMIRKS[CUR_SMIRK]]
+        mols = [s for i, s in enumerate(record.mols) if i in data]
+        print(mols[:5])
+        envs_in = [env for i, env in enumerate(record.envs) if i in data]
+        print(envs_in[:5])
+        x = []
+        y = []
+        for i, env in enumerate(record.envs):
+            if i in data:
+                x.append([env])
+                y.append([])
+            else:
+                x.append([])
+                y.append([env])
+        atom_index_list = [("x", x), ("y", y)]
+        print("calling smirksifier")
+        graph = SMIRKSifier(mols, atom_index_list, verbose=True, max_layers=1)
+        print("done with that")
+        print("the graph", graph)
+        red = graph.reduce(max_its=10)
+        print("the red", red)
+        print_smirks(red)
+        return f"{None}"
 
 
 @callback(
