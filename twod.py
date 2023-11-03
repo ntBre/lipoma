@@ -102,6 +102,13 @@ def display_click_data(clickData):
         return pics
 
 
+@callback(Output("select-output", "children"), Input("graph", "selectedData"))
+def display_select_data(selectData):
+    if selectData:
+        data = [x["pointNumber"] for x in selectData["points"]]
+        return f"{data}"
+
+
 @callback(
     Output("graph-container", "children", allow_duplicate=True),
     Input("previous", "n_clicks"),
@@ -284,6 +291,10 @@ app.layout = html.Div(
                 ),
             ],
             style=dict(display="flex"),
+        ),
+        html.Div(
+            [],
+            id="select-output",
         ),
     ],
 )
