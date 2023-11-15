@@ -50,3 +50,12 @@ $(msm): msm.py
 	python msm.py -o data/msm
 
 msm: $(msm)
+
+forcefields/full.offxml: apply.py
+	python apply.py							\
+		--output $@						\
+		--angles-eq output/angles_eq/industry/output.dat	\
+		--bonds-eq output/bonds_eq/industry/output.dat		\
+		--torsions output/torsions_dedup/industry/output.dat	\
+		--angles output/angles_dedup/industry/output.dat	\
+		--bonds output/bonds_dedup/industry/output.dat
