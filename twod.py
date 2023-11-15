@@ -8,7 +8,7 @@ from functools import cache
 from typing import List, Tuple
 
 import numpy as np
-from sklearn.cluster import KMeans as model
+from sklearn.mixture import GaussianMixture as model
 
 from query import Records
 
@@ -40,8 +40,9 @@ def make_fig(record, nclusters):
     # too many clusters again. KMeans it is
 
     if nclusters > 1 and len(mat) > nclusters:
-        kmeans = model(n_clusters=nclusters, n_init="auto").fit(mat)
-        colors = kmeans.labels_.astype(str)
+        m = model(n_components=nclusters).fit(mat)
+        kmeans = m.predict(mat)
+        colors = kmeans.astype(str)
     else:
         colors = ["black"] * len(mat)
     fig = px.scatter(
