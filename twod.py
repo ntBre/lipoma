@@ -116,8 +116,12 @@ def display_select_data(selectData):
             if i in data
         ]
         envs = [[env] for i, env in enumerate(record.envs) if i in data]
-        graph = ClusterGraph(mols, smirks_atoms_lists=envs, layers=1)
-        return f"{graph.as_smirks(compress=True)}"
+        try:
+            graph = ClusterGraph(mols, smirks_atoms_lists=envs, layers='all')
+        except Exception as e:
+            return f"{e}"
+        else:
+            return f"{graph.as_smirks(compress=True)}"
 
 
 @callback(
