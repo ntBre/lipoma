@@ -28,7 +28,7 @@ fb-deps := smiles-to-exclude.dat smarts-to-exclude.dat $(opt) $(td)	\
 	   opt-smirks.json td-smirks.json $(init)
 
 fb-ready fb-fit/optimize.in fb-fit/forcefield/force-field.offxml: $(fb-deps)
-	rm -r fb-fit/targets
+	-rm -r fb-fit/targets
 	mkdir -p fb-fit/targets
 	create_fb_inputs.py                                     \
 	--tag                       "fb-fit"                    \
@@ -36,7 +36,7 @@ fb-ready fb-fit/optimize.in fb-fit/forcefield/force-field.offxml: $(fb-deps)
 	--torsion-dataset           $(td)			\
 	--valence-to-optimize       opt-smirks.json		\
 	--torsions-to-optimize      td-smirks.json		\
-	--forcefield                msm.offxml                  \
+	--forcefield                $(init)			\
 	--smiles-to-exclude         smiles-to-exclude.dat	\
 	--smarts-to-exclude         smarts-to-exclude.dat	\
 	--max-iterations            100                         \
@@ -47,12 +47,12 @@ fb-ready fb-fit/optimize.in fb-fit/forcefield/force-field.offxml: $(fb-deps)
 
 # pack up the generated files for copying to a supercomputer
 fb-fit/targets.tar.gz: fb-ready
-	rm $@
+	-rm $@
 	cd fb-fit; tar cfz targets.tar.gz targets
 
 deps := $(addprefix fb-fit/,forcefield/force-field.offxml optimize.in	\
 targets.tar.gz)
 out.tar.gz: fb-ready $(deps)
-	rm $@
+	-rm $@
 	tar cfz $@ $(deps)
 
