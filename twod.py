@@ -5,7 +5,6 @@ import re
 import warnings
 from dataclasses import dataclass
 from functools import cache
-from io import StringIO
 from typing import List, Tuple
 
 import numpy as np
@@ -17,8 +16,6 @@ with warnings.catch_warnings():
     warnings.filterwarnings("ignore")
 
     import plotly.express as px
-    from chemper.mol_toolkits import mol_toolkit
-    from chemper.smirksify import SMIRKSifier, print_smirks
     from dash import Dash, Input, Output, callback, dcc, html
     from openff.toolkit import Molecule
     from rdkit.Chem.Draw import MolsToGridImage, rdDepictor, rdMolDraw2D
@@ -101,31 +98,7 @@ def display_click_data(clickData):
 def display_select_data(selectData):
     if selectData:
         data = [x["pointNumber"] for x in selectData["points"]]
-        record = RECORDS[SMIRKS[CUR_SMIRK]]
-        envs = [[env] for env in record.envs]
-        # new stuff
-        mols = [mol_toolkit.Mol.from_mapped_smiles(s) for s in record.mols]
-        work = dict(inc=[], out=[])
-
-        for i, mol in enumerate(mols):
-            if i in data:
-                work["inc"].append(envs[i])
-                work["out"].append([])
-            else:
-                work["out"].append(envs[i])
-                work["inc"].append([])
-
-        work = list(work.items())
-        buf = StringIO()
-        try:
-            fier = SMIRKSifier(mols, work)
-        except Exception as e:
-            return f"{e}"
-        else:
-            print_smirks(fier.current_smirks, output=buf)
-            fier.reduce()
-            print_smirks(fier.current_smirks, output=buf)
-            return buf.getvalue()
+        return f"{data}"
 
 
 @callback(
