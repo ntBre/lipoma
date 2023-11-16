@@ -6,6 +6,7 @@ import warnings
 from collections import defaultdict
 from dataclasses import dataclass
 from functools import cache
+from io import StringIO
 from typing import List, Tuple
 
 import numpy as np
@@ -37,34 +38,6 @@ def make_fig(record, nclusters):
         m = model(n_components=nclusters).fit(mat)
         kmeans = m.predict(mat)
         colors = kmeans.astype(str)
-        envs = [[env] for i, env in enumerate(record.envs)]
-        mols = [
-            mol_toolkit.Mol.from_mapped_smiles(s)
-            for i, s in enumerate(record.mols)
-        ]
-        ucolors = set(colors)
-        work = {c: [] for c in ucolors}
-
-        print(record.mols[:5])
-        print(envs[:5])
-        print([mol.get_smiles() for mol in mols[:5]])
-        for i, mol in enumerate(mols):
-            work[colors[i]].append(envs[i])
-            for c in ucolors:
-                if c != colors[i]:
-                    work[c].append([])
-
-        work = list(work.items())
-        try:
-            print("clicked")
-            fier = SMIRKSifier(mols, work)
-        except Exception as e:
-            print(e)
-        else:
-            print("running")
-            print_smirks(fier.current_smirks)
-            fier.reduce()
-            print_smirks(fier.current_smirks)
     else:
         colors = ["black"] * len(mat)
     fig = px.scatter(
@@ -132,18 +105,30 @@ def display_select_data(selectData):
     if selectData:
         data = [x["pointNumber"] for x in selectData["points"]]
         record = RECORDS[SMIRKS[CUR_SMIRK]]
-        mols = [
-            mol_toolkit.Mol.from_smiles(s)
-            for i, s in enumerate(record.mols)
-            if i in data
-        ]
-        envs = [[env] for i, env in enumerate(record.envs) if i in data]
+        envs = [[env] for env in record.envs]
+        # new stuff
+        mols = [mol_toolkit.Mol.from_mapped_smiles(s) for s in record.mols]
+        work = dict(inc=[], out=[])
+
+        for i, mol in enumerate(mols):
+            if i in data:
+                work["inc"].append(envs[i])
+                work["out"].append([])
+            else:
+                work["out"].append(envs[i])
+                work["inc"].append([])
+
+        work = list(work.items())
+        buf = StringIO()
         try:
-            graph = ClusterGraph(mols, smirks_atoms_lists=envs, layers="all")
+            fier = SMIRKSifier(mols, work)
         except Exception as e:
             return f"{e}"
         else:
-            return f"{graph.as_smirks(compress=True)}"
+            print_smirks(fier.current_smirks, output=buf)
+            fier.reduce()
+            print_smirks(fier.current_smirks, output=buf)
+            return buf.getvalue()
 
 
 @callback(
