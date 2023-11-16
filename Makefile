@@ -44,6 +44,23 @@ $(eq): query.py
 
 industry-eq: $(eq)
 
+# espaloma force constants on opt data
+esp_fc := $(addprefix data/esp/,bonds_dedup.json angles_dedup.json	\
+				   torsions_dedup.json impropers_dedup.json)
+$(esp_fc): query.py
+	python query.py --dataset datasets/filtered-opt.json \
+			--out-dir data/esp
+esp: $(esp_fc)
+
+# espaloma equilibrium values on opt data
+esp_eq := $(addprefix data/esp/,bonds_eq.json angles_eq.json)
+$(esp_eq): query.py
+	python query.py --dataset datasets/filtered-opt.json \
+			--out-dir data/esp --force-constants
+esp-eq: $(esp_eq)
+
+# all msm values for opt data
+
 msm := $(addprefix data/msm/,angles_dedup.json angles_eq.json bonds_dedup.json	\
 			     bonds_eq.json)
 $(msm): msm.py
