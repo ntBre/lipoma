@@ -3,6 +3,7 @@
 import base64
 import re
 import warnings
+from collections import defaultdict
 from dataclasses import dataclass
 from functools import cache
 from typing import List, Tuple
@@ -18,6 +19,8 @@ with warnings.catch_warnings():
     import plotly.express as px
     from chemper.graphs.cluster_graph import ClusterGraph
     from chemper.mol_toolkits import mol_toolkit
+    from chemper.mol_toolkits.mol_toolkit import Mol
+    from chemper.smirksify import SMIRKSifier, print_smirks
     from dash import Dash, Input, Output, callback, dcc, html
     from openff.toolkit import Molecule
     from rdkit.Chem.Draw import MolsToGridImage, rdDepictor, rdMolDraw2D
@@ -30,19 +33,38 @@ def unit(vec):
 
 def make_fig(record, nclusters):
     mat = np.column_stack((unit(record.eqs), unit(record.fcs)))
-    # kmeans seems to cluster too simply to be of much use.
-    # AffinityPropagation, on the other hand, yields too many clusters to be of
-    # much use. it's also quite slow to run. I skipped Mean-shift because it
-    # has similar characteristics to AffinityPropagation. SpectralClustering is
-    # nice because it finally gives non-vertical splits, but it becomes
-    # intractable above ~3 clusters. AgglomerativeClustering with the Ward
-    # linkage looks the same as kmeans but runs much slower. OPTICS produces
-    # too many clusters again. KMeans it is
-
     if nclusters > 1 and len(mat) > nclusters:
         m = model(n_components=nclusters).fit(mat)
         kmeans = m.predict(mat)
         colors = kmeans.astype(str)
+        envs = [[env] for i, env in enumerate(record.envs)]
+        mols = [
+            mol_toolkit.Mol.from_mapped_smiles(s)
+            for i, s in enumerate(record.mols)
+        ]
+        ucolors = set(colors)
+        work = {c: [] for c in ucolors}
+
+        print(record.mols[:5])
+        print(envs[:5])
+        print([mol.get_smiles() for mol in mols[:5]])
+        for i, mol in enumerate(mols):
+            work[colors[i]].append(envs[i])
+            for c in ucolors:
+                if c != colors[i]:
+                    work[c].append([])
+
+        work = list(work.items())
+        try:
+            print("clicked")
+            fier = SMIRKSifier(mols, work)
+        except Exception as e:
+            print(e)
+        else:
+            print("running")
+            print_smirks(fier.current_smirks)
+            fier.reduce()
+            print_smirks(fier.current_smirks)
     else:
         colors = ["black"] * len(mat)
     fig = px.scatter(
@@ -117,7 +139,7 @@ def display_select_data(selectData):
         ]
         envs = [[env] for i, env in enumerate(record.envs) if i in data]
         try:
-            graph = ClusterGraph(mols, smirks_atoms_lists=envs, layers='all')
+            graph = ClusterGraph(mols, smirks_atoms_lists=envs, layers="all")
         except Exception as e:
             return f"{e}"
         else:
