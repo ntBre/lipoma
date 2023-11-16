@@ -1,5 +1,3 @@
-from collections import defaultdict
-
 import numpy as np
 from chemper.mol_toolkits import mol_toolkit
 from chemper.smirksify import SMIRKSifier, print_smirks
@@ -7,6 +5,7 @@ from sklearn.mixture import GaussianMixture as model
 from tqdm import tqdm
 
 from twod import make_records, make_smirks
+from utils import unit
 
 RECORDS = make_records("msm")
 TYPE = "msm"
@@ -14,11 +13,6 @@ RECORDS = make_records(TYPE)
 SMIRKS = make_smirks(RECORDS)
 CUR_SMIRK = 0
 NCLUSTERS = 1
-
-
-def unit(vec):
-    v = np.array(vec)
-    return v / np.linalg.norm(v)
 
 
 def make_fig(record, nclusters):

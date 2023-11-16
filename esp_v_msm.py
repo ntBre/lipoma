@@ -34,7 +34,15 @@ def make_fig(record, nclusters):
         height=600,
         color=colors,  # for discrete types
     )
-    fig.update_layout(xaxis_title="eq", yaxis_title="k")
+    # diagonal line if they agreed
+    fig.add_shape(
+        type="line",
+        x0=min(record.eqs),
+        x1=max(record.eqs),
+        y0=min(record.fcs),
+        y1=max(record.fcs),
+    )
+    fig.update_layout(xaxis_title="msm", yaxis_title="esp")
     return dcc.Graph(figure=fig, id="graph")
 
 
@@ -142,37 +150,37 @@ def choose_parameter(value):
 @cache
 def make_records(method, param="bonds"):
     match method:
-        case "esp":
-            dir_ = "data/esp"
-        case "msm":
-            dir_ = "data/msm"
-    base = f"{dir_}/{param}"
-    bk = Records.from_file(f"{base}_dedup.json")
-    be = Records.from_file(f"{base}_eq.json")
+        case "k":
+            suff = "_dedup"
+        case "eq":
+            suff = "_eq"
+    # k -> espaloma, eq -> msm to reuse structure from twod
+    bk = Records.from_file(f"data/esp/{param}{suff}.json")
+    be = Records.from_file(f"data/msm/{param}{suff}.json")
 
     # a Records is a dict of smirks -> Record and a Record contains three
     # parallel arrays I'm interested in: molecules, espaloma_values, and envs.
 
-    # first make sure they have the same smirks patterns. probably I should
-    # convert to a set to ignore order, but this is working for now
-    assert list(bk.keys()) == list(be.keys())
+    keys = set(bk.keys()) & set(be.keys())
 
     rets = dict()
-    for smirks, record in bk.items():
+    for smirks in keys:
+        record = bk[smirks]
         dk = record.to_dict()
         de = be[smirks].to_dict()
         ret = Record.default(smirks, record.ident)
         for k, v in dk.items():
             mol, env = k
-            ret.eqs.append(de[k])
-            ret.fcs.append(v)
-            ret.mols.append(mol)
-            ret.envs.append(env)
+            if k in de:
+                ret.eqs.append(de[k])
+                ret.fcs.append(v)
+                ret.mols.append(mol)
+                ret.envs.append(env)
         rets[smirks] = ret
     return rets
 
 
-TYPE = "msm"
+TYPE = "k"
 RECORDS = make_records(TYPE)
 SMIRKS = make_smirks(RECORDS)
 CUR_SMIRK = 0
@@ -185,7 +193,8 @@ colors = {"background": "white", "text": "black"}
 app.layout = html.Div(
     style={"backgroundColor": colors["background"]},
     children=[
-        dcc.RadioItems(["msm", "esp"], TYPE, inline=True, id="radio3"),
+        html.H1("Espaloma vs MSM"),
+        dcc.RadioItems(["k", "eq"], TYPE, inline=True, id="radio3"),
         dcc.RadioItems(["Bonds", "Angles"], "Bonds", inline=True, id="radio"),
         html.Button("Previous", id="previous", n_clicks=0),
         html.Button("Next", id="next", n_clicks=0),
@@ -219,4 +228,4 @@ app.layout = html.Div(
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=8060)
+    app.run(debug=True, port=8070)

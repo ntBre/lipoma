@@ -139,6 +139,12 @@ class Record:
     def asdict(self):
         return asdict(self)
 
+    def to_dict(self):
+        return {
+            (m, tuple(e)): v
+            for m, e, v in zip(self.molecules, self.envs, self.espaloma_values)
+        }
+
 
 class Records(defaultdict):
     """Records is a defaultdict of smirks->Record with additional methods for
