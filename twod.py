@@ -3,7 +3,6 @@
 import base64
 import re
 import warnings
-from collections import defaultdict
 from dataclasses import dataclass
 from functools import cache
 from io import StringIO
@@ -18,9 +17,7 @@ with warnings.catch_warnings():
     warnings.filterwarnings("ignore")
 
     import plotly.express as px
-    from chemper.graphs.cluster_graph import ClusterGraph
     from chemper.mol_toolkits import mol_toolkit
-    from chemper.mol_toolkits.mol_toolkit import Mol
     from chemper.smirksify import SMIRKSifier, print_smirks
     from dash import Dash, Input, Output, callback, dcc, html
     from openff.toolkit import Molecule
