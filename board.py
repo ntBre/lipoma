@@ -1,6 +1,7 @@
 import base64
-import re
 import warnings
+
+from utils import draw_rdkit, make_smirks
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore")
@@ -9,7 +10,6 @@ with warnings.catch_warnings():
     import plotly.express as px
     from dash import Dash, Input, Output, callback, dcc, html
     from openff.toolkit import Molecule
-    from rdkit.Chem.Draw import MolsToGridImage, rdDepictor, rdMolDraw2D
 
     from query import Records
 
@@ -35,21 +35,6 @@ def make_fig(smirk, record, title):
     )
     fig.update_traces(marker_line_width=1, name=title)
     return dcc.Graph(figure=fig, id="graph")
-
-
-# adapted from ligand Molecule::to_svg
-def draw_rdkit(mol, smirks, matches):
-    rdmol = mol.to_rdkit()
-    rdDepictor.SetPreferCoordGen(True)
-    rdDepictor.Compute2DCoords(rdmol)
-    rdmol = rdMolDraw2D.PrepareMolForDrawing(rdmol)
-    return MolsToGridImage(
-        [rdmol],
-        useSVG=True,
-        highlightAtomLists=[matches],
-        subImgSize=(300, 300),
-        molsPerRow=1,
-    )
 
 
 MAX = 100
@@ -189,21 +174,6 @@ def choose_parameter(value):
     SMIRKS = make_smirks(RECORDS)
     CUR_SMIRK = 0
     return make_fig(SMIRKS[CUR_SMIRK], RECORDS[SMIRKS[CUR_SMIRK]], TITLE)
-
-
-# pasted from benchmarking/parse_hist
-LABEL = re.compile(r"([bati])(\d+)([a-z]*)")
-
-
-def sort_label(key):
-    t, n, tail = LABEL.match(key).groups()
-    return (t, int(n), tail)
-
-
-def make_smirks(records):
-    pairs = [(smirks, record) for smirks, record in records.items()]
-    pairs = sorted(pairs, key=lambda pair: sort_label(pair[1].ident))
-    return [smirks for smirks, record in pairs]
 
 
 def make_records(typ, param="bonds"):
