@@ -16,7 +16,6 @@ import click
 from tqdm import tqdm
 from vflib import load_dataset
 from vflib.coverage import ParameterType
-from vflib.utils import Timer
 
 from cluster import deduplicate_by
 
@@ -42,16 +41,10 @@ class Cover:
         print("checking coverage with")
         print(f"forcefield = {forcefield}")
 
-        timer = Timer()
-
         ff = ForceField(forcefield, allow_cosmetic_attributes=True)
-
-        timer.say("finished loading collection")
 
         h = ff.get_parameter_handler(parameter_type.value)
         tors_ids = [p.id for p in h.parameters]
-
-        timer.say("finished to_records")
 
         results = defaultdict(int)
         for molecule in tqdm(self.mols, desc="Counting results"):
@@ -59,8 +52,6 @@ class Cover:
             torsions = all_labels[parameter_type.value]
             for torsion in torsions.values():
                 results[torsion.id] += 1
-
-        timer.say("finished counting results")
 
         got = len(results)
         want = len(tors_ids)
@@ -78,8 +69,6 @@ class Cover:
         print("\nmissing ids:")
         for i, (id, smirk) in enumerate(zip(missing_ids, missing_smirks)):
             print(f"{i:5}{id:>7}   {smirk}")
-
-        timer.say("finished")
 
 
 @click.command()
