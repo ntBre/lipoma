@@ -14,11 +14,11 @@ with warnings.catch_warnings():
     warnings.filterwarnings("ignore")
 
     import plotly.express as px
-    from dash import Dash, Input, Output, callback, dcc, html, ctx
+    from dash import Dash, Input, Output, callback, ctx, dcc, exceptions, html
     from openff.toolkit import Molecule
 
 
-def make_fig(record, nclusters):
+def cluster(record, nclusters):
     mat = np.column_stack((unit(record.eqs), unit(record.fcs)))
     if nclusters > 1 and len(mat) > nclusters:
         m = model(n_components=nclusters).fit(mat)
@@ -26,6 +26,12 @@ def make_fig(record, nclusters):
         colors = kmeans.astype(str)
     else:
         colors = ["black"] * len(mat)
+    return colors
+
+
+def make_fig(record, nclusters=None, colors=None):
+    if nclusters is not None:
+        colors = cluster(record, nclusters)
     fig = px.scatter(
         x=record.eqs,
         y=record.fcs,
@@ -82,7 +88,10 @@ def previous_button(_):
 
 
 @callback(
-    Output("graph-container", "children", allow_duplicate=True),
+    [
+        Output("graph-container", "children", allow_duplicate=True),
+        Output("smirks_input", "value", allow_duplicate=True),
+    ],
     Input("next", "n_clicks"),
     prevent_initial_call=True,
 )
@@ -90,7 +99,7 @@ def next_button(_):
     global CUR_SMIRK
     if CUR_SMIRK < len(SMIRKS) - 1:
         CUR_SMIRK += 1
-    return make_fig(RECORDS[SMIRKS[CUR_SMIRK]], NCLUSTERS)
+    return make_fig(cur_record(), NCLUSTERS), SMIRKS[CUR_SMIRK]
 
 
 @callback(
@@ -139,15 +148,29 @@ def choose_parameter(value):
     return make_fig(RECORDS[SMIRKS[CUR_SMIRK]], NCLUSTERS)
 
 
+def cur_record():
+    return RECORDS[SMIRKS[CUR_SMIRK]]
+
+
 @callback(
     Output("graph-container", "children", allow_duplicate=True),
     [Input("submit", "n_clicks"), Input("smirks_input", "value")],
     prevent_initial_call=True,
 )
-def submit_smirks(_, inp):
+def submit_smirks(_, smirks):
     if ctx.triggered_id == "submit":
-        print(f"submitting smirks: {inp}")
-    return make_fig(RECORDS[SMIRKS[CUR_SMIRK]], NCLUSTERS)
+        rec = cur_record()
+        colors = []
+        for m, e in zip(rec.mols, rec.envs):
+            mol = Molecule.from_mapped_smiles(m, allow_undefined_stereo=True)
+            if (env := mol.chemical_environment_matches(smirks)) and (
+                e in env or e[::-1] in env
+            ):
+                colors.append("matched")
+            else:
+                colors.append("unmatched")
+        return make_fig(RECORDS[SMIRKS[CUR_SMIRK]], colors=colors)
+    raise exceptions.PreventUpdate()
 
 
 @cache
@@ -183,6 +206,10 @@ def make_records(method, param="bonds"):
     return rets
 
 
+def make_input(smirks):
+    return dcc.Input(id="smirks_input", value=smirks, style=dict(width="30vw"))
+
+
 TYPE = "msm"
 RECORDS = make_records(TYPE)
 SMIRKS = make_smirks(RECORDS)
@@ -202,7 +229,7 @@ app.layout = html.Div(
         html.Button("Previous", id="previous", n_clicks=0),
         html.Button("Next", id="next", n_clicks=0),
         dcc.Slider(1, 10, 1, value=NCLUSTERS, id="clusters"),
-        dcc.Input(id="smirks_input", value=SMIRKS[CUR_SMIRK]),
+        make_input(SMIRKS[CUR_SMIRK]),
         html.Button("Submit", id="submit", n_clicks=0),
         html.Div(
             [
