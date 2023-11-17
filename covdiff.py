@@ -59,25 +59,38 @@ class Cover:
         # these as separate parameters. maybe we essentially ignore ids
         # generally
 
-        print()
+        print(f"\n  {'id':7}{'Δ':>7}{'end':>7}   smirks")
 
         for i in i1:
-            if i in i2 and s1[i] == s2[i] and r1[i] != r2[i]:
-                # present in both with same smirks
-                smirk = s1[i]
-                print(f"  {i:5}{r2[i] - r1[i]:+5}   {smirk}")
+            if i in i2 and r1[i] != r2[i]:
+                if s1[i] == s2[i]:
+                    smirk = s1[i]
+                else:
+                    smirk = f"{s1[i]} -> {s2[i]}"
+                print(f"  {i:7}{r2[i] - r1[i]:+7}{r2[i]:7}   {smirk}")
+            elif i in i2 and r1[i] == r2[i]:
+                pass  # we don't care about these
             elif i not in i2:
                 # next easiest case, only present in i1
-                print(f"- {i:5}{-r1[i]:+5}   {smirk}")
+                print(f"- {i:7}{-r1[i]:+7}{r1[i]:7}   {smirk}")
+            else:
+                raise ValueError()
 
         for i in i2:
             if i not in i1:
                 # third easiest case, only present in i2
                 smirk = s2[i]
-                print(f"+ {i:5}{r2[i]:+5}   {smirk}")
+                print(f"+ {i:7}{r2[i]:+7}{r2[i]:7}   {smirk}")
+            elif i in i1:
+                pass  # already handled these above
+            else:
+                raise ValueError()
 
         # this is a decent start, but it might be more interesting to see where
-        # the matches went, not just the change
+        # the matches went, not just the change. for that I think I'll have to
+        # use chemical_environment_matches on everything and keep track of
+        # indices. and then how would you visualize this? I guess it would be
+        # in counts like b4 -> b7 123, for example
 
     # adapted from vflib
     def check_one(
