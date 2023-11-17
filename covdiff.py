@@ -15,7 +15,6 @@ from collections import defaultdict
 import click
 from tqdm import tqdm
 from vflib import load_dataset
-from vflib.coverage import ParameterType
 
 from cluster import deduplicate_by
 
@@ -29,43 +28,90 @@ logging.getLogger("openff").setLevel(logging.ERROR)
 class Cover:
     def __init__(self, dataset: str):
         dataset = load_dataset(dataset)
-        self.mols = deduplicate_by(
+        mols = deduplicate_by(
             tqdm(dataset.to_molecules(), desc="Converting molecules"),
             Molecule.to_inchikey,
         )
+        # this only takes 1 second, so very minor savings. not a big deal to
+        # omit this if we ever need the molecules themselves
+        self.mols = [
+            m.to_topology()
+            for m in tqdm(mols, desc="Converting to topologies")
+        ]
+
+    def check(self, ff1, ff2):
+        r1, i1, s1 = self.check_one(ff1)
+        r2, i2, s2 = self.check_one(ff2)
+
+        # there are several cases to consider when reporting the results:
+        # 1. id is present in both -> check if count differs
+        # 2. id present only in r1
+        # 3. id present only in r2
+        # 4. the ids are the same but smirks differ
+        #
+        # iterating over one of them makes it difficult to identify ids only in
+        # the other set, especially if we want to keep the order recognizable
+        #
+        # I really want to produce something that looks like a diff, with
+        # insertions and deletions shown in the right order
+
+        for i in i1:
+            if i in i2 and r1[i] != r2[i]:
+                # TODO here's another place something could go wrong - the
+                # parameter smirks are different. leave an assert for now and
+                # think about the real fix later
+                assert s1[i] == s2[i]
+                smirk = s1[i]
+                print(f"{i:5}{r1[i]:5}{r2[i]:5}   {smirk}")
 
     # adapted from vflib
-    def check(self, forcefield, parameter_type: ParameterType):
-        """Check parameter coverage in `forcefield` using `dataset`."""
+    def check_one(
+        self, forcefield: str
+    ) -> tuple[dict[str, int], list[str], dict[str, str]]:
+        """Check parameter coverage in `forcefield` using `self.mols`.
+
+        Returns the main results dict mapping parameter ids to coverage counts,
+        a list of ids in `forcefield`, and a map of parameter id to parameter
+        smirks for printing.
+
+        """
 
         print("checking coverage with")
         print(f"forcefield = {forcefield}")
 
         ff = ForceField(forcefield, allow_cosmetic_attributes=True)
 
-        h = ff.get_parameter_handler(parameter_type.value)
-        tors_ids = [p.id for p in h.parameters]
+        ptypes = ["Bonds", "Angles", "ProperTorsions", "ImproperTorsions"]
+
+        ids = []
+        smirks = {}
+        for ptype in ptypes:
+            h = ff.get_parameter_handler(ptype)
+            ids.extend((p.id for p in h.parameters))
+            smirks.update({p.id: p.smirks for p in h.parameters})
 
         results = defaultdict(int)
         for molecule in tqdm(self.mols, desc="Counting results"):
-            all_labels = ff.label_molecules(molecule.to_topology())[0]
-            torsions = all_labels[parameter_type.value]
-            for torsion in torsions.values():
-                results[torsion.id] += 1
+            all_labels = ff.label_molecules(molecule)[0]
+            for ptype in ptypes:
+                ps = all_labels[ptype]
+                for p in ps.values():
+                    results[p.id] += 1
 
+        return results, ids, smirks
+
+    def print_results(self, results, ids, smirks):
         got = len(results)
-        want = len(tors_ids)
+        want = len(ids)
         pct = 100.0 * float(got) / float(want)
         print(f"{got} / {want} ({pct:.1f}%) ids covered:")
 
-        for id in tors_ids:
-            smirk = h.get_parameter(dict(id=id))[0].smirks
+        for id in ids:
+            smirk = smirks[id]
             print(f"{id:5}{results[id]:5}   {smirk}")
 
         missing_ids = [k for k in results.keys() if results[k] == 0]
-        missing_smirks = [
-            h.get_parameter(dict(id=p))[0].smirks for p in missing_ids
-        ]
+        missing_smirks = [smirks[p] for p in missing_ids]
         print("\nmissing ids:")
         for i, (id, smirk) in enumerate(zip(missing_ids, missing_smirks)):
             print(f"{i:5}{id:>7}   {smirk}")
@@ -77,7 +123,7 @@ class Cover:
 @click.option("--dataset", "-d")
 def main(ff1, ff2, dataset):
     c = Cover(dataset)
-    c.check(ff1, ParameterType.Bonds)
+    c.check(ff1, ff2)
 
 
 if __name__ == "__main__":
