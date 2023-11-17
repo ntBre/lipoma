@@ -54,15 +54,30 @@ class Cover:
         #
         # I really want to produce something that looks like a diff, with
         # insertions and deletions shown in the right order
+        #
+        # case 4 is also complicated. I think the easiest fix will be treating
+        # these as separate parameters. maybe we essentially ignore ids
+        # generally
+
+        print()
 
         for i in i1:
-            if i in i2 and r1[i] != r2[i]:
-                # TODO here's another place something could go wrong - the
-                # parameter smirks are different. leave an assert for now and
-                # think about the real fix later
-                assert s1[i] == s2[i]
+            if i in i2 and s1[i] == s2[i] and r1[i] != r2[i]:
+                # present in both with same smirks
                 smirk = s1[i]
-                print(f"{i:5}{r1[i]:5}{r2[i]:5}   {smirk}")
+                print(f"  {i:5}{r2[i] - r1[i]:+5}   {smirk}")
+            elif i not in i2:
+                # next easiest case, only present in i1
+                print(f"- {i:5}{-r1[i]:+5}   {smirk}")
+
+        for i in i2:
+            if i not in i1:
+                # third easiest case, only present in i2
+                smirk = s2[i]
+                print(f"+ {i:5}{r2[i]:+5}   {smirk}")
+
+        # this is a decent start, but it might be more interesting to see where
+        # the matches went, not just the change
 
     # adapted from vflib
     def check_one(
@@ -75,9 +90,6 @@ class Cover:
         smirks for printing.
 
         """
-
-        print("checking coverage with")
-        print(f"forcefield = {forcefield}")
 
         ff = ForceField(forcefield, allow_cosmetic_attributes=True)
 
