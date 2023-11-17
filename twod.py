@@ -151,10 +151,6 @@ def choose_parameter(value):
     return make_fig(RECORDS[SMIRKS[CUR_SMIRK]], NCLUSTERS)
 
 
-def cur_record():
-    return RECORDS[SMIRKS[CUR_SMIRK]]
-
-
 @callback(
     Output("graph-container", "children", allow_duplicate=True),
     [Input("submit", "n_clicks"), Input("smirks_input", "value")],
@@ -211,6 +207,10 @@ def make_records(method, param="bonds"):
 
 def make_input(smirks):
     return dcc.Input(id="smirks_input", value=smirks, style=dict(width="30vw"))
+
+
+def cur_record():
+    return RECORDS[SMIRKS[CUR_SMIRK]]
 
 
 TYPE = "msm"
