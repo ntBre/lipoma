@@ -76,7 +76,10 @@ def display_select_data(selectData):
 
 
 @callback(
-    Output("graph-container", "children", allow_duplicate=True),
+    [
+        Output("graph-container", "children", allow_duplicate=True),
+        Output("smirks_input", "value", allow_duplicate=True),
+    ],
     Input("previous", "n_clicks"),
     prevent_initial_call=True,
 )
@@ -84,7 +87,7 @@ def previous_button(_):
     global CUR_SMIRK
     if CUR_SMIRK >= 1:
         CUR_SMIRK -= 1
-    return make_fig(RECORDS[SMIRKS[CUR_SMIRK]], NCLUSTERS)
+    return make_fig(cur_record(), NCLUSTERS), SMIRKS[CUR_SMIRK]
 
 
 @callback(
