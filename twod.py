@@ -44,18 +44,15 @@ def make_fig(record, nclusters=None, colors=None):
     return dcc.Graph(figure=fig, id="graph")
 
 
-@callback(Output("click-output", "children"), Input("graph", "clickData"))
-def display_click_data(clickData):
-    if clickData:
-        data = clickData["points"][0]
-        dx, dy = data["x"], data["y"]
-        record = RECORDS[SMIRKS[CUR_SMIRK]]
+def make_pics(pairs):
+    record = cur_record()
+    # have to search directly because the multiple curves when clustering
+    # ruins using the data index directly
+    pics = []
+    for dx, dy in pairs:
         find = zip(record.eqs, record.fcs)
-        # have to search directly because the multiple curves when clustering
-        # ruins using the data index directly
         p = position_if(find, lambda px: close(px[0], dx) and close(px[1], dy))
         mol, env = record.mols[p], record.envs[p]
-        pics = []
         mol = Molecule.from_mapped_smiles(mol, allow_undefined_stereo=True)
         svg = draw_rdkit(mol, SMIRKS[CUR_SMIRK], env)
         try:
@@ -65,14 +62,30 @@ def display_click_data(clickData):
         pics.append(
             html.Img(src=f"data:image/svg+xml;base64,{encoded.decode()}")
         )
-        return pics
+    return pics
 
 
-@callback(Output("select-output", "children"), Input("graph", "selectedData"))
+@callback(
+    Output("click-output", "children", allow_duplicate=True),
+    Input("graph", "clickData"),
+    prevent_initial_call=True,
+)
+def display_click_data(clickData):
+    if clickData:
+        data = clickData["points"][0]
+        dx, dy = data["x"], data["y"]
+        return make_pics([(dx, dy)])
+
+
+@callback(
+    Output("click-output", "children", allow_duplicate=True),
+    Input("graph", "selectedData"),
+    prevent_initial_call=True,
+)
 def display_select_data(selectData):
     if selectData:
-        data = [x["pointNumber"] for x in selectData["points"]]
-        return f"{data}"
+        vals = [(p["x"], p["y"]) for p in selectData["points"]]
+        return make_pics(vals)
 
 
 @callback(
