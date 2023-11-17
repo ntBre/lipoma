@@ -14,7 +14,7 @@ with warnings.catch_warnings():
     warnings.filterwarnings("ignore")
 
     import plotly.express as px
-    from dash import Dash, Input, Output, callback, dcc, html
+    from dash import Dash, Input, Output, callback, dcc, html, ctx
     from openff.toolkit import Molecule
 
 
@@ -139,6 +139,17 @@ def choose_parameter(value):
     return make_fig(RECORDS[SMIRKS[CUR_SMIRK]], NCLUSTERS)
 
 
+@callback(
+    Output("graph-container", "children", allow_duplicate=True),
+    [Input("submit", "n_clicks"), Input("smirks_input", "value")],
+    prevent_initial_call=True,
+)
+def submit_smirks(_, inp):
+    if ctx.triggered_id == "submit":
+        print(f"submitting smirks: {inp}")
+    return make_fig(RECORDS[SMIRKS[CUR_SMIRK]], NCLUSTERS)
+
+
 @cache
 def make_records(method, param="bonds"):
     match method:
@@ -185,11 +196,14 @@ colors = {"background": "white", "text": "black"}
 app.layout = html.Div(
     style={"backgroundColor": colors["background"]},
     children=[
+        html.H1("k vs eq"),
         dcc.RadioItems(["msm", "esp"], TYPE, inline=True, id="radio3"),
         dcc.RadioItems(["Bonds", "Angles"], "Bonds", inline=True, id="radio"),
         html.Button("Previous", id="previous", n_clicks=0),
         html.Button("Next", id="next", n_clicks=0),
         dcc.Slider(1, 10, 1, value=NCLUSTERS, id="clusters"),
+        dcc.Input(id="smirks_input", value=SMIRKS[CUR_SMIRK]),
+        html.Button("Submit", id="submit", n_clicks=0),
         html.Div(
             [
                 html.Div(
