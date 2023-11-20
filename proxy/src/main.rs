@@ -1,10 +1,11 @@
 #![feature(lazy_cell)]
 
-use std::collections::HashSet;
+use std::collections::HashMap;
 use std::net::SocketAddr;
-use std::process::Command;
+use std::process::{Child, Command};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{LazyLock, RwLock};
+use std::time::Instant;
 
 use bytes::Bytes;
 use http::header::{COOKIE, SET_COOKIE};
@@ -21,8 +22,13 @@ mod utils;
 use utils::TokioIo;
 
 static COUNTER: AtomicUsize = AtomicUsize::new(8050);
-static TABLE: LazyLock<RwLock<HashSet<usize>>> =
-    LazyLock::new(|| RwLock::new(HashSet::new()));
+static TABLE: LazyLock<RwLock<HashMap<usize, TimedChild>>> =
+    LazyLock::new(|| RwLock::new(HashMap::new()));
+
+struct TimedChild {
+    time: Instant,
+    child: Child,
+}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -49,6 +55,23 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 }
 
+/// remove outdated sessions from the process table
+fn cleanup() {
+    let mut tab = TABLE.write().unwrap();
+    // don't worry about small tables
+    if tab.len() < 10 {
+        return;
+    }
+
+    let keys = tab.keys().copied().collect::<Vec<_>>();
+    for k in keys {
+        if tab.get(&k).unwrap().time.elapsed().as_secs() > 15 * 60 {
+            tab.get_mut(&k).unwrap().child.kill().unwrap();
+            tab.remove(&k);
+        }
+    }
+}
+
 async fn proxy(
     req: Request<hyper::body::Incoming>,
 ) -> Result<Response<BoxBody<Bytes, hyper::Error>>, hyper::Error> {
@@ -65,15 +88,26 @@ async fn proxy(
     let host = "127.0.0.1";
     let addr = format!("{}:{}", host, port);
 
-    if !TABLE.read().unwrap().contains(&port) {
-        let _ = Command::new("python")
+    if !TABLE.read().unwrap().contains_key(&port) {
+        let child = Command::new("python")
             .current_dir("../../")
             .arg("board.py")
             .arg("--port")
             .arg(format!("{port}"))
             .spawn()
             .unwrap();
-        TABLE.write().unwrap().insert(port);
+        TABLE.write().unwrap().insert(
+            port,
+            TimedChild {
+                time: std::time::Instant::now(),
+                child,
+            },
+        );
+    } else {
+        // table contains child, update access time
+        let mut tab = TABLE.write().unwrap();
+        let tc = tab.get_mut(&port).unwrap();
+        tc.time = Instant::now();
     }
 
     let stream = loop {
@@ -81,6 +115,7 @@ async fn proxy(
             Ok(s) => break s,
             Err(e) => {
                 eprintln!("waiting for server to start: {e}");
+                cleanup();
                 tokio::time::sleep(tokio::time::Duration::from_millis(400))
                     .await;
             }
