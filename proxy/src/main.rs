@@ -52,8 +52,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 async fn proxy(
     req: Request<hyper::body::Incoming>,
 ) -> Result<Response<BoxBody<Bytes, hyper::Error>>, hyper::Error> {
-    println!("req: {:?}", req);
-
     let mut found_cookie = false;
     let port = match req.headers().get(COOKIE) {
         Some(s) => {
@@ -79,7 +77,7 @@ async fn proxy(
     }
 
     let stream = loop {
-        match TcpStream::connect(dbg!(&addr)).await {
+        match TcpStream::connect(&addr).await {
             Ok(s) => break s,
             Err(e) => {
                 eprintln!("waiting for server to start: {e}");
