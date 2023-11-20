@@ -76,3 +76,9 @@ forcefields/full.offxml: apply.py
 		--torsions output/torsions_dedup/industry/output.dat	\
 		--angles output/angles_dedup/industry/output.dat	\
 		--bonds output/bonds_dedup/industry/output.dat
+
+data := $(json) $(eq) $(msm)
+src := proxy/src proxy/Cargo.toml proxy/Cargo.lock
+py := board.py utils.py query.py cluster.py main.py wrapper.py
+deploy:
+	rsync -Ravz $(src) env.yaml board.py utils.py $(data) 'vomsf:server/.'
