@@ -7,18 +7,31 @@ with warnings.catch_warnings():
     warnings.filterwarnings("ignore")
 
     import numpy as np
+    import pandas as pd
     import plotly.express as px
-    from dash import Dash, Input, Output, callback, dcc, html
+    from dash import Dash, Input, Output, callback, ctx, dcc, exceptions, html
     from openff.toolkit import Molecule
 
     from query import Records
 
 
-def make_fig(smirk, record, title):
+def make_fig(smirk, record, title, colors=None):
+    if colors is None:
+        df = pd.DataFrame(
+            dict(
+                values=record.espaloma_values,
+                labels=[title] * len(record.espaloma_values),
+            )
+        )
+    else:
+        df = pd.DataFrame(colors)
+
     fig = px.histogram(
-        record.espaloma_values,
+        df,
         title=f"{record.ident} {smirk}",
-        labels=title,
+        x="values",
+        color="labels",
+        labels="labels",
         width=800,
         height=600,
     )
@@ -33,7 +46,7 @@ def make_fig(smirk, record, title):
         annotation_text=f"{title} Avg.",
         line_dash="dash",
     )
-    fig.update_traces(marker_line_width=1, name=title)
+    fig.update_traces(marker_line_width=1)
     return dcc.Graph(figure=fig, id="graph")
 
 
@@ -65,7 +78,10 @@ def display_click_data(clickData):
 
 
 @callback(
-    Output("graph-container", "children", allow_duplicate=True),
+    [
+        Output("graph-container", "children", allow_duplicate=True),
+        Output("smirks_input", "value", allow_duplicate=True),
+    ],
     Input("previous", "n_clicks"),
     prevent_initial_call=True,
 )
@@ -73,11 +89,17 @@ def previous_button(_):
     global CUR_SMIRK
     if CUR_SMIRK >= 1:
         CUR_SMIRK -= 1
-    return make_fig(SMIRKS[CUR_SMIRK], RECORDS[SMIRKS[CUR_SMIRK]], TITLE)
+    return (
+        make_fig(SMIRKS[CUR_SMIRK], RECORDS[SMIRKS[CUR_SMIRK]], TITLE),
+        SMIRKS[CUR_SMIRK],
+    )
 
 
 @callback(
-    Output("graph-container", "children", allow_duplicate=True),
+    [
+        Output("graph-container", "children", allow_duplicate=True),
+        Output("smirks_input", "value", allow_duplicate=True),
+    ],
     Input("next", "n_clicks"),
     prevent_initial_call=True,
 )
@@ -85,7 +107,41 @@ def next_button(_):
     global CUR_SMIRK
     if CUR_SMIRK < len(SMIRKS) - 1:
         CUR_SMIRK += 1
-    return make_fig(SMIRKS[CUR_SMIRK], RECORDS[SMIRKS[CUR_SMIRK]], TITLE)
+    return (
+        make_fig(SMIRKS[CUR_SMIRK], RECORDS[SMIRKS[CUR_SMIRK]], TITLE),
+        SMIRKS[CUR_SMIRK],
+    )
+
+
+@callback(
+    Output("graph-container", "children", allow_duplicate=True),
+    [Input("submit", "n_clicks"), Input("smirks_input", "value")],
+    prevent_initial_call=True,
+)
+def submit_smirks(_, smirks):
+    if ctx.triggered_id == "submit":
+        rec = cur_record()
+        colors = dict(labels=[], values=[])
+        for m, e, v in zip(rec.molecules, rec.envs, rec.espaloma_values):
+            mol = Molecule.from_mapped_smiles(m, allow_undefined_stereo=True)
+            # in this class the envs are lists!!! I hate python so much, why
+            # didn't this give a type error
+            if (env := mol.chemical_environment_matches(smirks)) and (
+                tuple(e) in env or tuple(e[::-1]) in env
+            ):
+                colors["labels"].append("matched")
+            else:
+                colors["labels"].append("unmatched")
+            colors["values"].append(v)
+
+        return make_fig(
+            SMIRKS[CUR_SMIRK], RECORDS[SMIRKS[CUR_SMIRK]], TITLE, colors=colors
+        )
+    raise exceptions.PreventUpdate()
+
+
+def cur_record():
+    return RECORDS[SMIRKS[CUR_SMIRK]]
 
 
 def make_radio(k):
@@ -186,6 +242,10 @@ def make_records(typ, param="bonds"):
     return Records.from_file(f"{DIR}/{param}{suff}.json")
 
 
+def make_input(smirks):
+    return dcc.Input(id="smirks_input", value=smirks, style=dict(width="30vw"))
+
+
 TITLE = "Espaloma"
 DIR = "data/industry"
 TYPE = "k"
@@ -205,6 +265,12 @@ app.layout = html.Div(
         html.Div(make_radio("k"), id="radio-parent"),
         html.Button("Previous", id="previous", n_clicks=0),
         html.Button("Next", id="next", n_clicks=0),
+        html.Div(
+            [
+                make_input(SMIRKS[CUR_SMIRK]),
+                html.Button("Submit", id="submit", n_clicks=0),
+            ]
+        ),
         html.Div(
             [
                 html.Div(
