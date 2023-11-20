@@ -24,3 +24,4 @@ data/industry/torsions_dedup.json
 /pretty.patched.json
 /data/msm/*.json
 data/esp/*.json
+/proxy/target/
