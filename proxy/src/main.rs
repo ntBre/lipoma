@@ -61,6 +61,7 @@ fn cleanup() {
     let mut tab = TABLE.write().unwrap();
     eprintln!("calling cleanup with {} entries", tab.len());
     let keys = tab.keys().copied().collect::<Vec<_>>();
+    eprintln!("found {} keys: {:?}", keys.len(), keys);
     for k in keys {
         if tab.get(&k).unwrap().time.elapsed().as_secs() > 5 * 60 {
             let pid = tab.get_mut(&k).unwrap().child.id();
@@ -92,6 +93,10 @@ async fn proxy(
     let addr = format!("{}:{}", host, port);
 
     if !TABLE.read().unwrap().contains_key(&port) {
+        if TABLE.read().unwrap().len() > 5 {
+            eprintln!("too many open connections!");
+            return Ok(Response::default());
+        }
         let child = Command::new("python")
             .arg("board.py")
             .arg("--port")
@@ -112,6 +117,7 @@ async fn proxy(
         let mut tab = TABLE.write().unwrap();
         let tc = tab.get_mut(&port).unwrap();
         tc.time = Instant::now();
+        eprintln!("found existing key: {port}");
     }
 
     let stream = loop {
