@@ -119,12 +119,14 @@ async fn proxy(
             Ok(s) => break s,
             Err(e) => {
                 eprintln!("waiting for server to start: {e}");
-                cleanup();
                 tokio::time::sleep(tokio::time::Duration::from_millis(400))
                     .await;
             }
         }
     };
+
+    cleanup();
+
     let io = TokioIo::new(stream);
 
     let (mut sender, conn) = Builder::new()
