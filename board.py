@@ -11,24 +11,21 @@ with warnings.catch_warnings():
     warnings.filterwarnings("ignore")
 
     import numpy as np
-    import pandas as pd
     import plotly.express as px
     from dash import Dash, Input, Output, callback, ctx, dcc, exceptions, html
-    from openff.toolkit import Molecule
+    from openff.toolkit.topology.molecule import Molecule
 
-    from query import Record
+    from record import Record
 
 
 def make_fig(smirk, record, title, colors=None):
     if colors is None:
-        df = pd.DataFrame(
-            dict(
-                values=record.espaloma_values,
-                labels=[title] * len(record.espaloma_values),
-            )
+        df = dict(
+            values=record.espaloma_values,
+            labels=[title] * len(record.espaloma_values),
         )
     else:
-        df = pd.DataFrame(colors)
+        df = colors
 
     fig = px.histogram(
         df,
