@@ -2,6 +2,7 @@
 
 use std::collections::HashMap;
 use std::net::SocketAddr;
+use std::os::unix::process::CommandExt;
 use std::process::{Child, Command};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{LazyLock, RwLock};
@@ -62,9 +63,14 @@ fn cleanup() {
     let keys = tab.keys().copied().collect::<Vec<_>>();
     for k in keys {
         if tab.get(&k).unwrap().time.elapsed().as_secs() > 5 * 60 {
-            tab.get_mut(&k).unwrap().child.kill().unwrap();
+            let pid = tab.get_mut(&k).unwrap().child.id();
+            Command::new("pkill")
+                .arg("-g")
+                .arg(format!("{pid}"))
+                .output()
+                .unwrap();
             tab.remove(&k);
-            eprintln!("removing instance on {k}");
+            eprintln!("removing instance on {k} with pid {pid}");
         }
     }
 }
@@ -90,6 +96,7 @@ async fn proxy(
             .arg("board.py")
             .arg("--port")
             .arg(format!("{port}"))
+            .process_group(0) // give subprocesses the same PGID
             .spawn()
             .unwrap();
         eprintln!("starting new instance on {port}");
