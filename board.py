@@ -1,10 +1,11 @@
 import base64
+import json
 import warnings
 
 import click
 from tqdm import tqdm
 
-from utils import draw_rdkit, make_smirks
+from utils import draw_rdkit, sort_label
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore")
@@ -15,7 +16,7 @@ with warnings.catch_warnings():
     from dash import Dash, Input, Output, callback, ctx, dcc, exceptions, html
     from openff.toolkit import Molecule
 
-    from query import Records
+    from query import Record
 
 
 def make_fig(smirk, record, title, colors=None):
@@ -60,7 +61,7 @@ MAX = 100
 def display_click_data(clickData):
     if clickData:
         points = clickData["points"][0]["pointNumbers"]
-        record = RECORDS[SMIRKS[CUR_SMIRK]]
+        record = cur_record()
         mols = {record.molecules[p]: record.envs[p] for p in points}
         pics = []
         count = 0
@@ -68,7 +69,7 @@ def display_click_data(clickData):
             if count > MAX:
                 break
             mol = Molecule.from_mapped_smiles(mol, allow_undefined_stereo=True)
-            svg = draw_rdkit(mol, SMIRKS[CUR_SMIRK], env)
+            svg = draw_rdkit(mol, cur_smirk(), env)
             try:
                 encoded = base64.b64encode(bytes(svg, "utf-8"))
             except Exception as e:
@@ -93,8 +94,8 @@ def previous_button(_):
     if CUR_SMIRK >= 1:
         CUR_SMIRK -= 1
     return (
-        make_fig(SMIRKS[CUR_SMIRK], RECORDS[SMIRKS[CUR_SMIRK]], TITLE),
-        SMIRKS[CUR_SMIRK],
+        make_fig(cur_smirk(), cur_record(), TITLE),
+        cur_smirk(),
     )
 
 
@@ -111,8 +112,8 @@ def next_button(_):
     if CUR_SMIRK < len(SMIRKS) - 1:
         CUR_SMIRK += 1
     return (
-        make_fig(SMIRKS[CUR_SMIRK], RECORDS[SMIRKS[CUR_SMIRK]], TITLE),
-        SMIRKS[CUR_SMIRK],
+        make_fig(cur_smirk(), cur_record(), TITLE),
+        cur_smirk(),
     )
 
 
@@ -141,14 +142,8 @@ def submit_smirks(_, smirks):
                 colors["labels"].append("unmatched")
             colors["values"].append(v)
 
-        return make_fig(
-            SMIRKS[CUR_SMIRK], RECORDS[SMIRKS[CUR_SMIRK]], TITLE, colors=colors
-        )
+        return make_fig(cur_smirk(), cur_record(), TITLE, colors=colors)
     raise exceptions.PreventUpdate()
-
-
-def cur_record():
-    return RECORDS[SMIRKS[CUR_SMIRK]]
 
 
 def make_radio(k):
@@ -181,12 +176,10 @@ def make_radio(k):
     prevent_initial_call=True,
 )
 def choose_constant(value):
-    global RECORDS, SMIRKS, CUR_SMIRK, TYPE
-    TYPE = value
-    RECORDS = make_records(value)
-    SMIRKS = make_smirks(RECORDS)
+    global SMIRKS, CUR_SMIRK
+    SMIRKS = make_smirks(value)
     CUR_SMIRK = 0
-    fig = make_fig(SMIRKS[CUR_SMIRK], RECORDS[SMIRKS[CUR_SMIRK]], TITLE)
+    fig = make_fig(cur_smirk(), cur_record(), TITLE)
     radio = make_radio(value)
     return radio, fig
 
@@ -198,7 +191,7 @@ def choose_constant(value):
     prevent_initial_call=True,
 )
 def choose_data(value):
-    global RECORDS, SMIRKS, CUR_SMIRK, TYPE, DIR, TITLE
+    global SMIRKS, CUR_SMIRK, DIR, TITLE
     match value:
         case "esp":
             TITLE = "Espaloma"
@@ -209,10 +202,9 @@ def choose_data(value):
         case e:
             raise ValueError(e)
 
-    RECORDS = make_records(TYPE)
-    SMIRKS = make_smirks(RECORDS)
+    SMIRKS = make_smirks(TYPE)
     CUR_SMIRK = 0
-    fig = make_fig(SMIRKS[CUR_SMIRK], RECORDS[SMIRKS[CUR_SMIRK]], TITLE)
+    fig = make_fig(cur_smirk(), cur_record(), TITLE)
     radio = make_radio(value)
     return radio, fig
 
@@ -223,7 +215,7 @@ def choose_data(value):
     prevent_initial_call=True,
 )
 def choose_parameter(value):
-    global RECORDS, SMIRKS, CUR_SMIRK
+    global SMIRKS, CUR_SMIRK
     match value:
         case "Bonds":
             param = "bonds"
@@ -233,32 +225,60 @@ def choose_parameter(value):
             param = "torsions"
         case "Impropers":
             param = "impropers"
-    RECORDS = make_records(TYPE, param)
-    SMIRKS = make_smirks(RECORDS)
+    SMIRKS = make_smirks(TYPE, param)
     CUR_SMIRK = 0
-    return make_fig(SMIRKS[CUR_SMIRK], RECORDS[SMIRKS[CUR_SMIRK]], TITLE)
+    return make_fig(cur_smirk(), cur_record(), TITLE)
 
 
-def make_records(typ, param="bonds"):
-    match typ:
+def find_record(smirks):
+    match TYPE:
         case "k":
             suff = "_dedup"
         case "eq":
             suff = "_eq"
-
-    return Records.from_file(f"{DIR}/{param}{suff}.json")
+    filename = f"{DIR}/{PARAM}{suff}.json"
+    with open(filename, "r") as inp:
+        d = json.load(inp)
+        return Record(**d[smirks])
 
 
 def make_input(smirks):
     return dcc.Input(id="smirks_input", value=smirks, style=dict(width="30vw"))
 
 
+def make_smirks(typ, param="bonds"):
+    global TYPE, PARAM
+    TYPE = typ
+    PARAM = param
+    match typ:
+        case "k":
+            suff = "_dedup"
+        case "eq":
+            suff = "_eq"
+    filename = f"{DIR}/{param}{suff}.json"
+    pairs = []
+    with open(filename, "r") as inp:
+        d = json.load(inp)
+        for k, v in d.items():
+            pairs.append((k, v["ident"]))
+    pairs = sorted(pairs, key=lambda pair: sort_label(pair[1]))
+    return [smirks for smirks, _ in pairs]
+
+
 TITLE = "Espaloma"
 DIR = "data/industry"
 TYPE = "k"
-RECORDS = make_records(TYPE)
-SMIRKS = make_smirks(RECORDS)
+SMIRKS = make_smirks(TYPE)
 CUR_SMIRK = 0
+
+
+def cur_smirk():
+    return SMIRKS[CUR_SMIRK]
+
+
+def cur_record():
+    return find_record(cur_smirk())
+
 
 app = Dash(__name__)
 
@@ -274,20 +294,14 @@ app.layout = html.Div(
         html.Button("Next", id="next", n_clicks=0),
         html.Div(
             [
-                make_input(SMIRKS[CUR_SMIRK]),
+                make_input(cur_smirk()),
                 html.Button("Submit", id="submit", n_clicks=0),
             ]
         ),
         html.Div(
             [
                 html.Div(
-                    [
-                        make_fig(
-                            SMIRKS[CUR_SMIRK],
-                            RECORDS[SMIRKS[CUR_SMIRK]],
-                            TITLE,
-                        )
-                    ],
+                    [make_fig(cur_smirk(), cur_record(), TITLE)],
                     id="graph-container",
                     style=dict(display="inline-block"),
                 ),
