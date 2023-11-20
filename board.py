@@ -1,6 +1,7 @@
 import base64
 import warnings
 
+import click
 from tqdm import tqdm
 
 from utils import draw_rdkit, make_smirks
@@ -308,5 +309,11 @@ app.layout = html.Div(
 )
 
 
+@click.command()
+@click.option("--port", "-p", default=8050)
+def main(port):
+    app.run(debug=True, port=port)
+
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    main()
