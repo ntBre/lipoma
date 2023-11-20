@@ -147,26 +147,24 @@ def submit_smirks(_, smirks):
 
 
 def make_radio(k):
-    match k:
-        case "k" | "esp":
-            radio = (
-                dcc.RadioItems(
-                    ["Bonds", "Angles", "Torsions", "Impropers"],
-                    "Bonds",
-                    inline=True,
-                    id="radio",
-                ),
-            )
-        case "eq" | "msm":
-            radio = (
-                dcc.RadioItems(
-                    ["Bonds", "Angles"],
-                    "Bonds",
-                    inline=True,
-                    id="radio",
-                ),
-            )
-    return radio
+    if TYPE == "eq" or "msm" in DIR:
+        return (
+            dcc.RadioItems(
+                ["Bonds", "Angles"],
+                "Bonds",
+                inline=True,
+                id="radio",
+            ),
+        )
+    else:
+        return (
+            dcc.RadioItems(
+                ["Bonds", "Angles", "Torsions", "Impropers"],
+                "Bonds",
+                inline=True,
+                id="radio",
+            ),
+        )
 
 
 @callback(
@@ -265,8 +263,8 @@ def make_smirks(typ, param="bonds"):
     return [smirks for smirks, _ in pairs]
 
 
-TITLE = "Espaloma"
-DIR = "data/industry"
+TITLE = "MSM"
+DIR = "data/msm"
 TYPE = "k"
 SMIRKS = make_smirks(TYPE)
 CUR_SMIRK = 0
@@ -287,7 +285,7 @@ colors = {"background": "white", "text": "black"}
 app.layout = html.Div(
     style={"backgroundColor": colors["background"]},
     children=[
-        dcc.RadioItems(["esp", "msm"], "esp", inline=True, id="radio3"),
+        dcc.RadioItems(["msm", "esp"], "msm", inline=True, id="radio3"),
         dcc.RadioItems(["k", "eq"], "k", inline=True, id="radio2"),
         html.Div(make_radio("k"), id="radio-parent"),
         html.Button("Previous", id="previous", n_clicks=0),
