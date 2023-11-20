@@ -1,6 +1,8 @@
 import base64
 import warnings
 
+from tqdm import tqdm
+
 from utils import draw_rdkit, make_smirks
 
 with warnings.catch_warnings():
@@ -31,9 +33,9 @@ def make_fig(smirk, record, title, colors=None):
         title=f"{record.ident} {smirk}",
         x="values",
         color="labels",
-        labels="labels",
         width=800,
         height=600,
+        barmode="overlay",
     )
     fig.add_vline(
         x=record.sage_value,
@@ -46,7 +48,7 @@ def make_fig(smirk, record, title, colors=None):
         annotation_text=f"{title} Avg.",
         line_dash="dash",
     )
-    fig.update_traces(marker_line_width=1)
+    fig.update_traces(marker_line_width=1, opacity=0.95)
     return dcc.Graph(figure=fig, id="graph")
 
 
@@ -122,7 +124,11 @@ def submit_smirks(_, smirks):
     if ctx.triggered_id == "submit":
         rec = cur_record()
         colors = dict(labels=[], values=[])
-        for m, e, v in zip(rec.molecules, rec.envs, rec.espaloma_values):
+        for m, e, v in tqdm(
+            zip(rec.molecules, rec.envs, rec.espaloma_values),
+            desc="Labeling molecules",
+            total=len(rec.molecules),
+        ):
             mol = Molecule.from_mapped_smiles(m, allow_undefined_stereo=True)
             # in this class the envs are lists!!! I hate python so much, why
             # didn't this give a type error
