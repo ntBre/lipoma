@@ -32,7 +32,7 @@ struct TimedChild {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let addr = SocketAddr::from(([127, 0, 0, 1], 8049));
+    let addr = SocketAddr::from(([0, 0, 0, 0], 80));
 
     let listener = TcpListener::bind(addr).await?;
     println!("Listening on http://{}", addr);
@@ -58,14 +58,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// remove outdated sessions from the process table
 fn cleanup() {
     let mut tab = TABLE.write().unwrap();
-    // don't worry about small tables
-    if tab.len() < 10 {
-        return;
-    }
-
     let keys = tab.keys().copied().collect::<Vec<_>>();
     for k in keys {
-        if tab.get(&k).unwrap().time.elapsed().as_secs() > 15 * 60 {
+        if tab.get(&k).unwrap().time.elapsed().as_secs() > 5 * 60 {
             tab.get_mut(&k).unwrap().child.kill().unwrap();
             tab.remove(&k);
         }
@@ -90,7 +85,6 @@ async fn proxy(
 
     if !TABLE.read().unwrap().contains_key(&port) {
         let child = Command::new("python")
-            .current_dir("../../")
             .arg("board.py")
             .arg("--port")
             .arg(format!("{port}"))
