@@ -58,11 +58,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// remove outdated sessions from the process table
 fn cleanup() {
     let mut tab = TABLE.write().unwrap();
+    eprintln!("calling cleanup with {} entries", tab.len());
     let keys = tab.keys().copied().collect::<Vec<_>>();
     for k in keys {
         if tab.get(&k).unwrap().time.elapsed().as_secs() > 5 * 60 {
             tab.get_mut(&k).unwrap().child.kill().unwrap();
             tab.remove(&k);
+            eprintln!("removing instance on {k}");
         }
     }
 }
@@ -78,7 +80,7 @@ async fn proxy(
                 .parse::<usize>()
                 .unwrap()
         }
-        None => COUNTER.fetch_add(1, Ordering::Relaxed) + 1,
+        None => COUNTER.fetch_add(1, Ordering::Relaxed),
     };
     let host = "127.0.0.1";
     let addr = format!("{}:{}", host, port);
@@ -90,6 +92,7 @@ async fn proxy(
             .arg(format!("{port}"))
             .spawn()
             .unwrap();
+        eprintln!("starting new instance on {port}");
         TABLE.write().unwrap().insert(
             port,
             TimedChild {
