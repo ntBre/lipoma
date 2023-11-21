@@ -13,3 +13,4 @@ bytes = "1"
 http = "1"
 futures-util = { version = "0.3", default-features = false }
 pin-project-lite = "0.2.4"
+clap = { version = "4.4.8", features = ["derive"] }

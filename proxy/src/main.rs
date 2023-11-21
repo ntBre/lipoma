@@ -10,7 +10,10 @@ use std::time::Instant;
 
 use bytes::Bytes;
 use http::header::{COOKIE, SET_COOKIE};
-use http_body_util::{combinators::BoxBody, BodyExt};
+use http_body_util::{
+    Full,
+    {combinators::BoxBody, BodyExt},
+};
 use hyper::client::conn::http1::Builder;
 use hyper::server::conn::http1;
 use hyper::service::service_fn;
@@ -31,9 +34,19 @@ struct TimedChild {
     child: Child,
 }
 
+use clap::Parser;
+
+#[derive(Parser)]
+struct Cli {
+    /// Sets a custom config file
+    #[arg(short, long, default_value_t = String::from("127.0.0.1:8048"))]
+    addr: String,
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let addr = SocketAddr::from(([0, 0, 0, 0], 80));
+    let cli = Cli::parse();
+    let addr: SocketAddr = cli.addr.parse().unwrap();
 
     let listener = TcpListener::bind(addr).await?;
     println!("Listening on http://{}", addr);
@@ -46,7 +59,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             if let Err(err) = http1::Builder::new()
                 .preserve_header_case(true)
                 .title_case_headers(true)
-                .serve_connection(io, service_fn(proxy))
+                .serve_connection(io, service_fn(dispatch))
                 .with_upgrades()
                 .await
             {
@@ -73,6 +86,28 @@ fn cleanup() {
             tab.remove(&k);
             eprintln!("removing instance on {k} with pid {pid}");
         }
+    }
+}
+
+async fn index(
+    _: Request<hyper::body::Incoming>,
+) -> Result<Response<BoxBody<Bytes, hyper::Error>>, hyper::Error> {
+    Ok(Response::new(
+        Full::new(Bytes::from(
+            std::fs::read_to_string("proxy/index.html").unwrap(),
+        ))
+        .map_err(|never| match never {})
+        .boxed(),
+    ))
+}
+
+async fn dispatch(
+    req: Request<hyper::body::Incoming>,
+) -> Result<Response<BoxBody<Bytes, hyper::Error>>, hyper::Error> {
+    if req.uri() == "/" {
+        index(req).await
+    } else {
+        proxy(req).await
     }
 }
 
