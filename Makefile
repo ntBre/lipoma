@@ -78,7 +78,7 @@ forcefields/full.offxml: apply.py
 		--bonds output/bonds_dedup/industry/output.dat
 
 data := $(json) $(eq) $(msm)
-src := proxy/src proxy/Cargo.toml proxy/Cargo.lock
-py := board.py utils.py query.py cluster.py main.py wrapper.py
+src := proxy/src proxy/Cargo.toml proxy/Cargo.lock proxy/index.html
+py := board.py utils.py query.py cluster.py main.py wrapper.py twod.py
 deploy:
-	rsync -Ravz $(src) env.yaml board.py utils.py $(data) 'vomsf:server/.'
+	rsync -Ravz $(src) env.yaml $(py) $(data) 'vomsf:server/.'
