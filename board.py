@@ -58,11 +58,21 @@ MAX = 100
 def display_click_data(clickData):
     if clickData:
         points = clickData["points"][0]["pointNumbers"]
+        center = clickData["points"][0]["x"]
         record = cur_record()
-        mols = {record.molecules[p]: record.envs[p] for p in points}
+        # again, can't trust points because of multiple curves, so sort
+        # molecules by their distance from the center of the bin and then take
+        # the number we expect
+        mols = []
+        for p, v in enumerate(record.espaloma_values):
+            mols.append((v, record.molecules[p], record.envs[p]))
+
+        mols = sorted(mols, key=lambda x: abs(x[0] - center))
+        mols = mols[: len(points)]
+
         pics = []
         count = 0
-        for mol, env in mols.items():
+        for _, mol, env in mols:
             if count > MAX:
                 break
             mol = Molecule.from_mapped_smiles(mol, allow_undefined_stereo=True)
