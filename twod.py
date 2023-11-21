@@ -4,6 +4,7 @@ import base64
 import warnings
 from functools import cache
 
+import click
 import numpy as np
 from sklearn.mixture import GaussianMixture as model
 
@@ -275,5 +276,11 @@ app.layout = html.Div(
 )
 
 
+@click.command()
+@click.option("--port", "-p", default=8060)
+def main(port):
+    app.run(debug=True, port=port)
+
+
 if __name__ == "__main__":
-    app.run(debug=True, port=8060)
+    main()

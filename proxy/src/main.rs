@@ -29,9 +29,36 @@ static COUNTER: AtomicUsize = AtomicUsize::new(8050);
 static TABLE: LazyLock<RwLock<HashMap<usize, TimedChild>>> =
     LazyLock::new(|| RwLock::new(HashMap::new()));
 
+#[derive(Clone, Copy, PartialEq)]
+enum PType {
+    Board,
+    Twod,
+}
+
+impl PType {
+    fn as_str(&self) -> &'static str {
+        match self {
+            PType::Board => "board.py",
+            PType::Twod => "twod.py",
+        }
+    }
+}
+
 struct TimedChild {
     time: Instant,
     child: Child,
+    typ: PType,
+}
+
+impl TimedChild {
+    fn kill(self) {
+        let pid = self.child.id();
+        Command::new("pkill")
+            .arg("-g")
+            .arg(format!("{pid}"))
+            .output()
+            .unwrap();
+    }
 }
 
 use clap::Parser;
@@ -77,14 +104,9 @@ fn cleanup() {
     eprintln!("found {} keys: {:?}", keys.len(), keys);
     for k in keys {
         if tab.get(&k).unwrap().time.elapsed().as_secs() > 5 * 60 {
-            let pid = tab.get_mut(&k).unwrap().child.id();
-            Command::new("pkill")
-                .arg("-g")
-                .arg(format!("{pid}"))
-                .output()
-                .unwrap();
-            tab.remove(&k);
-            eprintln!("removing instance on {k} with pid {pid}");
+            let child = tab.remove(&k).unwrap();
+            child.kill();
+            eprintln!("removing instance on {k}");
         }
     }
 }
@@ -107,48 +129,54 @@ async fn dispatch(
     if req.uri() == "/" {
         index(req).await
     } else {
-        proxy(req).await
+        let cookie = check_cookie(&req);
+        let port = match cookie {
+            Ok(c) | Err(c) => c,
+        };
+        if req.uri() == "/board" {
+            eprintln!("got board");
+            proxy(req, cookie, port, Some(PType::Board)).await
+        } else if req.uri() == "/twod" {
+            eprintln!("got twod",);
+            proxy(req, cookie, port, Some(PType::Twod)).await
+        } else {
+            proxy(req, cookie, port, None).await
+        }
     }
 }
 
 async fn proxy(
     req: Request<hyper::body::Incoming>,
+    cookie: Result<usize, usize>,
+    port: usize,
+    cmd: Option<PType>,
 ) -> Result<Response<BoxBody<Bytes, hyper::Error>>, hyper::Error> {
-    let mut found_cookie = false;
-    let port = match req.headers().get(COOKIE) {
-        Some(s) => {
-            found_cookie = true;
-            String::from_utf8_lossy(s.as_bytes())
-                .parse::<usize>()
-                .unwrap()
-        }
-        None => COUNTER.fetch_add(1, Ordering::Relaxed),
-    };
     let host = "127.0.0.1";
     let addr = format!("{}:{}", host, port);
 
     if !TABLE.read().unwrap().contains_key(&port) {
-        if TABLE.read().unwrap().len() > 5 {
-            eprintln!("too many open connections!");
-            return Ok(Response::default());
+        // new value, just start up the cmd
+        if let Some(value) = start_cmd(cmd, port) {
+            return value;
         }
-        let child = Command::new("python")
-            .arg("board.py")
-            .arg("--port")
-            .arg(format!("{port}"))
-            .process_group(0) // give subprocesses the same PGID
-            .spawn()
-            .unwrap();
-        eprintln!("starting new instance on {port}");
-        TABLE.write().unwrap().insert(
-            port,
-            TimedChild {
-                time: std::time::Instant::now(),
-                child,
-            },
-        );
+    } else if TABLE
+        .read()
+        .unwrap()
+        .get(&port)
+        .is_some_and(|c| cmd.is_some_and(|cmd| cmd != c.typ))
+    {
+        // table contains a different dashboard than is now requested, so kill
+        // the existing child process and start a new one
+        {
+            let mut tab = TABLE.write().unwrap();
+            let child = tab.remove(&port).unwrap();
+            child.kill();
+        }
+        if let Some(value) = start_cmd(cmd, port) {
+            return value;
+        }
     } else {
-        // table contains child, update access time
+        // using existing child, update access time
         let mut tab = TABLE.write().unwrap();
         let tc = tab.get_mut(&port).unwrap();
         tc.time = Instant::now();
@@ -182,9 +210,48 @@ async fn proxy(
     });
 
     let mut resp = sender.send_request(req).await?;
-    if !found_cookie {
-        resp.headers_mut()
-            .insert(SET_COOKIE, COUNTER.load(Ordering::Relaxed).into());
+    if let Err(c) = cookie {
+        resp.headers_mut().insert(SET_COOKIE, c.into());
     }
+
     Ok(resp.map(|b| b.boxed()))
+}
+
+fn start_cmd(
+    cmd: Option<PType>,
+    port: usize,
+) -> Option<Result<Response<BoxBody<Bytes, hyper::Error>>, hyper::Error>> {
+    if TABLE.read().unwrap().len() > 5 {
+        eprintln!("too many open connections!");
+        return Some(Ok(Response::default()));
+    }
+    let cmd = cmd.unwrap();
+    let child = Command::new("python")
+        .arg(cmd.as_str())
+        .arg("--port")
+        .arg(format!("{port}"))
+        .process_group(0) // give subprocesses the same PGID
+        .spawn()
+        .unwrap();
+    eprintln!("starting new instance on {port}");
+    TABLE.write().unwrap().insert(
+        port,
+        TimedChild {
+            time: std::time::Instant::now(),
+            child,
+            typ: cmd,
+        },
+    );
+    // if cmd is None, it should already be in the table
+    None
+}
+
+/// returns Ok(cookie) if it was loaded and Err(cookie) if not
+fn check_cookie(req: &Request<hyper::body::Incoming>) -> Result<usize, usize> {
+    match req.headers().get(COOKIE) {
+        Some(s) => Ok(String::from_utf8_lossy(s.as_bytes())
+            .parse::<usize>()
+            .unwrap()),
+        None => Err(COUNTER.fetch_add(1, Ordering::Relaxed)),
+    }
 }
