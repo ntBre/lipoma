@@ -1,0 +1,21 @@
+split parameters based on trends observed in the dashboards
+
+using environment fb_193 from the sage-2.1.0 repo for generating FB inputs
+locally and Pavan's fb_193 environment on HPC3
+
+#+name: params
+| Param | New Params       | Reason                   |
+|-------+------------------+--------------------------|
+| t50   | t50, t50a        | specify H                |
+| a19   | a19, a19a        | specify H                |
+| a18a  | a18a, a18b, a18c | r4 and r5 instead of !r6 |
+| b87   | b87, b87a        | N +1                     |
+| a1    | a1, a1a          | specify H                |
+
+#+name: files
+| File                  | Source             |
+|-----------------------+--------------------|
+| smarts-to-exclude.dat | valence-fitting/04 |
+| smiles-to-exclude.dat | valence-fitting/04 |
+| opt.json              | sage-2.1.0         |
+| td.json               | sage-2.1.0         |
