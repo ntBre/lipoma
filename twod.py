@@ -7,6 +7,7 @@ from functools import cache
 import click
 import numpy as np
 from sklearn.mixture import GaussianMixture as model
+from tqdm import tqdm
 
 from query import Records
 from utils import Record, close, draw_rdkit, make_smirks, position_if, unit
@@ -174,7 +175,11 @@ def submit_smirks(_, smirks):
     if ctx.triggered_id == "submit":
         rec = cur_record()
         colors = []
-        for m, e in zip(rec.mols, rec.envs):
+        for m, e in tqdm(
+            zip(rec.mols, rec.envs),
+            desc="Labeling molecules",
+            total=len(rec.mols),
+        ):
             mol = Molecule.from_mapped_smiles(m, allow_undefined_stereo=True)
             if (env := mol.chemical_environment_matches(smirks)) and (
                 e in env or e[::-1] in env
