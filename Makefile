@@ -4,33 +4,28 @@ ifdef PLOT
     query_flags += -p
 endif
 
-parse_query = \
-    python parse_query.py -i data/$1/$2.dat \
-			  -o output/$2/$1 \
-		          $(query_flags)
-
-parse_query_i = $(call parse_query,industry,$1)
-parse_query_m = $(call parse_query,msm,$1)
-
 all: msm industry industry-eq
 
-parse:
-	$(call parse_query_i,bonds_dedup)
-	$(call parse_query_i,angles_dedup)
-	$(call parse_query_i,torsions_dedup)
-	$(call parse_query_i,impropers_dedup)
+output_dats := $(addsuffix /output.dat,\
+       output/bonds_dedup/industry output/angles_dedup/industry		\
+       output/torsions_dedup/industry output/impropers_dedup/industry	\
+       output/bonds_eq/industry output/angles_eq/industry		\
+       output/bonds_dedup/msm output/angles_dedup/msm			\
+       output/bonds_eq/msm output/angles_eq/msm)
 
-	$(call parse_query_i,bonds_eq)
-	$(call parse_query_i,angles_eq)
+parse: $(output_dats)
 
-	$(call parse_query_m,bonds_dedup)
-	$(call parse_query_m,angles_dedup)
-	$(call parse_query_m,bonds_eq)
-	$(call parse_query_m,angles_eq)
+output/%/industry/output.dat: data/industry/%.dat
+	python parse_query.py -i $< -o $(dir $@) $(query_flags)
+
+output/%/msm/output.dat: data/msm/%.dat
+	python parse_query.py -i $< -o $(dir $@) $(query_flags)
+
 
 # industry force constants
 json := $(addprefix data/industry/,bonds_dedup.json angles_dedup.json	\
 				   torsions_dedup.json impropers_dedup.json)
+
 $(json): query.py
 	python query.py --dataset datasets/industry.json \
 			--out-dir data/industry
@@ -68,7 +63,7 @@ $(msm): msm.py
 
 msm: $(msm)
 
-forcefields/full.offxml: apply.py
+forcefields/full.offxml: apply.py $(output_dats)
 	python apply.py							\
 		--output $@						\
 		--angles-eq output/angles_eq/industry/output.dat	\
