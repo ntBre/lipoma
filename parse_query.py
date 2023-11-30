@@ -54,6 +54,9 @@ def main(infile, outdir, plot):
             data = [float(r) for r in rest]
             esp_avg = np.average(data)
 
+            if sage == "None":
+                sage = 0.0
+
             sage = float(sage)
 
             diff = [abs(d - sage) / d for d in data if d != 0.0]
