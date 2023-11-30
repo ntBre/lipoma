@@ -208,7 +208,8 @@ class Driver:
             if self.verbose:
                 self.print_header(cls)
 
-            for k, (v, smirks) in sage.items():
+            for k, _ in espaloma.items():
+                (v, smirks) = sage[k]
                 # smirks is actually a tagged smirks for torsions to separate
                 # the k values
                 id_key = re.sub(r"-k[123]$", "", smirks)
