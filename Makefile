@@ -25,15 +25,16 @@ output/%/msm/output.dat: data/msm/%.dat
 # industry force constants
 json := $(addprefix data/industry/,bonds_dedup.json angles_dedup.json	\
 				   torsions_dedup.json impropers_dedup.json)
+dats := $(subst .json,.dat,$(json))
 
-$(json): query.py
+$(json) $(dats): query.py
 	python query.py --dataset datasets/industry.json \
 			--out-dir data/industry
 industry: $(json)
 
 # industry equilibrium values
 eq := $(addprefix data/industry/,bonds_eq.json angles_eq.json)
-$(eq): query.py
+$(eq) $(subst .json,.dat,$(eq)): query.py
 	python query.py --dataset datasets/industry.json \
 			--out-dir data/industry --force-constants
 
