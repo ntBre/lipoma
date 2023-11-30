@@ -15,16 +15,8 @@ from openff.toolkit import ForceField
 # python parse_query.py -i data/bonds_dedup.dat -o /tmp/bonds [-p]
 
 
-@click.command()
-@click.option("--infile", "-i")
-@click.option("--outdir", "-o")
-@click.option("--plot", "-p", default=True, is_flag=True)
-def main(infile, outdir, plot):
-    if os.path.exists(outdir):
-        shutil.rmtree(outdir)
-    os.makedirs(outdir)
-
-    ff = ForceField("openff-2.1.0.offxml")
+def get_parameter_map(ff: ForceField):
+    "Build a map of SMIRKS to parameter id for `ff`"
     bh = ff.get_parameter_handler("Bonds")
     ah = ff.get_parameter_handler("Angles")
     th = ff.get_parameter_handler("ProperTorsions")
@@ -34,6 +26,20 @@ def main(infile, outdir, plot):
     pmap.update({h.smirks: h.id for h in ah})
     pmap.update({h.smirks: h.id for h in th})
     pmap.update({h.smirks: h.id for h in ih})
+
+    return pmap
+
+
+@click.command()
+@click.option("--infile", "-i")
+@click.option("--outdir", "-o")
+@click.option("--plot", "-p", default=True, is_flag=True)
+def main(infile, outdir, plot):
+    if os.path.exists(outdir):
+        shutil.rmtree(outdir)
+    os.makedirs(outdir)
+
+    pmap = get_parameter_map(ForceField("openff-2.1.0.offxml"))
 
     buf = StringIO()
     averages = []
@@ -64,7 +70,7 @@ def main(infile, outdir, plot):
                 ax.axvline(x=sage, color="green", label="Sage")
                 ax.axvline(x=esp_avg, color="orange", label="Espaloma Avg.")
                 fig = ax.get_figure()
-                id_key = re.sub(r"-k[123]$", "", smirks)
+                id_key = re.sub(r"-k[1-6]$", "", smirks)
                 pid = pmap[id_key]
                 if id_key != smirks:
                     title = f"{pid} {smirks[-2:]}"  # append k[123] to pid

@@ -38,7 +38,7 @@ def main(bonds, angles, torsions, output, bonds_eq, angles_eq):
         ah[smirk].k = avg * p.units
 
     for smirk, avg in load_params(torsions):
-        id_key = re.sub(r"-k[123]$", "", smirk)
+        id_key = re.sub(r"-k[1-6]$", "", smirk)
         k = smirk[-2:]
         p = getattr(th[id_key], k)
         setattr(th[id_key], k, avg * p.units)

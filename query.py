@@ -19,6 +19,7 @@ with warnings.catch_warnings():
 
     from cluster import deduplicate_by
     from main import espaloma_label
+    from parse_query import get_parameter_map
     from record import Record
 
 
@@ -84,7 +85,7 @@ class Torsions:
         return (i, j, k, m, per), fc
 
     def insert_sage(sage, key, v):
-        for fc in ["k1", "k2", "k3"]:
+        for fc in ["k1", "k2", "k3", "k4", "k5", "k6"]:
             val = getattr(v, fc, None)
             if val is not None:
                 per = getattr(v, f"periodicity{fc[-1]}")
@@ -172,6 +173,7 @@ class Driver:
 
         Returns a [Records]
         """
+        ids = get_parameter_map(self.forcefield)
         ret = Records()
         for m, mol in tqdm(
             enumerate(self.molecules),
@@ -185,9 +187,7 @@ class Driver:
 
             labels = self.sage_labels[m][cls.sage_label]
             sage = {}
-            ids = {}  # map of smirks to id
             for k, v in labels.items():
-                ids[v.smirks] = v.id
                 cls.insert_sage(sage, k, v)
 
             if self.espaloma_labels[m] is None:
@@ -199,24 +199,34 @@ class Driver:
                 k, v = cls.to_pair(bond)
                 espaloma[k] = v
 
-            # needed for torsions
-            if hasattr(cls, "fix_keys"):
-                espaloma = cls.fix_keys(espaloma, sage)
-
-            assert espaloma.keys() == sage.keys()
-
             if self.verbose:
                 self.print_header(cls)
 
             for k, _ in espaloma.items():
-                (v, smirks) = sage[k]
+                if (value := sage.get(k)) is None:
+                    v = None
+                    # v can be none, but we need to find a matching smirks by
+                    # replacing the periodicity and searching again
+                    for i in range(6):
+                        ki = list(k[:])  # copy, I hope
+                        ki[4] = i + 1
+                        ki = tuple(ki)
+                        if (value := sage.get(ki)) is not None:
+                            _, smirks = value
+                            break
+                else:
+                    v, smirks = value
                 # smirks is actually a tagged smirks for torsions to separate
                 # the k values
-                id_key = re.sub(r"-k[123]$", "", smirks)
-                diff = abs(v - espaloma[k])
-                if diff > self.eps:
+                id_key = re.sub(r"-k[1-6]$", "", smirks)
+                if v is None:
+                    diff = 0
+                else:
+                    diff = abs(v - espaloma[k])
+                if diff >= self.eps:
                     if self.verbose:
                         self.print_row(cls, k, v, espaloma, diff)
+                    # this seems to happen for impropers for some reason
                     smiles = mol.to_smiles(mapped=True)
                     ret[smirks].molecules.append(smiles)
                     ret[smirks].espaloma_values.append(espaloma[k])
@@ -252,8 +262,12 @@ def print_summary(records: Records, outfile=None):
     items.sort(key=lambda x: len(x[1].espaloma_values), reverse=True)
     for smirks, record in items:
         count = len(record.espaloma_values)
+        if records[smirks].sage_value is None:
+            fmt = ""
+        else:
+            fmt = "8.2f"
         print(
-            f"{smirks:{ml}} {count:5}{records[smirks].sage_value:8.2f}",
+            f"{smirks:{ml}} {count:5} {records[smirks].sage_value:{fmt}}",
             end="",
             file=outfile,
         )
