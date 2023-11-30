@@ -267,7 +267,7 @@ def print_summary(records: Records, outfile=None):
 @click.command()
 @click.option("--force-constants", "-f", is_flag=True, default=True)
 @click.option("--dataset", "-d", default="datasets/filtered-opt.json")
-@click.option("--out-dir", "-o", default="data")
+@click.option("--out-dir", "-o", default="data/esp")
 def main(force_constants, dataset, out_dir):
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
