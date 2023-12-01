@@ -43,7 +43,7 @@ industry-eq: $(eq)
 # espaloma force constants on opt data
 esp_fc := $(addprefix data/esp/,bonds_dedup.json angles_dedup.json	\
 				   torsions_dedup.json impropers_dedup.json)
-$(esp_fc): query.py
+$(esp_fc) $(subst .json,.dat,$(esp_fc)): query.py
 	python query.py --dataset datasets/filtered-opt.json \
 			--out-dir data/esp
 esp: $(esp_fc)
