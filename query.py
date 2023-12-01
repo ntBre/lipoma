@@ -204,25 +204,6 @@ class Driver:
             if self.verbose:
                 self.print_header(cls)
 
-            # the problem is that my search for a matching smirks pattern is
-            # overwriting the earlier values. I might actually have to
-            # restructure this more substantially. I have the key k, which is
-            # (i, j, k, l, p) where p is periodicity, but I need to know which
-            # fc value the periodicity corresponds to. that's okay when the
-            # value is in Sage because I can check the Sage periodicity values
-            # and match up the fc values that way. When there's no Sage, value
-            # I guess I just assign them numbers above what Sage does have.
-            #
-            # A bigger problem then is probably that I also need an idivf value
-            # for each force constant, and I don't know where to get that.
-            # Almost all of them in Sage are 1.0, but a couple of them are 3.0.
-            # I *can* get the periodicity and phase from espaloma, but I'm not
-            # sure about this idivf value. Oh, there's a default_idivf="auto"
-            # tag for the ProperTorsions as a whole, so I guess I can somewhat
-            # safely leave it out, or also somewhat safely assign it a value of
-            # 1.0 for each of them. idivf "specifies a torsion multiplicity by
-            # which the barrier height should be divided," according to the
-            # SMIRNOFF standard
             for k, lock in espaloma.items():
                 if isinstance(lock, tuple):
                     fc, phase = lock
