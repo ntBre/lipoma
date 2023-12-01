@@ -189,6 +189,7 @@ def handle_torsions(force, g, d):
             periodicities = g.nodes["n4"].data["periodicity"][idx]
             phases = g.nodes["n4"].data["phases"][idx]
             ks = g.nodes["n4"].data["k"][idx]
+            pdcs = set()
             for sub_idx in range(ks.flatten().shape[0]):
                 k = ks[sub_idx].item()
                 if k != 0.0:
@@ -204,6 +205,7 @@ def handle_torsions(force, g, d):
                         esp.units.ENERGY_UNIT,
                     ).value_in_unit(unit.kilocalories_per_mole)
 
+                    pdcs.add((idx0, idx1, idx2, idx3, periodicity))
                     d["torsions"].append(
                         Torsion(
                             idx0 + 1,
@@ -215,6 +217,7 @@ def handle_torsions(force, g, d):
                             k,
                         )
                     )
+            assert len(pdcs) == 6
 
     if "k" in g.nodes["n4_improper"].data:
         for idx in range(g.heterograph.number_of_nodes("n4_improper")):
