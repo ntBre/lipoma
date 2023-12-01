@@ -205,6 +205,7 @@ def handle_torsions(force, g, d):
                         esp.units.ENERGY_UNIT,
                     ).value_in_unit(unit.kilocalories_per_mole)
 
+                    print(idx0, idx1, idx2, idx3, periodicity, phase)
                     pdcs.add((idx0, idx1, idx2, idx3, periodicity))
                     d["torsions"].append(
                         Torsion(
