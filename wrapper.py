@@ -9,6 +9,8 @@ from openmm.unit import Quantity
 
 import espaloma as esp
 
+Smiles = str
+
 
 @dataclass
 class Bond:
@@ -190,12 +192,12 @@ def handle_torsions(force, g, d):
             for sub_idx in range(ks.flatten().shape[0]):
                 k = ks[sub_idx].item()
                 if k != 0.0:
-                    _periodicity = periodicities[sub_idx].item()
-                    _phase = phases[sub_idx].item()
+                    periodicity = periodicities[sub_idx].item()
+                    phase = phases[sub_idx].item()
 
                     if k < 0:
                         k = -k
-                        _phase = math.pi - _phase
+                        phase = math.pi - phase
 
                     k = Quantity(
                         k,
@@ -208,8 +210,8 @@ def handle_torsions(force, g, d):
                             idx1 + 1,
                             idx2 + 1,
                             idx3 + 1,
-                            _periodicity,
-                            _phase,
+                            periodicity,
+                            phase,
                             k,
                         )
                     )
@@ -227,12 +229,12 @@ def handle_torsions(force, g, d):
             for sub_idx in range(ks.flatten().shape[0]):
                 k = ks[sub_idx].item()
                 if k != 0.0:
-                    _periodicity = periodicities[sub_idx].item()
-                    _phase = phases[sub_idx].item()
+                    periodicity = periodicities[sub_idx].item()
+                    phase = phases[sub_idx].item()
 
                     if k < 0:
                         k = -k
-                        _phase = math.pi - _phase
+                        phase = math.pi - phase
 
                     k = Quantity(
                         k,
@@ -245,8 +247,8 @@ def handle_torsions(force, g, d):
                             idx1 + 1,
                             idx2 + 1,
                             idx3 + 1,
-                            _periodicity,
-                            _phase,
+                            periodicity,
+                            phase,
                             0.5 * k,
                         )
                     )

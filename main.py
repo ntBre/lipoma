@@ -3,13 +3,14 @@ import logging
 import warnings
 from collections import defaultdict
 from multiprocessing import Pool
+from typing import Dict, Tuple, Union
 
 from openff.toolkit import ForceField, Molecule
 from tqdm import tqdm
 from vflib import load_dataset
 
 import espaloma as esp
-from wrapper import openmm_system_from_graph
+from wrapper import Angle, Bond, Smiles, Torsion, openmm_system_from_graph
 
 warnings.filterwarnings("ignore", category=UserWarning)
 logging.getLogger("openff").setLevel(logging.ERROR)
@@ -18,7 +19,9 @@ logging.getLogger("openff").setLevel(logging.ERROR)
 FORCEFIELD = ForceField("openff_unconstrained-2.1.0.offxml")
 
 
-def espaloma_label(molecule, types=["bonds", "angles", "torsions"]):
+def espaloma_label(
+    molecule, types=["bonds", "angles", "torsions"]
+) -> Tuple[str, Dict[Smiles, Union[Bond, Angle, Torsion]]]:
     """Takes a `Molecule`, constructs an espaloma Graph object, assigns the
     molecule parameters based on that graph, constructs an OpenMM system from
     the graph, and extracts the force field parameters from the OpenMM system.
