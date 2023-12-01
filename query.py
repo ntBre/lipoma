@@ -81,8 +81,8 @@ class Torsions:
     header_keys = ["i", "j", "k", "l"]
 
     def to_pair(torsion):
-        i, j, k, m, per, _phase, fc = torsion.from_zero().as_tuple()
-        return (i, j, k, m, per), fc
+        i, j, k, m, per, phase, fc = torsion.from_zero().as_tuple()
+        return (i, j, k, m, per), (fc, phase)
 
     def insert_sage(sage, key, v):
         for fc in ["k1", "k2", "k3", "k4", "k5", "k6"]:
@@ -146,12 +146,25 @@ class Driver:
 
         # caches of labels to prevent repeated labeling for multiple parameter
         # types. initialized to None and filled in on the first call to compare
-        self.espaloma_labels = [None] * self.total_molecules
-        self.sage_labels = [None] * self.total_molecules
+        self._espaloma_labels = [None] * self.total_molecules
+        self._sage_labels = [None] * self.total_molecules
 
     @property
     def total_molecules(self):
         return len(self.molecules)
+
+    def sage_labels(self, m: int, mol: Molecule):
+        "Returns `self._sage_labels[m]` if it exists, and computes it if not"
+        if self._sage_labels[m] is None:
+            self._sage_labels[m] = self.forcefield.label_molecules(
+                mol.to_topology()
+            )[0]
+        return self._sage_labels[m]
+
+    def espaloma_labels(self, m: int, mol: Molecule):
+        if self._espaloma_labels[m] is None:
+            _, self._espaloma_labels[m] = espaloma_label(mol)
+        return self._espaloma_labels[m]
 
     def print_header(self, cls):
         cls.print_header()
@@ -162,7 +175,7 @@ class Driver:
     def print_row(self, cls, k, v, espaloma, diff):
         for elt in k:
             print(f"{elt:5}", end="")
-        print(f"{v:12.8}{espaloma[k]:12.8}{diff:12.8}")
+        print(f"{v:12.8}{espaloma:12.8}{diff:12.8}")
 
     def compare(self, cls) -> Records:
         """Compare paramters of type `cls` assigned by `self.forcefield` and
@@ -177,20 +190,12 @@ class Driver:
             desc=f"Comparing {cls.espaloma_label}",
             total=self.total_molecules,
         ):
-            if self.sage_labels[m] is None:
-                self.sage_labels[m] = self.forcefield.label_molecules(
-                    mol.to_topology()
-                )[0]
-
-            labels = self.sage_labels[m][cls.sage_label]
+            labels = self.sage_labels(m, mol)[cls.sage_label]
             sage = {}
             for k, v in labels.items():
                 cls.insert_sage(sage, k, v)
 
-            if self.espaloma_labels[m] is None:
-                _, self.espaloma_labels[m] = espaloma_label(mol)
-
-            d = self.espaloma_labels[m]
+            d = self.espaloma_labels(m, mol)
             espaloma = {}
             for bond in d[cls.espaloma_label]:
                 k, v = cls.to_pair(bond)
@@ -218,7 +223,11 @@ class Driver:
             # 1.0 for each of them. idivf "specifies a torsion multiplicity by
             # which the barrier height should be divided," according to the
             # SMIRNOFF standard
-            for k, _ in espaloma.items():
+            for k, lock in espaloma.items():
+                if isinstance(lock, tuple):
+                    fc, phase = lock
+                else:
+                    fc = lock
                 if (value := sage.get(k)) is None:
                     v = None
                     # v can be none, but we need to find a matching smirks by
@@ -238,14 +247,14 @@ class Driver:
                 if v is None:
                     diff = 0
                 else:
-                    diff = abs(v - espaloma[k])
+                    diff = abs(v - fc)
                 if diff >= self.eps:
                     if self.verbose:
-                        self.print_row(cls, k, v, espaloma, diff)
+                        self.print_row(cls, k, v, fc, diff)
                     # this seems to happen for impropers for some reason
                     smiles = mol.to_smiles(mapped=True)
                     ret[smirks].molecules.append(smiles)
-                    ret[smirks].espaloma_values.append(espaloma[k])
+                    ret[smirks].espaloma_values.append(fc)
                     # trim periodicity off of torsions, others should be fine
                     ret[smirks].envs.append(list(k)[:4])
                     ret[smirks].sage_value = v
