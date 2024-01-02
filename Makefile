@@ -73,6 +73,9 @@ forcefields/full.offxml: apply.py $(output_dats)
 		--angles output/angles_dedup/industry/output.dat	\
 		--bonds output/bonds_dedup/industry/output.dat
 
+apple.offxml: apple.py
+	python $< --dataset datasets/industry.json --output $@
+
 data := $(json) $(eq) $(msm)
 src := proxy/src proxy/Cargo.toml proxy/Cargo.lock proxy/index.html
 py := board.py utils.py query.py cluster.py main.py wrapper.py twod.py
