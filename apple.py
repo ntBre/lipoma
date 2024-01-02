@@ -6,6 +6,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 
 import click
+from openff.units import unit
 from tqdm import tqdm
 
 from query import Driver, Records, Torsions
@@ -67,7 +68,8 @@ def mean(lst):
 
 @click.command()
 @click.option("--dataset", "-d", default="datasets/filtered-opt.json")
-def main(dataset):
+@click.option("--output", "-o", default="apple.offxml")
+def main(dataset, output):
     driver = Driver(
         forcefield="openff-2.1.0.offxml",
         dataset=dataset,
@@ -75,8 +77,15 @@ def main(dataset):
         verbose=False,
     )
     records = driver.compare(Torsions)
+
+    th = driver.forcefield.get_parameter_handler("ProperTorsions")
     for smirks, data in records.items():
-        print(smirks)
+        if driver.verbose:
+            print(smirks, "=>", th[smirks].id)
+
+        th[smirks].periodicity.clear()
+        th[smirks].phase.clear()
+        th[smirks].k.clear()
 
         assert len(set(data.values.keys())) == 6
         assert len(set(data.phases.keys())) == 6
@@ -84,7 +93,16 @@ def main(dataset):
         assert len(data.values.values()) == len(data.phases.values())
 
         for k, v in data.phases.items():
-            print(f"\tper {k}, phase {mode(v)}, k {mean(data.values[k])}")
+            per = k
+            phase = mode(v)
+            fc = mean(data.values[k])
+            th[smirks].periodicity.append(per)
+            th[smirks].phase.append(phase * unit.radian)
+            th[smirks].k.append(fc * unit.kilocalories_per_mole)
+            if driver.verbose:
+                print(f"\tper {per}, phase {phase}, k {fc}")
+
+    driver.forcefield.to_file(output)
 
 
 if __name__ == "__main__":
