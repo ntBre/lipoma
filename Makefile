@@ -76,15 +76,12 @@ forcefields/full.offxml: apply.py $(output_dats)
 apple.offxml: apple.py
 	python $< --dataset datasets/industry.json --output $@
 
+.INTERMEDIATE: apple.torsions
+
 apple.torsions: apple.offxml
 	sed -n '/<ProperTorsions/,/<\/ProperTorsions/p' $< > $@
 
-sage-2.1.0.offxml:
-	python -c \
-	'from openff.toolkit import ForceField; \
-	ForceField("openff-2.1.0.offxml").to_file("$@")'
-
-all_espaloma.offxml: sage-2.1.0.offxml apple.torsions
+forcefields/espaloma-all.offxml: forcefields/full.offxml apple.torsions
 	sed '/<ProperTorsions/,/<\/ProperTorsions/d' $< > $@
 	sed -i '/<\/Angles>/r apple.torsions' $@
 
