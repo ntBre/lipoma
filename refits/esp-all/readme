@@ -17,3 +17,53 @@ using idivf_default for ProperTorsions by deleting all of them with this:
 #+end_src
 
 this prevents error with different lengths on k, periodicity, phase, and idivf
+
+but the code can't handle idivf=auto (!!) so I need to put idivf[1-6]="1" in for
+it actually to work
+
+#+begin_src shell
+  sed -i.again \
+	  's/<Proper /&idivf1="1" idivf2="1" idivf3="1" idivf4="1" idivf5="1" idivf6="1" /g' \
+  input.offxml
+#+end_src
+
+Now I'm getting an issue where some of them don't have enough periodicity or
+phase values! Let's find those
+
+#+begin_src awk :in-file input.offxml
+  /Proper/ && /idivf6/ && !/phase3/
+#+end_src
+
+#+RESULTS:
+| <Proper | idivf1="1" | idivf2="1" | idivf3="1" | idivf4="1" | idivf5="1" | idivf6="1" | smirks="[#35:1]-[#6X4:2]-[#6X4:3]-[#35:4]"                     | periodicity1="3" | periodicity2="1" | phase1="0.0 | *      | degree | ** | 1"        | phase2="180.0          | * | degree | ** | 1" | id="t8"    | k1="1.077457566744    | *  | mole | **         | -1 | * | kilocalorie | ** | 1" | k2="-0.1136715754252 | * | mole | ** | -1 | * | kilocalorie | ** | 1" | ></Proper> |
+| <Proper | idivf1="1" | idivf2="1" | idivf3="1" | idivf4="1" | idivf5="1" | idivf6="1" | smirks="[#6X4;r3:1]-;@[#6X4;r3:2]-[#6X3:3](~[#8X1])~[#8X1:4]"    | periodicity1="2" | phase1="320.0    | *           | degree | **     | 1" | id="t42a" | k1="-0.4826638180162   | * | mole   | ** | -1 | *          | kilocalorie           | ** | 1"   | ></Proper> |    |   |             |    |    |                      |   |      |    |    |   |             |    |    |            |
+| <Proper | idivf1="1" | idivf2="1" | idivf3="1" | idivf4="1" | idivf5="1" | idivf6="1" | smirks="[*:1]-[#7X4:2]-[#6X3:3]~[*:4]"                         | periodicity1="1" | phase1="0.0      | *           | degree | **     | 1" | id="t63"  | k1="-0.003553710469134 | * | mole   | ** | -1 | *          | kilocalorie           | ** | 1"   | ></Proper> |    |   |             |    |    |                      |   |      |    |    |   |             |    |    |            |
+| <Proper | idivf1="1" | idivf2="1" | idivf3="1" | idivf4="1" | idivf5="1" | idivf6="1" | smirks="[#16X4,#16X3+0:1]-[#7X2:2]=[#6X3:3]-[#16X2,#16X3+1:4]" | periodicity1="2" | phase1="180.0    | *           | degree | **     | 1" | id="t89"  | k1="3.602517565373     | * | mole   | ** | -1 | *          | kilocalorie           | ** | 1"   | ></Proper> |    |   |             |    |    |                      |   |      |    |    |   |             |    |    |            |
+| <Proper | idivf1="1" | idivf2="1" | idivf3="1" | idivf4="1" | idivf5="1" | idivf6="1" | smirks="[*:1]-[#8X2+1:2]=[#6X3:3]-[*:4]"                       | periodicity1="2" | phase1="180.0    | *           | degree | **     | 1" | id="t112" | k1="7.917885966353     | * | mole   | ** | -1 | *          | kilocalorie           | ** | 1"   | ></Proper> |    |   |             |    |    |                      |   |      |    |    |   |             |    |    |            |
+| <Proper | idivf1="1" | idivf2="1" | idivf3="1" | idivf4="1" | idivf5="1" | idivf6="1" | smirks="[*:1]=[#8X2+1:2]-[#6:3]~[*:4]"                         | periodicity1="2" | phase1="180.0    | *           | degree | **     | 1" | id="t113" | k1="0.6347242530165    | * | mole   | ** | -1 | *          | kilocalorie           | ** | 1"   | ></Proper> |    |   |             |    |    |                      |   |      |    |    |   |             |    |    |            |
+| <Proper | idivf1="1" | idivf2="1" | idivf3="1" | idivf4="1" | idivf5="1" | idivf6="1" | smirks="[*:1]~[#16:2]=,:[#6:3]~[*:4]"                          | periodicity1="2" | phase1="180.0    | *           | degree | **     | 1" | id="t114" | k1="-1.975848663415    | * | mole   | ** | -1 | *          | kilocalorie           | ** | 1"   | ></Proper> |    |   |             |    |    |                      |   |      |    |    |   |             |    |    |            |
+| <Proper | idivf1="1" | idivf2="1" | idivf3="1" | idivf4="1" | idivf5="1" | idivf6="1" | smirks="[*:1]~[#15:2]-[#6:3]-[*:4]"                            | periodicity1="1" | phase1="0.0      | *           | degree | **     | 1" | id="t123" | k1="-10.84539398162    | * | mole   | ** | -1 | *          | kilocalorie           | ** | 1"   | ></Proper> |    |   |             |    |    |                      |   |      |    |    |   |             |    |    |            |
+| <Proper | idivf1="1" | idivf2="1" | idivf3="1" | idivf4="1" | idivf5="1" | idivf6="1" | smirks="[*:1]~[#7X2:2]-[#7X4:3]~[*:4]"                         | periodicity1="3" | periodicity2="2" | phase1="0.0 | *      | degree | ** | 1"        | phase2="180.0          | * | degree | ** | 1" | id="t138a" | k1="-0.09510851427019 | *  | mole | **         | -1 | * | kilocalorie | ** | 1" | k2="1.554435554256   | * | mole | ** | -1 | * | kilocalorie | ** | 1" | ></Proper> |
+| <Proper | idivf1="1" | idivf2="1" | idivf3="1" | idivf4="1" | idivf5="1" | idivf6="1" | smirks="[*:1]~[#7:2]=[#15:3]~[*:4]"                            | periodicity1="3" | phase1="0.0      | *           | degree | **     | 1" | id="t164" | k1="-0.9670595402247   | * | mole   | ** | -1 | *          | kilocalorie           | ** | 1"   | ></Proper> |    |   |             |    |    |                      |   |      |    |    |   |             |    |    |            |
+
+Let's try it with awk instead.
+
+#+begin_src awk :in-file input.offxml
+   /<Proper / {
+	   for (i = 1; i <= NF; i++) {
+		   matched = match($i, /phase([1-6])/, arr)
+		   if (matched && arr[1] > max) max = arr[1]
+		   print max
+	   }
+   }
+#+end_src
+
+org doesn't like this, so I put it in [[file:fix.awk][a file]] to finish
+
+#+begin_src shell
+  t=$(mktemp)
+  awk -f fix.awk input.offxml > $t
+  mv $t input.offxml
+#+end_src
+
+#+RESULTS:
