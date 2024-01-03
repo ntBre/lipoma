@@ -1,0 +1,19 @@
+input is ../forcefields/espaloma-all.offxml, which contains the 6 force constant
+torsions from apple.py and the rest of the espaloma averaged parameters from
+apply.py applied to Sage 2.1.0
+
+using fb-196 environment and the following files from ../dashboard
+- Makefile
+- smiles-to-exclude.dat
+- smarts-to-exclude.dat
+- opt.json
+- td.json
+- explicit_ring_torsions.dat
+
+using idivf_default for ProperTorsions by deleting all of them with this:
+
+#+begin_src shell
+  sed -i.bak 's/idivf[1-6]="[^"]\+"//g' input.offxml
+#+end_src
+
+this prevents error with different lengths on k, periodicity, phase, and idivf
