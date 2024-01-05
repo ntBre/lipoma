@@ -33,6 +33,33 @@
       "parameters": [
         {
           "type": "Angles",
+          "smirks": "[#1:1]-[#6X4:2]-[#1:3]",
+          "attributes": [
+            "angle",
+            "k"
+          ],
+          "cached": false
+        },
+        {
+          "type": "Angles",
+          "smirks": "[#1:1]-[#6X3:2]~[*:3]",
+          "attributes": [
+            "angle",
+            "k"
+          ],
+          "cached": false
+        },
+        {
+          "type": "Angles",
+          "smirks": "[*:1]-[#8:2]-[*:3]",
+          "attributes": [
+            "angle",
+            "k"
+          ],
+          "cached": false
+        },
+        {
+          "type": "Angles",
           "smirks": "[*:1]~[#7X3$(*~[#6X3,#6X2,#7X2+0]):2]~[*:3]",
           "attributes": [
             "angle",
@@ -51,52 +78,7 @@
         },
         {
           "type": "Angles",
-          "smirks": "[#1:1]-[#6X3:2]~[*:3]",
-          "attributes": [
-            "angle",
-            "k"
-          ],
-          "cached": false
-        },
-        {
-          "type": "Angles",
-          "smirks": "[#1:1]-[#6X4:2]-[#1:3]",
-          "attributes": [
-            "angle",
-            "k"
-          ],
-          "cached": false
-        },
-        {
-          "type": "Angles",
-          "smirks": "[*:1]-[#8:2]-[*:3]",
-          "attributes": [
-            "angle",
-            "k"
-          ],
-          "cached": false
-        },
-        {
-          "type": "Angles",
           "smirks": "[*:1]~[#6X3:2]~[*:3]",
-          "attributes": [
-            "angle",
-            "k"
-          ],
-          "cached": false
-        },
-        {
-          "type": "Angles",
-          "smirks": "[*:1]~[#7X4,#7X3,#7X2-1:2]~[*:3]",
-          "attributes": [
-            "angle",
-            "k"
-          ],
-          "cached": false
-        },
-        {
-          "type": "Angles",
-          "smirks": "[#1:1]-[#7X3$(*~[#6X3,#6X2,#7X2+0]):2]-[*:3]",
           "attributes": [
             "angle",
             "k"
@@ -114,7 +96,16 @@
         },
         {
           "type": "Angles",
-          "smirks": "[*:1]~;!@[*;X3;r5:2]~;@[*;r5:3]",
+          "smirks": "[#1:1]-[#7X3$(*~[#6X3,#6X2,#7X2+0]):2]-[*:3]",
+          "attributes": [
+            "angle",
+            "k"
+          ],
+          "cached": false
+        },
+        {
+          "type": "Angles",
+          "smirks": "[*:1]~[#7X4,#7X3,#7X2-1:2]~[*:3]",
           "attributes": [
             "angle",
             "k"
@@ -150,6 +141,15 @@
         },
         {
           "type": "Angles",
+          "smirks": "[*:1]~;!@[*;X3;r5:2]~;@[*;r5:3]",
+          "attributes": [
+            "angle",
+            "k"
+          ],
+          "cached": false
+        },
+        {
+          "type": "Angles",
           "smirks": "[*:1]~[#7X2+0:2]~[*:3]",
           "attributes": [
             "angle",
@@ -177,7 +177,7 @@
         },
         {
           "type": "Angles",
-          "smirks": "[#1:1]-[*;r3:2]~;!@[*:3]",
+          "smirks": "[*;r3:1]1~;@[*;r3:2]~;@[*;r3:3]1",
           "attributes": [
             "angle",
             "k"
@@ -186,7 +186,7 @@
         },
         {
           "type": "Angles",
-          "smirks": "[*;r3:1]1~;@[*;r3:2]~;@[*;r3:3]1",
+          "smirks": "[#1:1]-[*;r3:2]~;!@[*:3]",
           "attributes": [
             "angle",
             "k"
@@ -329,7 +329,7 @@
         },
         {
           "type": "Angles",
-          "smirks": "[*:1]~[#16X2,#16X3+1:2]~[*:3]",
+          "smirks": "[*:1]~[#7X2+0:2]~[#6X2:3](~[#16X1])",
           "attributes": [
             "angle",
             "k"
@@ -338,7 +338,7 @@
         },
         {
           "type": "Angles",
-          "smirks": "[*:1]~[#7X2+0:2]~[#6X2:3](~[#16X1])",
+          "smirks": "[*:1]~[#16X2,#16X3+1:2]~[*:3]",
           "attributes": [
             "angle",
             "k"
@@ -381,82 +381,10 @@
         },
         {
           "type": "Bonds",
-          "smirks": "[#6X3:1]:[#6X3:2]",
+          "smirks": "[#6X3:1]=[#6X3:2]",
           "attributes": [
-            "length",
-            "k"
-          ],
-          "cached": false
-        },
-        {
-          "type": "Bonds",
-          "smirks": "[#6X4:1]-[#8X2H0:2]",
-          "attributes": [
-            "length",
-            "k"
-          ],
-          "cached": false
-        },
-        {
-          "type": "Bonds",
-          "smirks": "[#6X3:1]-[#7X3:2]",
-          "attributes": [
-            "length",
-            "k"
-          ],
-          "cached": false
-        },
-        {
-          "type": "Bonds",
-          "smirks": "[#6:1]=[#8X1+0,#8X2+1:2]",
-          "attributes": [
-            "length",
-            "k"
-          ],
-          "cached": false
-        },
-        {
-          "type": "Bonds",
-          "smirks": "[#6X3:1](=[#8X1+0])-[#7X3:2]",
-          "attributes": [
-            "length",
-            "k"
-          ],
-          "cached": false
-        },
-        {
-          "type": "Bonds",
-          "smirks": "[#6X3a:1]-[#8X2H0:2]",
-          "attributes": [
-            "length",
-            "k"
-          ],
-          "cached": false
-        },
-        {
-          "type": "Bonds",
-          "smirks": "[#6X4:1]-[#7X3:2]-[#6X3]=[#8X1+0]",
-          "attributes": [
-            "length",
-            "k"
-          ],
-          "cached": false
-        },
-        {
-          "type": "Bonds",
-          "smirks": "[#6X3:1]-[#1:2]",
-          "attributes": [
-            "length",
-            "k"
-          ],
-          "cached": false
-        },
-        {
-          "type": "Bonds",
-          "smirks": "[#6X3:1]-[#6X3:2]",
-          "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -464,35 +392,89 @@
           "type": "Bonds",
           "smirks": "[#6X4:1]-[#1:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
         {
           "type": "Bonds",
-          "smirks": "[#6X3:1]=[#6X3:2]",
+          "smirks": "[#6X4:1]-[#7X3:2]-[#6X3]=[#8X1+0]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
         {
           "type": "Bonds",
-          "smirks": "[#6X4:1]-[#6X3:2]",
+          "smirks": "[#6X3:1]-[#7X3:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
         {
           "type": "Bonds",
-          "smirks": "[#6:1]-[#7:2]",
+          "smirks": "[#6X3:1]-[#1:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
+          ],
+          "cached": false
+        },
+        {
+          "type": "Bonds",
+          "smirks": "[#6X3:1](=[#8X1+0])-[#7X3:2]",
+          "attributes": [
+            "k",
+            "length"
+          ],
+          "cached": false
+        },
+        {
+          "type": "Bonds",
+          "smirks": "[#6X4:1]-[#8X2H0:2]",
+          "attributes": [
+            "k",
+            "length"
+          ],
+          "cached": false
+        },
+        {
+          "type": "Bonds",
+          "smirks": "[#6:1]=[#8X1+0,#8X2+1:2]",
+          "attributes": [
+            "k",
+            "length"
+          ],
+          "cached": false
+        },
+        {
+          "type": "Bonds",
+          "smirks": "[#6X3:1]:[#6X3:2]",
+          "attributes": [
+            "k",
+            "length"
+          ],
+          "cached": false
+        },
+        {
+          "type": "Bonds",
+          "smirks": "[#6X3a:1]-[#8X2H0:2]",
+          "attributes": [
+            "k",
+            "length"
+          ],
+          "cached": false
+        },
+        {
+          "type": "Bonds",
+          "smirks": "[#6X3:1]-[#6X3:2]",
+          "attributes": [
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -500,8 +482,26 @@
           "type": "Bonds",
           "smirks": "[#6X4:1]-[#6X4:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
+          ],
+          "cached": false
+        },
+        {
+          "type": "Bonds",
+          "smirks": "[#6X4:1]-[#6X3:2]",
+          "attributes": [
+            "k",
+            "length"
+          ],
+          "cached": false
+        },
+        {
+          "type": "Bonds",
+          "smirks": "[#6:1]-[#7:2]",
+          "attributes": [
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -509,8 +509,8 @@
           "type": "Bonds",
           "smirks": "[#7:1]-[#1:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -518,17 +518,8 @@
           "type": "Bonds",
           "smirks": "[#16X4,#16X3!+1:1]-[#6:2]",
           "attributes": [
-            "length",
-            "k"
-          ],
-          "cached": false
-        },
-        {
-          "type": "Bonds",
-          "smirks": "[#16X2,#16X1-1,#16X3+1:1]-[#6X3:2]",
-          "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -536,8 +527,17 @@
           "type": "Bonds",
           "smirks": "[#16X4,#16X3:1]~[#8X1:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
+          ],
+          "cached": false
+        },
+        {
+          "type": "Bonds",
+          "smirks": "[#16X2,#16X1-1,#16X3+1:1]-[#6X3:2]",
+          "attributes": [
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -545,8 +545,8 @@
           "type": "Bonds",
           "smirks": "[#6:1]-[#9:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -554,8 +554,8 @@
           "type": "Bonds",
           "smirks": "[#16X4,#16X3:1]~[#7:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -563,17 +563,8 @@
           "type": "Bonds",
           "smirks": "[#6X3:1]:[#7X2,#7X3+1:2]",
           "attributes": [
-            "length",
-            "k"
-          ],
-          "cached": false
-        },
-        {
-          "type": "Bonds",
-          "smirks": "[#6X3:1]=[#7X2,#7X3+1:2]",
-          "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -581,8 +572,17 @@
           "type": "Bonds",
           "smirks": "[#6X3:1]-[#7X2:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
+          ],
+          "cached": false
+        },
+        {
+          "type": "Bonds",
+          "smirks": "[#6X3:1]=[#7X2,#7X3+1:2]",
+          "attributes": [
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -590,8 +590,8 @@
           "type": "Bonds",
           "smirks": "[#6X4:1]-[#6X3:2]=[#8X1+0]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -599,8 +599,8 @@
           "type": "Bonds",
           "smirks": "[#6:1]-[#8:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -608,8 +608,8 @@
           "type": "Bonds",
           "smirks": "[#8:1]-[#1:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -617,8 +617,8 @@
           "type": "Bonds",
           "smirks": "[#6X3:1]-[#8X2H1:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -626,8 +626,8 @@
           "type": "Bonds",
           "smirks": "[#6X3:1]-[#8X2:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -635,8 +635,8 @@
           "type": "Bonds",
           "smirks": "[#7X3:1]-[#7X2:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -644,8 +644,8 @@
           "type": "Bonds",
           "smirks": "[#16X4,#16X3:1]~[#7X2:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -653,8 +653,8 @@
           "type": "Bonds",
           "smirks": "[#6X4:1]-[#9:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -662,8 +662,8 @@
           "type": "Bonds",
           "smirks": "[#6:1]-[#17:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -671,17 +671,8 @@
           "type": "Bonds",
           "smirks": "[#6X3:1](=[#8X1])-[#8X2H0:2]",
           "attributes": [
-            "length",
-            "k"
-          ],
-          "cached": false
-        },
-        {
-          "type": "Bonds",
-          "smirks": "[#7X2:1]-[#7X2:2]",
-          "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -689,8 +680,17 @@
           "type": "Bonds",
           "smirks": "[#7:1]=[#7:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
+          ],
+          "cached": false
+        },
+        {
+          "type": "Bonds",
+          "smirks": "[#7X2:1]-[#7X2:2]",
+          "attributes": [
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -698,17 +698,8 @@
           "type": "Bonds",
           "smirks": "[#7:1]-[#8X2:2]",
           "attributes": [
-            "length",
-            "k"
-          ],
-          "cached": false
-        },
-        {
-          "type": "Bonds",
-          "smirks": "[#6X2:1]-[#6:2]",
-          "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -716,8 +707,17 @@
           "type": "Bonds",
           "smirks": "[#6:1]#[#7:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
+          ],
+          "cached": false
+        },
+        {
+          "type": "Bonds",
+          "smirks": "[#6X2:1]-[#6:2]",
+          "attributes": [
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -725,8 +725,8 @@
           "type": "Bonds",
           "smirks": "[#7:1]~[#8X1:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -734,8 +734,8 @@
           "type": "Bonds",
           "smirks": "[#7:1]-[#7:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -743,8 +743,8 @@
           "type": "Bonds",
           "smirks": "[#7:1]:[#7:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -752,8 +752,8 @@
           "type": "Bonds",
           "smirks": "[#6X2:1]-[#7:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -761,8 +761,8 @@
           "type": "Bonds",
           "smirks": "[#6X3:1](~[#8X1])~[#8X1:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -770,8 +770,8 @@
           "type": "Bonds",
           "smirks": "[#16X4,#16X3:1]-[#8X2:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -779,8 +779,8 @@
           "type": "Bonds",
           "smirks": "[#15:1]=[#7:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -788,8 +788,8 @@
           "type": "Bonds",
           "smirks": "[#15:1]~[#6:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -797,17 +797,8 @@
           "type": "Bonds",
           "smirks": "[#15:1]~[#8X1:2]",
           "attributes": [
-            "length",
-            "k"
-          ],
-          "cached": false
-        },
-        {
-          "type": "Bonds",
-          "smirks": "[#15:1]~[#8X2:2]",
-          "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -815,8 +806,17 @@
           "type": "Bonds",
           "smirks": "[#15:1]-[#1:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
+          ],
+          "cached": false
+        },
+        {
+          "type": "Bonds",
+          "smirks": "[#15:1]~[#8X2:2]",
+          "attributes": [
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -824,8 +824,8 @@
           "type": "Bonds",
           "smirks": "[#15:1]-[#7:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -833,8 +833,8 @@
           "type": "Bonds",
           "smirks": "[#16:1]=[#6:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -842,8 +842,8 @@
           "type": "Bonds",
           "smirks": "[#6X4:1]-[#35:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -851,17 +851,8 @@
           "type": "Bonds",
           "smirks": "[#6X2:1]=[#6X3:2]",
           "attributes": [
-            "length",
-            "k"
-          ],
-          "cached": false
-        },
-        {
-          "type": "Bonds",
-          "smirks": "[#16:1]-[#16:2]",
-          "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -869,17 +860,8 @@
           "type": "Bonds",
           "smirks": "[#6X2:1]=[#7:2]",
           "attributes": [
-            "length",
-            "k"
-          ],
-          "cached": false
-        },
-        {
-          "type": "Bonds",
-          "smirks": "[#6X2:1]=[#16:2]",
-          "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -887,8 +869,26 @@
           "type": "Bonds",
           "smirks": "[#16X2,#16X1-1,#16X3+1:1]-[#6X4:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
+          ],
+          "cached": false
+        },
+        {
+          "type": "Bonds",
+          "smirks": "[#6X2:1]=[#16:2]",
+          "attributes": [
+            "k",
+            "length"
+          ],
+          "cached": false
+        },
+        {
+          "type": "Bonds",
+          "smirks": "[#16:1]-[#16:2]",
+          "attributes": [
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -896,8 +896,8 @@
           "type": "Bonds",
           "smirks": "[#16:1]-[#15:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -905,8 +905,8 @@
           "type": "Bonds",
           "smirks": "[#6X4:1]-[#17:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -914,8 +914,8 @@
           "type": "Bonds",
           "smirks": "[#15:1]-[#17:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -923,8 +923,8 @@
           "type": "Bonds",
           "smirks": "[#16X2,#16X1-1:1]-[#7:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -932,8 +932,8 @@
           "type": "Bonds",
           "smirks": "[#16:1]-[#1:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -941,8 +941,8 @@
           "type": "Bonds",
           "smirks": "[#16X2:1]-[#8X2:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -950,8 +950,8 @@
           "type": "Bonds",
           "smirks": "[#6X2:1]#[#6X2:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -959,8 +959,8 @@
           "type": "Bonds",
           "smirks": "[#6X2:1]-[#1:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -968,17 +968,8 @@
           "type": "Bonds",
           "smirks": "[#6:1]-[#35:2]",
           "attributes": [
-            "length",
-            "k"
-          ],
-          "cached": false
-        },
-        {
-          "type": "Bonds",
-          "smirks": "[#6X2:1]-[#6X4:2]",
-          "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -986,8 +977,17 @@
           "type": "Bonds",
           "smirks": "[#7+1:1]=[#7-1:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
+          ],
+          "cached": false
+        },
+        {
+          "type": "Bonds",
+          "smirks": "[#6X2:1]-[#6X4:2]",
+          "attributes": [
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -995,8 +995,8 @@
           "type": "Bonds",
           "smirks": "[#7:1]#[#7:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -1004,8 +1004,8 @@
           "type": "Bonds",
           "smirks": "[#16:1]-[#17:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -1013,8 +1013,8 @@
           "type": "Bonds",
           "smirks": "[#7:1]-[#9:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -1022,8 +1022,8 @@
           "type": "Bonds",
           "smirks": "[#6X3:1]-[#8X1-1:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -1031,8 +1031,8 @@
           "type": "Bonds",
           "smirks": "[#6:1]-[#53:2]",
           "attributes": [
-            "length",
-            "k"
+            "k",
+            "length"
           ],
           "cached": false
         },
@@ -1041,24 +1041,11 @@
           "smirks": "[*:1]-[#6X4:2]-[#6X4:3]-[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
-          ],
-          "cached": false
-        },
-        {
-          "type": "ProperTorsions",
-          "smirks": "[#1:1]-[#6X4:2]-[#6X4:3]-[#1:4]",
-          "attributes": [
-            "k5",
             "k2",
-            "k1",
-            "k4",
-            "k3",
-            "k6"
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1067,11 +1054,24 @@
           "smirks": "[#1:1]-[#6X4:2]-[#6X4:3]-[#9:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
+          ],
+          "cached": false
+        },
+        {
+          "type": "ProperTorsions",
+          "smirks": "[#1:1]-[#6X4:2]-[#6X4:3]-[#1:4]",
+          "attributes": [
+            "k5",
+            "k1",
+            "k3",
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1080,11 +1080,11 @@
           "smirks": "[#6X4:1]-[#6X4:2]-[#6X4:3]-[#6X4:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1093,11 +1093,11 @@
           "smirks": "[#1:1]-[#6X4:2]-[#6X4:3]-[#6X4:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1106,11 +1106,11 @@
           "smirks": "[#1:1]-[#6X4:2]-[#6X4:3]-[#8X2:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1119,24 +1119,11 @@
           "smirks": "[*:1]~[#6X3:2]-[#6X4:3]-[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
-          ],
-          "cached": false
-        },
-        {
-          "type": "ProperTorsions",
-          "smirks": "[#1:1]-[#6X4:2]-[#6X3:3]=[#6X3:4]",
-          "attributes": [
-            "k5",
             "k2",
-            "k1",
-            "k4",
-            "k3",
-            "k6"
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1145,11 +1132,24 @@
           "smirks": "[*:1]-[#6X4:2]-[#6X3:3]=[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
+          ],
+          "cached": false
+        },
+        {
+          "type": "ProperTorsions",
+          "smirks": "[#1:1]-[#6X4:2]-[#6X3:3]=[#6X3:4]",
+          "attributes": [
+            "k5",
+            "k1",
+            "k3",
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1158,11 +1158,11 @@
           "smirks": "[#1:1]-[#6X4:2]-[#6X3:3]=[#8X1:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1171,11 +1171,11 @@
           "smirks": "[#6X3:1]-[#6X4:2]-[#6X3:3]=[#6X3:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1184,11 +1184,11 @@
           "smirks": "[#6X4:1]-[#6X4:2]-[#6X3:3]-[#7X3:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1197,11 +1197,11 @@
           "smirks": "[#16X2,#16X1-1,#16X3+1:1]-[#6X3:2]-[#6X4:3]-[#1:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1210,11 +1210,11 @@
           "smirks": "[*:1]-[#6X4;r3:2]-[#6X3:3]~[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1223,11 +1223,11 @@
           "smirks": "[#6X4;r3:1]-;@[#6X4;r3:2]-[#6X3:3]=[#8X1:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1236,11 +1236,11 @@
           "smirks": "[#6X4;r3:1]-;@[#6X4;r3:2]-[#6X3:3]=[#7X2:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1249,11 +1249,11 @@
           "smirks": "[#1:1]-[#6X4;r3:2]-[#6X3:3]~[#6X3:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1262,11 +1262,11 @@
           "smirks": "[#6X4;r3:1]-;@[#6X4;r3:2]-[#6X3;r6:3]:[#6X3;r6:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1275,11 +1275,11 @@
           "smirks": "[#6X4;r3:1]-;@[#6X4;r3:2]-[#6X3;r6:3]:[#7X2;r6:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1288,11 +1288,11 @@
           "smirks": "[#7X3:1]-[#6X4;r3:2]-[#6X3:3]~[#6X3:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1301,11 +1301,11 @@
           "smirks": "[#6X4;r3:1]-;@[#6X4;r3:2]-[#6X3:3]-[#8X2:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1314,11 +1314,11 @@
           "smirks": "[*:1]~[#6X3:2]-[#6X3:3]~[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1327,11 +1327,11 @@
           "smirks": "[*:1]~[#6X3:2]:[#6X3:3]~[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1340,11 +1340,11 @@
           "smirks": "[*:1]~[#6X3:2]-[#6X3$(*=[#8,#16,#7]):3]~[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1353,11 +1353,11 @@
           "smirks": "[#6X3:1]=[#6X3:2]-[#6X3:3]=[#8X1:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1366,11 +1366,11 @@
           "smirks": "[*:1]~[#6X4:2]-[#7X3:3]~[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1379,11 +1379,11 @@
           "smirks": "[#6X4:1]-[#6X4:2]-[#7X4,#7X3:3]-[#6X4:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1392,24 +1392,11 @@
           "smirks": "[*:1]-[#6X4:2]-[#7X4:3]-[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
-          ],
-          "cached": false
-        },
-        {
-          "type": "ProperTorsions",
-          "smirks": "[*:1]-[#6X4:2]-[#7X3$(*~[#6X3,#6X2]):3]~[*:4]",
-          "attributes": [
-            "k5",
             "k2",
-            "k1",
-            "k4",
-            "k3",
-            "k6"
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1418,11 +1405,24 @@
           "smirks": "[#6X3:1]-[#7X3:2]-[#6X4:3]-[#6X3:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
+          ],
+          "cached": false
+        },
+        {
+          "type": "ProperTorsions",
+          "smirks": "[*:1]-[#6X4:2]-[#7X3$(*~[#6X3,#6X2]):3]~[*:4]",
+          "attributes": [
+            "k5",
+            "k1",
+            "k3",
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1431,11 +1431,11 @@
           "smirks": "[#6X3:1]-[#7X3:2]-[#6X4;r3:3]-[#6X4;r3:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1444,24 +1444,11 @@
           "smirks": "[#6X4:1]-[#6X4:2]-[#7X3:3]-[#6X3:4]=[#8,#16,#7]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
-          ],
-          "cached": false
-        },
-        {
-          "type": "ProperTorsions",
-          "smirks": "[*:1]-[#7X3:2]-[#6X3$(*=[#8,#16,#7]):3]~[*:4]",
-          "attributes": [
-            "k5",
             "k2",
-            "k1",
-            "k4",
-            "k3",
-            "k6"
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1470,11 +1457,24 @@
           "smirks": "[#1:1]-[#7X3:2]-[#6X3:3]=[#8,#16,#7:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
+          ],
+          "cached": false
+        },
+        {
+          "type": "ProperTorsions",
+          "smirks": "[*:1]-[#7X3:2]-[#6X3$(*=[#8,#16,#7]):3]~[*:4]",
+          "attributes": [
+            "k5",
+            "k1",
+            "k3",
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1483,11 +1483,11 @@
           "smirks": "[#7X2:1]~[#7X2:2]-[#6X3:3]~[#6X3:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1496,24 +1496,11 @@
           "smirks": "[*:1]~[#7X3,#7X2-1:2]-!@[#6X3:3]~[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
-          ],
-          "cached": false
-        },
-        {
-          "type": "ProperTorsions",
-          "smirks": "[*:1]-[#7X3:2]-!@[#6X3:3](=[#8,#16,#7:4])-[#6,#1]",
-          "attributes": [
-            "k5",
             "k2",
-            "k1",
-            "k4",
-            "k3",
-            "k6"
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1522,11 +1509,24 @@
           "smirks": "[#1:1]-[#7X3:2]-!@[#6X3:3](=[#8,#16,#7:4])-[#6,#1]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
+          ],
+          "cached": false
+        },
+        {
+          "type": "ProperTorsions",
+          "smirks": "[*:1]-[#7X3:2]-!@[#6X3:3](=[#8,#16,#7:4])-[#6,#1]",
+          "attributes": [
+            "k5",
+            "k1",
+            "k3",
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1535,11 +1535,11 @@
           "smirks": "[*:1]-[#7X3:2]-!@[#6X3:3](=[#8,#16,#7:4])-[#7X3]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1548,11 +1548,11 @@
           "smirks": "[*:1]-[#7X3;r5:2]-@[#6X3;r5:3]~[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1561,11 +1561,11 @@
           "smirks": "[*:1]=,:[#6X3:2]-[#7X3:3](~[#8X1])~[#8X1:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1574,11 +1574,11 @@
           "smirks": "[*:1]~[#7X2,#7X3$(*~[#8X1]):2]:[#6X3:3]~[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1587,11 +1587,11 @@
           "smirks": "[#6X3:1]:[#7X2:2]:[#6X3:3]:[#6X3:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1600,11 +1600,11 @@
           "smirks": "[#6X4:1]-[#6X4:2]-[#8X2H1:3]-[#1:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1613,11 +1613,11 @@
           "smirks": "[*:1]-[#6X4:2]-[#8X2:3]-[#1:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1626,11 +1626,11 @@
           "smirks": "[*:1]-[#6X4:2]-[#8X2H0:3]-[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1639,11 +1639,11 @@
           "smirks": "[#6X4:1]-[#6X4:2]-[#8X2:3]-[#6X3:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1652,11 +1652,11 @@
           "smirks": "[#6X3:1]-[#8X2:2]-[#6X4;r3:3]-@[#6X4;r3:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1665,11 +1665,11 @@
           "smirks": "[#1:1]-[#8X2:2]-[#6X4;r3:3]-[#6X4;r3:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1678,11 +1678,11 @@
           "smirks": "[#1:1]-[#8X2:2]-[#6X4;r3:3]-[#6X4:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1691,11 +1691,11 @@
           "smirks": "[*:1]~[#6X3:2]-[#8X2:3]-[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1704,11 +1704,11 @@
           "smirks": "[*:1]~[#6X3:2]-[#8X2:3]-[#1:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1717,11 +1717,11 @@
           "smirks": "[#8,#16,#7:1]=[#6X3:2]-[#8X2H0:3]-[#6X4:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1730,11 +1730,11 @@
           "smirks": "[*:1]~[#6X3:2](=[#8,#16,#7])-[#8X2H0:3]-[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1743,11 +1743,11 @@
           "smirks": "[*:1]-[#8X2:2]@[#6X3:3]~[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1756,11 +1756,11 @@
           "smirks": "[*:1]-[#16X2,#16X3+1:2]-[#6:3]~[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1769,11 +1769,11 @@
           "smirks": "[#6X3:1]-@[#16X2,#16X1-1,#16X3+1:2]-@[#6X3,#7X2;r5:3]=@[#6,#7;r5:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1782,11 +1782,11 @@
           "smirks": "[*:1]-[#16X2,#16X3+1:2]-[#6:3]-[#1:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1795,11 +1795,11 @@
           "smirks": "[*:1]~[#16X4,#16X3!+1:2]-[#6X4:3]-[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1808,11 +1808,11 @@
           "smirks": "[#6X4:1]-[#16X4,#16X3+0:2]-[#6X4:3]-[#1:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1821,11 +1821,11 @@
           "smirks": "[#6X4:1]-[#16X4,#16X3+0:2]-[#6X4:3]~[#6X4:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1834,11 +1834,11 @@
           "smirks": "[*:1]~[#16X4,#16X3+0:2]-[#6X3:3]~[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1847,11 +1847,11 @@
           "smirks": "[#6:1]-[#16X4,#16X3+0:2]-[#6X3:3]~[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1860,11 +1860,11 @@
           "smirks": "[*:1]-[#8X2r5:2]-;@[#7X2r5:3]~[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1873,11 +1873,11 @@
           "smirks": "[*:1]@[#7X2:2]@[#7X2:3]@[#7X2,#6X3:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1886,37 +1886,11 @@
           "smirks": "[*:1]~[#7X2:2]=,:[#7X2:3]~[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
-          ],
-          "cached": false
-        },
-        {
-          "type": "ProperTorsions",
-          "smirks": "[#8X1:1]~[#16X4,#16X3+0:2]-[#7X4,#7X3:3]-[#1:4]",
-          "attributes": [
-            "k5",
             "k2",
-            "k1",
-            "k4",
-            "k3",
-            "k6"
-          ],
-          "cached": false
-        },
-        {
-          "type": "ProperTorsions",
-          "smirks": "[#6X4:1]-[#16X4,#16X3+0:2]-[#7X4,#7X3:3]-[#1:4]",
-          "attributes": [
-            "k5",
-            "k2",
-            "k1",
-            "k4",
-            "k3",
-            "k6"
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1925,11 +1899,24 @@
           "smirks": "[#6X4:1]-[#16X4,#16X3+0:2]-[#7X3:3]-[#6X3:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
+          ],
+          "cached": false
+        },
+        {
+          "type": "ProperTorsions",
+          "smirks": "[#6X4:1]-[#16X4,#16X3+0:2]-[#7X4,#7X3:3]-[#1:4]",
+          "attributes": [
+            "k5",
+            "k1",
+            "k3",
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1938,24 +1925,24 @@
           "smirks": "[#8X1:1]~[#16X4,#16X3+0:2]-[#7X3:3]-[#6X3:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
         {
           "type": "ProperTorsions",
-          "smirks": "[#6X3:1]-[#16X4,#16X3+0:2]-[#7X4,#7X3:3]-[#1:4]",
+          "smirks": "[#8X1:1]~[#16X4,#16X3+0:2]-[#7X4,#7X3:3]-[#1:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1964,11 +1951,11 @@
           "smirks": "[#6X3:1]-[#16X4,#16X3+0:2]-[#7X4,#7X3:3]-[#6X4:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1977,11 +1964,24 @@
           "smirks": "[#8X1:1]~[#16X4,#16X3+0:2]-[#7X4,#7X3:3]-[#6X4:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
+          ],
+          "cached": false
+        },
+        {
+          "type": "ProperTorsions",
+          "smirks": "[#6X3:1]-[#16X4,#16X3+0:2]-[#7X4,#7X3:3]-[#1:4]",
+          "attributes": [
+            "k5",
+            "k1",
+            "k3",
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -1990,11 +1990,11 @@
           "smirks": "[#6X4:1]-[#16X4,#16X3+0:2]-[#7X4,#7X3:3]-[#6X4:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2012,11 +2012,11 @@
           "smirks": "[#9:1]-[#6X4:2]-[#6X4:3]-[#9:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2025,11 +2025,11 @@
           "smirks": "[#1:1]-[#6X4:2]-[#6X4:3]-[#17:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2038,11 +2038,11 @@
           "smirks": "[#17:1]-[#6X4:2]-[#6X4:3]-[#17:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2051,11 +2051,11 @@
           "smirks": "[*:1]-[#6X4:2]-[#6X4;r3:3]-[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2064,24 +2064,11 @@
           "smirks": "[*:1]-[#6X4:2]-[#6X4;r3:3]-[#6X4;r3:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
-          ],
-          "cached": false
-        },
-        {
-          "type": "ProperTorsions",
-          "smirks": "[*:1]-[#6X4;r3:2]-@[#6X4;r3:3]-[*:4]",
-          "attributes": [
-            "k5",
             "k2",
-            "k1",
-            "k4",
-            "k3",
-            "k6"
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2090,11 +2077,11 @@
           "smirks": "[#6X4;r3:1]-[#6X4;r3:2]-[#6X4;r3:3]-[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2103,11 +2090,11 @@
           "smirks": "[#16X2,#16X1-1,#16X3+1:1]-[#6X3:2]-[#6X4:3]-[#7X3$(*-[#6X3,#6X2]):4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2116,11 +2103,11 @@
           "smirks": "[#7X3:1]-[#6X4:2]-[#6X3:3]-[#7X3:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2129,24 +2116,11 @@
           "smirks": "[#16X2,#16X1-1,#16X3+1:1]-[#6X3:2]-[#6X4:3]-[#7X4,#7X3:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
-          ],
-          "cached": false
-        },
-        {
-          "type": "ProperTorsions",
-          "smirks": "[#6X4;r3:1]-;@[#6X4;r3:2]-[#6X3:3]-[#6X4:4]",
-          "attributes": [
-            "k5",
             "k2",
-            "k1",
-            "k4",
-            "k3",
-            "k6"
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2155,11 +2129,24 @@
           "smirks": "[#6X4:1]-[#6X4;r3:2]-[#6X3:3]~[#6X3:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
+          ],
+          "cached": false
+        },
+        {
+          "type": "ProperTorsions",
+          "smirks": "[#6X4;r3:1]-;@[#6X4;r3:2]-[#6X3:3]-[#6X4:4]",
+          "attributes": [
+            "k5",
+            "k1",
+            "k3",
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2168,24 +2155,11 @@
           "smirks": "[#6X4;r3:1]-;@[#6X4;r3:2]-[#6X3:3]~[#6X3:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
-          ],
-          "cached": false
-        },
-        {
-          "type": "ProperTorsions",
-          "smirks": "[#6X4;r3:1]-;@[#6X4;r3:2]-[#6X3;r5:3]=;@[#6X3;r5:4]",
-          "attributes": [
-            "k5",
             "k2",
-            "k1",
-            "k4",
-            "k3",
-            "k6"
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2194,11 +2168,24 @@
           "smirks": "[#6X4;r3:1]-;@[#6X4;r3:2]-[#6X3;r5:3]-;@[#6X3;r5:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
+          ],
+          "cached": false
+        },
+        {
+          "type": "ProperTorsions",
+          "smirks": "[#6X4;r3:1]-;@[#6X4;r3:2]-[#6X3;r5:3]=;@[#6X3;r5:4]",
+          "attributes": [
+            "k5",
+            "k1",
+            "k3",
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2207,11 +2194,11 @@
           "smirks": "[#6X3:1]-[#6X4;r3:2]-[#6X3:3]=[#8X1:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2220,11 +2207,11 @@
           "smirks": "[#6X3:1]-[#6X4;r3:2]-[#6X3:3]~[#6X3:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2233,11 +2220,11 @@
           "smirks": "[*:1]-[#7X3+1:2]=,:[#6X3:3]-,:[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2246,11 +2233,11 @@
           "smirks": "[#1:1]-[#7X4,#7X3:2]-[#6X4;r3:3]-[#6X4;r3:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2259,11 +2246,11 @@
           "smirks": "[#1:1]-[#7X4,#7X3:2]-[#6X4;r3:3]-[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2272,11 +2259,11 @@
           "smirks": "[!#1:1]-[#7X4,#7X3:2]-[#6X4;r3:3]-[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2285,24 +2272,11 @@
           "smirks": "[!#1:1]-[#7X4,#7X3:2]-[#6X4;r3:3]-[#6X4;r3:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
-          ],
-          "cached": false
-        },
-        {
-          "type": "ProperTorsions",
-          "smirks": "[*:1]~[#7X2:2]-[#6X4:3]-[*:4]",
-          "attributes": [
-            "k5",
             "k2",
-            "k1",
-            "k4",
-            "k3",
-            "k6"
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2311,11 +2285,24 @@
           "smirks": "[#7X2:1]~[#7X2:2]-[#6X4:3]~[#1:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
+          ],
+          "cached": false
+        },
+        {
+          "type": "ProperTorsions",
+          "smirks": "[*:1]~[#7X2:2]-[#6X4:3]-[*:4]",
+          "attributes": [
+            "k5",
+            "k1",
+            "k3",
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2324,11 +2311,11 @@
           "smirks": "[*:1]=[#7X2,#7X3+1:2]-[#6X3:3]=,:[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2337,11 +2324,11 @@
           "smirks": "[#7X2:1]~[#7X2:2]-[#6X4:3]-[#6X3:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2350,11 +2337,11 @@
           "smirks": "[#6X4:1]-[#8X2:2]-[#6X4:3]-[#8X2:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2373,11 +2360,11 @@
           "smirks": "[#1:1]-[#8X2:2]-[#6X3:3]=[#8X1:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2386,11 +2373,11 @@
           "smirks": "[*:1]~[#6X3:2](=[#8,#16,#7])-[#8:3]-[#1:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2399,11 +2386,11 @@
           "smirks": "[*:1]~[#15:2]-[#6X3:3]~[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2412,11 +2399,11 @@
           "smirks": "[#1:1]-[#7X4,#7X3:2]-[#7X4,#7X3:3]-[#1:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2425,11 +2412,11 @@
           "smirks": "[#6X4:1]-[#7X4,#7X3:2]-[#7X4,#7X3:3]-[#1:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2438,11 +2425,11 @@
           "smirks": "[*:1]-[#7X3$(*-[#6X3,#6X2]):2]-[#7X3$(*-[#6X3,#6X2]):3]-[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2451,11 +2438,11 @@
           "smirks": "[*:1]-[#7X3$(*-[#6X3,#6X2])r5:2]-@[#7X3$(*-[#6X3,#6X2])r5:3]~[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2464,11 +2451,11 @@
           "smirks": "[*:1]-[#16X2,#16X3+1:2]-[!#6:3]~[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2477,11 +2464,11 @@
           "smirks": "[*:1]~[#16X4,#16X3+0:2]-[#7:3]~[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2490,24 +2477,11 @@
           "smirks": "[#8X1:1]~[#16X4,#16X3+0:2]-[#7X3:3]-[#7X2:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
-          ],
-          "cached": false
-        },
-        {
-          "type": "ProperTorsions",
-          "smirks": "[*:1]-[#8X2:2]-[#15:3]~[*:4]",
-          "attributes": [
-            "k5",
             "k2",
-            "k1",
-            "k4",
-            "k3",
-            "k6"
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2516,24 +2490,24 @@
           "smirks": "[#8X2:1]-[#15:2]-[#8X2:3]-[#6X4:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
         {
           "type": "ProperTorsions",
-          "smirks": "[*:1]-[#7:2]-[#15:3]=[*:4]",
+          "smirks": "[*:1]-[#8X2:2]-[#15:3]~[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2542,11 +2516,11 @@
           "smirks": "[*:1]~[#7:2]-[#15:3]~[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2555,11 +2529,24 @@
           "smirks": "[#6X3:1]-[#7:2]-[#15:3]=[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
+          ],
+          "cached": false
+        },
+        {
+          "type": "ProperTorsions",
+          "smirks": "[*:1]-[#7:2]-[#15:3]=[*:4]",
+          "attributes": [
+            "k5",
+            "k1",
+            "k3",
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2568,11 +2555,11 @@
           "smirks": "[#6X4:1]-[#6X4:2]-[#8X2H0:3]-[#6X4:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2581,11 +2568,11 @@
           "smirks": "[*:1]~[#8X2:2]-[#7:3]~[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2594,11 +2581,11 @@
           "smirks": "[*:1]~[#7X2:2]-[#7X3:3]~[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2607,11 +2594,11 @@
           "smirks": "[#8X2:1]-[#6X4:2]-[#6X4:3]-[#8X2:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2620,11 +2607,11 @@
           "smirks": "[*:1]-[#6X4:2]-[#7X3:3]-[#7X2:4]=[#6]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2633,11 +2620,11 @@
           "smirks": "[#1:1]-[#6X4:2]-[#7X3:3]-[#7X2:4]=[#6]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2646,11 +2633,11 @@
           "smirks": "[#1:1]-[#6X4:2]-[#7X3:3]-[#7X2:4]=[#7X2,#8X1]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2659,11 +2646,11 @@
           "smirks": "[*:1]-[#6X4:2]-[#7X3$(*@1-[*]=,:[*][*]=,:[*]@1):3]-[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2672,11 +2659,11 @@
           "smirks": "[#1:1]-[#6X4:2]-[#7X3$(*@1-[*]=,:[*][*]=,:[*]@1):3]-[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2685,11 +2672,11 @@
           "smirks": "[*:1]-[#6X4:2]-[#7X3$(*~[#8X1]):3]~[#8X1:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2698,11 +2685,11 @@
           "smirks": "[#6X3:1]=[#7X2,#7X3+1:2]-[#6X4:3]-[#6X3,#6X4:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2711,11 +2698,11 @@
           "smirks": "[#6X3:1]=[#7X2,#7X3+1:2]-[#6X4:3]-[#1:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2724,11 +2711,11 @@
           "smirks": "[#8X2H0:1]-[#6X4:2]-[#7X3:3]-[#6X3:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2737,11 +2724,11 @@
           "smirks": "[*:1]=[#7X2,#7X3+1:2]-[#6X3:3]-[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2750,11 +2737,11 @@
           "smirks": "[*:1]-[#6X3:2]-[#7X3:3](~[#8X1])~[#8X1:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2763,11 +2750,11 @@
           "smirks": "[*:1]=[#7X2:2]-[#7X2:3]=[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2776,11 +2763,11 @@
           "smirks": "[#8X1:1]~[#16X4,#16X3+0:2]-[#7X2:3]~[#6X3:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2789,11 +2776,11 @@
           "smirks": "[*:1]~[#16X4,#16X3+0:2]-[#8X2:3]-[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2802,11 +2789,11 @@
           "smirks": "[*:1]-,:[#6X3:2]=[#6X3:3]-,:[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2815,11 +2802,11 @@
           "smirks": "[#6X4:1]-[#8X2:2]-[#6X4:3]-[#7X3:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2828,11 +2815,11 @@
           "smirks": "[*:1]-[#6X4:2]-[#7X3:3]-[#7X2:4]=[#7X2,#8X1]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2857,11 +2844,11 @@
           "smirks": "[*:1]-[#8:2]-[#8:3]-[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2870,19 +2857,11 @@
           "smirks": "[*:1]~[#16X4,#16X3+0:2]=,:[#7X2:3]-,:[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
-          ],
-          "cached": false
-        },
-        {
-          "type": "ProperTorsions",
-          "smirks": "[#6X4;r3:1]-;@[#6X4;r3:2]-[#6X3:3](~[#8X1])~[#8X1:4]",
-          "attributes": [
-            "k1"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2898,14 +2877,22 @@
         },
         {
           "type": "ProperTorsions",
+          "smirks": "[#6X4;r3:1]-;@[#6X4;r3:2]-[#6X3:3](~[#8X1])~[#8X1:4]",
+          "attributes": [
+            "k1"
+          ],
+          "cached": false
+        },
+        {
+          "type": "ProperTorsions",
           "smirks": "[*:1]-[#7X4,#7X3:2]-[#7X3$(*~[#6X3,#6X2]):3]~[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2914,11 +2901,11 @@
           "smirks": "[#6X4:1]-[#16X4,#16X3+0:2]-[#7X2:3]~[#6X3:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2927,11 +2914,11 @@
           "smirks": "[*:1]~[#15:2]-[#6X4:3]-[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2940,11 +2927,11 @@
           "smirks": "[*:1]~[#7X4,#7X3:2]-[#7X4,#7X3:3]~[*:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         },
@@ -2953,11 +2940,11 @@
           "smirks": "[#6X4:1]-[#7X4,#7X3:2]-[#7X4,#7X3:3]-[#6X4:4]",
           "attributes": [
             "k5",
-            "k2",
             "k1",
-            "k4",
             "k3",
-            "k6"
+            "k2",
+            "k6",
+            "k4"
           ],
           "cached": false
         }
@@ -7024,78 +7011,6 @@
                 },
                 {
                   "type": "torsion",
-                  "record_id": "2703084",
-                  "cmiles": "[H:9][C:1]1([C:2]([C:3]1([H:13])[N:6]([H:17])[S@@:8](=[N-:5])(=[O:7])[C:4]([H:14])([H:15])[H:16])([H:11])[H:12])[H:10]",
-                  "inchi_key": "ABBYYETZVRHWJH-IYLNGKKTNA-N"
-                },
-                {
-                  "type": "torsion",
-                  "record_id": "2703086",
-                  "cmiles": "[H:9][C:1]1([C:2]([C:3]1([H:13])[N:6]([H:17])[S@@:8](=[N-:5])(=[O:7])[C:4]([H:14])([H:15])[H:16])([H:11])[H:12])[H:10]",
-                  "inchi_key": "ABBYYETZVRHWJH-IYLNGKKTNA-N"
-                },
-                {
-                  "type": "torsion",
-                  "record_id": "2703087",
-                  "cmiles": "[H:9][C:1]1([C:2]([C:3]1([H:13])[N:6]([H:17])[S@@:8](=[N-:5])(=[O:7])[C:4]([H:14])([H:15])[H:16])([H:11])[H:12])[H:10]",
-                  "inchi_key": "ABBYYETZVRHWJH-IYLNGKKTNA-N"
-                },
-                {
-                  "type": "torsion",
-                  "record_id": "2703090",
-                  "cmiles": "[H:9][C:1]1([C:2]([C:3]1([H:13])[N:6]([H:17])[S@@:8](=[N-:5])(=[O:7])[C:4]([H:14])([H:15])[H:16])([H:11])[H:12])[H:10]",
-                  "inchi_key": "ABBYYETZVRHWJH-IYLNGKKTNA-N"
-                },
-                {
-                  "type": "torsion",
-                  "record_id": "2703093",
-                  "cmiles": "[H:9][C:1]1([C:2]([C:3]1([H:13])[N:6]([H:17])[S@@:8](=[N-:5])(=[O:7])[C:4]([H:14])([H:15])[H:16])([H:11])[H:12])[H:10]",
-                  "inchi_key": "ABBYYETZVRHWJH-IYLNGKKTNA-N"
-                },
-                {
-                  "type": "torsion",
-                  "record_id": "2703097",
-                  "cmiles": "[H:9][C:1]1([C:2]([C:3]1([H:13])[N:6]([H:17])[S@@:8](=[N-:5])(=[O:7])[C:4]([H:14])([H:15])[H:16])([H:11])[H:12])[H:10]",
-                  "inchi_key": "ABBYYETZVRHWJH-IYLNGKKTNA-N"
-                },
-                {
-                  "type": "torsion",
-                  "record_id": "2703098",
-                  "cmiles": "[H:9][C:1]1([C:2]([C:3]1([H:13])[N:6]([H:17])[S@@:8](=[N-:5])(=[O:7])[C:4]([H:14])([H:15])[H:16])([H:11])[H:12])[H:10]",
-                  "inchi_key": "ABBYYETZVRHWJH-IYLNGKKTNA-N"
-                },
-                {
-                  "type": "torsion",
-                  "record_id": "2703100",
-                  "cmiles": "[H:9][C:1]1([C:2]([C:3]1([H:13])[N:6]([H:17])[S@@:8](=[N-:5])(=[O:7])[C:4]([H:14])([H:15])[H:16])([H:11])[H:12])[H:10]",
-                  "inchi_key": "ABBYYETZVRHWJH-IYLNGKKTNA-N"
-                },
-                {
-                  "type": "torsion",
-                  "record_id": "2703103",
-                  "cmiles": "[H:9][C:1]1([C:2]([C:3]1([H:13])[N:6]([H:17])[S@@:8](=[N-:5])(=[O:7])[C:4]([H:14])([H:15])[H:16])([H:11])[H:12])[H:10]",
-                  "inchi_key": "ABBYYETZVRHWJH-IYLNGKKTNA-N"
-                },
-                {
-                  "type": "torsion",
-                  "record_id": "2703104",
-                  "cmiles": "[H:9][C:1]1([C:2]([C:3]1([H:13])[N:6]([H:17])[S@@:8](=[N-:5])(=[O:7])[C:4]([H:14])([H:15])[H:16])([H:11])[H:12])[H:10]",
-                  "inchi_key": "ABBYYETZVRHWJH-IYLNGKKTNA-N"
-                },
-                {
-                  "type": "torsion",
-                  "record_id": "2703106",
-                  "cmiles": "[H:9][C:1]1([C:2]([C:3]1([H:13])[N:6]([H:17])[S@@:8](=[N-:5])(=[O:7])[C:4]([H:14])([H:15])[H:16])([H:11])[H:12])[H:10]",
-                  "inchi_key": "ABBYYETZVRHWJH-IYLNGKKTNA-N"
-                },
-                {
-                  "type": "torsion",
-                  "record_id": "2703107",
-                  "cmiles": "[H:9][C:1]1([C:2]([C:3]1([H:13])[N:6]([H:17])[S@@:8](=[N-:5])(=[O:7])[C:4]([H:14])([H:15])[H:16])([H:11])[H:12])[H:10]",
-                  "inchi_key": "ABBYYETZVRHWJH-IYLNGKKTNA-N"
-                },
-                {
-                  "type": "torsion",
                   "record_id": "2703114",
                   "cmiles": "[H:9][C:1]1([C:2]([C:3]1([H:13])[N-:5][S@:8](=[N:6][H:17])(=[O:7])[C:4]([H:14])([H:15])[H:16])([H:11])[H:12])[H:10]",
                   "inchi_key": "ABBYYETZVRHWJH-JGGALAHINA-N"
@@ -7111,24 +7026,6 @@
                   "record_id": "2703116",
                   "cmiles": "[H:9][C:1]1([C:2]([C:3]1([H:13])[N-:5][S@:8](=[N:6][H:17])(=[O:7])[C:4]([H:14])([H:15])[H:16])([H:11])[H:12])[H:10]",
                   "inchi_key": "ABBYYETZVRHWJH-JGGALAHINA-N"
-                },
-                {
-                  "type": "torsion",
-                  "record_id": "2703122",
-                  "cmiles": "[H:9][C:1]1([C:2]([C:3]1([H:13])[N:6]([H:17])[S@:8](=[N-:5])(=[O:7])[C:4]([H:14])([H:15])[H:16])([H:11])[H:12])[H:10]",
-                  "inchi_key": "ABBYYETZVRHWJH-PAPCRKNUNA-N"
-                },
-                {
-                  "type": "torsion",
-                  "record_id": "2703124",
-                  "cmiles": "[H:9][C:1]1([C:2]([C:3]1([H:13])[N:6]([H:17])[S@:8](=[N-:5])(=[O:7])[C:4]([H:14])([H:15])[H:16])([H:11])[H:12])[H:10]",
-                  "inchi_key": "ABBYYETZVRHWJH-PAPCRKNUNA-N"
-                },
-                {
-                  "type": "torsion",
-                  "record_id": "2703125",
-                  "cmiles": "[H:9][C:1]1([C:2]([C:3]1([H:13])[N:6]([H:17])[S@:8](=[N-:5])(=[O:7])[C:4]([H:14])([H:15])[H:16])([H:11])[H:12])[H:10]",
-                  "inchi_key": "ABBYYETZVRHWJH-PAPCRKNUNA-N"
                 },
                 {
                   "type": "torsion",
@@ -10582,12 +10479,6 @@
                 },
                 {
                   "type": "torsion",
-                  "record_id": "35044997",
-                  "cmiles": "[H:8][C:2]([H:9])([H:10])[N+:4](=[C:1]([O-:5])[O:7][O-:6])[C:3]([H:11])([H:12])[H:13]",
-                  "inchi_key": "IAWUPGFWHQOAEL-YJRCQQTANA-M"
-                },
-                {
-                  "type": "torsion",
                   "record_id": "35045009",
                   "cmiles": "[H:11][C:3]([H:12])([H:13])[N+:7](=[C:2]([O-:9])[O:10]/[N:5]=[C:1](\\[N:6]([H:17])[H:18])/[O-:8])[C:4]([H:14])([H:15])[H:16]",
                   "inchi_key": "DTCMRXHZNSFHAY-JGZMGFSENA-N"
@@ -10648,7 +10539,8 @@
                     "Br"
                   ]
                 },
-                "SMARTSFilter-5": {
+                "ChargeCheckFilter-5": {},
+                "SMARTSFilter-6": {
                   "smarts_to_include": null,
                   "smarts_to_exclude": [
                     "[#8+1:1]=[#7:2]",
@@ -10661,7 +10553,7 @@
                     "[#16-1:1]~[#16:2]"
                   ]
                 },
-                "SMILESFilter-6": {
+                "SMILESFilter-7": {
                   "smiles_to_include": null,
                   "smiles_to_exclude": [
                     "[S](=[N-])(=O)",
@@ -12697,12 +12589,6 @@
                   "record_id": "18433614",
                   "cmiles": "[H:15][C@@:5]([c:2]1[n:7][c:3](=[O:11])[n:9]([n:8]1[H:16])[H:17])([C:4]([H:12])([H:13])[H:14])[N:10]([H:18])[C:1]#[N:6]",
                   "inchi_key": "ZNBINHBZKCGNHH-YHRNCBRFNA-N"
-                },
-                {
-                  "type": "optimization",
-                  "record_id": "18433675",
-                  "cmiles": "[H:9][C:1]1([C:2]([C:3]1([H:13])[N:6]([H:17])[S@@:8](=[N-:5])(=[O:7])[C:4]([H:14])([H:15])[H:16])([H:11])[H:12])[H:10]",
-                  "inchi_key": "ABBYYETZVRHWJH-IYLNGKKTNA-N"
                 },
                 {
                   "type": "optimization",
@@ -41110,18 +40996,6 @@
                 },
                 {
                   "type": "optimization",
-                  "record_id": "2002929",
-                  "cmiles": "[H:9][C:1]1([C:2]([C:3]1([H:13])[N:6]([H:17])[S@@:8](=[N-:5])(=[O:7])[C:4]([H:14])([H:15])[H:16])([H:11])[H:12])[H:10]",
-                  "inchi_key": "ABBYYETZVRHWJH-IYLNGKKTNA-N"
-                },
-                {
-                  "type": "optimization",
-                  "record_id": "2002930",
-                  "cmiles": "[H:9][C:1]1([C:2]([C:3]1([H:13])[N:6]([H:17])[S@@:8](=[N-:5])(=[O:7])[C:4]([H:14])([H:15])[H:16])([H:11])[H:12])[H:10]",
-                  "inchi_key": "ABBYYETZVRHWJH-IYLNGKKTNA-N"
-                },
-                {
-                  "type": "optimization",
                   "record_id": "2002931",
                   "cmiles": "[H:9][C:1]1([C:2]([C:3]1([H:13])[N-:5][S@:8](=[N:6][H:17])(=[O:7])[C:4]([H:14])([H:15])[H:16])([H:11])[H:12])[H:10]",
                   "inchi_key": "ABBYYETZVRHWJH-JGGALAHINA-N"
@@ -41485,12 +41359,6 @@
                   "record_id": "2003024",
                   "cmiles": "[H:6][C:2]([H:7])([H:8])[C:1](=[O:3])[O:5][O:4][H:9]",
                   "inchi_key": "KFSLWBXXFJQRDL-UHFFFAOYNA-N"
-                },
-                {
-                  "type": "optimization",
-                  "record_id": "2003025",
-                  "cmiles": "[H:6][C:2]([H:7])([H:8])[C:1](=[O:4])[O:5][O-:3]",
-                  "inchi_key": "KFSLWBXXFJQRDL-UZDNQCEWNA-M"
                 },
                 {
                   "type": "optimization",
@@ -43561,7 +43429,8 @@
                   "heavy_atoms_only": true,
                   "check_automorphs": true
                 },
-                "SMARTSFilter-5": {
+                "ChargeCheckFilter-5": {},
+                "SMARTSFilter-6": {
                   "smarts_to_include": null,
                   "smarts_to_exclude": [
                     "[#8+1:1]=[#7:2]",
@@ -43574,7 +43443,7 @@
                     "[#16-1:1]~[#16:2]"
                   ]
                 },
-                "SMILESFilter-6": {
+                "SMILESFilter-7": {
                   "smiles_to_include": null,
                   "smiles_to_exclude": [
                     "[S](=[N-])(=O)",
