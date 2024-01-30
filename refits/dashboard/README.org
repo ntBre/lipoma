@@ -1,7 +1,6 @@
 split parameters based on trends observed in the dashboards
 
-using environment fb_193 from the sage-2.1.0 repo for generating FB inputs
-locally and Pavan's fb_193 environment on HPC3
+using fb-196 environment from torsion multiplicity work
 
 #+name: params
 | Param | New Params       | Reason                   |
