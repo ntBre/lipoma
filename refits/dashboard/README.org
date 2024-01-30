@@ -13,9 +13,9 @@ locally and Pavan's fb_193 environment on HPC3
 | a1    | a1, a1a          | specify H                |
 
 #+name: files
-| File                  | Source             |
-|-----------------------+--------------------|
-| smarts-to-exclude.dat | valence-fitting/04 |
-| smiles-to-exclude.dat | valence-fitting/04 |
-| opt.json              | sage-2.1.0         |
-| td.json               | sage-2.1.0         |
+| File                  | Source                 |
+|-----------------------+------------------------|
+| smarts-to-exclude.dat | valence-fitting/04     |
+| smiles-to-exclude.dat | valence-fitting/04     |
+| opt.json              | vf/filtered-sage-2.1.0 |
+| td.json               | vf/filtered-sage-2.1.0 |
